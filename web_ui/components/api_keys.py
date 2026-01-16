@@ -1,0 +1,412 @@
+import reflex as rx
+from ..api_key_state import APIKeyState, APIKeyData
+
+
+def api_key_card(key: APIKeyData) -> rx.Component:
+    return rx.card(
+        rx.vstack(
+            rx.hstack(
+                rx.vstack(
+                    rx.text(key.account_name, size="4", weight="bold"),
+                    rx.hstack(
+                        rx.text(key.exchange.title(), size="2", color="gray"),
+                        rx.cond(
+                            key.is_master_account,
+                            rx.badge("Master Account", size="1", color_scheme="blue"),
+                            rx.badge("Sub-Account", size="1", color_scheme="purple"),
+                        ),
+                        spacing="2",
+                    ),
+                    spacing="1",
+                    align_items="start",
+                ),
+                rx.spacer(),
+                rx.hstack(
+                    rx.badge(
+                        rx.cond(key.is_active, "Active", "Inactive"),
+                        color_scheme=rx.cond(key.is_active, "green", "gray"),
+                    ),
+                    rx.button(
+                        "Edit",
+                        size="2",
+                        variant="soft",
+                        on_click=lambda: APIKeyState.edit_api_key(key.id),
+                    ),
+                    rx.button(
+                        "Delete",
+                        size="2",
+                        variant="soft",
+                        color_scheme="red",
+                        on_click=lambda: APIKeyState.delete_api_key(key.id),
+                    ),
+                    spacing="2",
+                ),
+                width="100%",
+                align="center",
+            ),
+            rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
+            rx.vstack(
+                rx.cond(
+                    key.wallet_address != "",
+                    rx.text("Wallet: " + key.wallet_address[:10] + "..." + key.wallet_address[-8:], size="2", color="gray"),
+                ),
+                rx.cond(
+                    key.subaccount_name != "",
+                    rx.text("Subaccount: " + key.subaccount_name, size="2", color="gray"),
+                ),
+                rx.cond(
+                    key.notes != "",
+                    rx.text("Notes: " + key.notes, size="2", color="gray"),
+                ),
+                spacing="1",
+                align_items="start",
+                width="100%",
+            ),
+            rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
+            rx.hstack(
+                rx.button(
+                    rx.cond(
+                        key.balance_loading,
+                        rx.spinner(size="1"),
+                        "Check Balance",
+                    ),
+                    size="2",
+                    variant="soft",
+                    on_click=lambda: APIKeyState.fetch_balance(key.id),
+                    disabled=key.balance_loading,
+                ),
+                rx.cond(
+                    key.account_value > 0,
+                    rx.vstack(
+                        rx.text(f"Account Value: ${key.account_value:,.2f}", size="2", weight="bold"),
+                        rx.text(f"Available: ${key.available_balance:,.2f}", size="2", color="gray"),
+                        spacing="0",
+                        align_items="start",
+                    ),
+                ),
+                rx.cond(
+                    key.balance_error != "",
+                    rx.text(key.balance_error, size="2", color="red"),
+                ),
+                spacing="3",
+                align="center",
+                width="100%",
+            ),
+            spacing="2",
+            width="100%",
+        ),
+        width="100%",
+    )
+
+
+def api_keys_component() -> rx.Component:
+    return rx.vstack(
+        rx.card(
+            rx.vstack(
+                rx.hstack(
+                    rx.heading("API Keys", size="6"),
+                    rx.spacer(),
+                    rx.cond(
+                        APIKeyState.is_editing,
+                        rx.button(
+                            "Cancel",
+                            size="2",
+                            variant="soft",
+                            on_click=APIKeyState.clear_form,
+                        ),
+                    ),
+                    width="100%",
+                    align="center",
+                ),
+                rx.text(
+                    "Manage your exchange API credentials. You can add multiple accounts, subaccounts, and wallets.",
+                    size="2",
+                    color="gray",
+                ),
+                spacing="2",
+                width="100%",
+            ),
+            width="100%",
+        ),
+        
+        rx.cond(
+            APIKeyState.error_message != "",
+            rx.callout(
+                APIKeyState.error_message,
+                icon="triangle_alert",
+                color_scheme="red",
+                role="alert",
+            ),
+        ),
+        
+        rx.cond(
+            APIKeyState.success_message != "",
+            rx.callout(
+                APIKeyState.success_message,
+                icon="check",
+                color_scheme="green",
+                role="alert",
+            ),
+        ),
+        
+        rx.cond(
+            APIKeyState.api_keys.length() > 0,
+            rx.vstack(
+                rx.foreach(APIKeyState.api_keys, api_key_card),
+                spacing="3",
+                width="100%",
+            ),
+        ),
+        
+        rx.card(
+            rx.vstack(
+                rx.heading(
+                    rx.cond(
+                        APIKeyState.is_editing,
+                        "Edit API Key",
+                        "Add New API Key",
+                    ),
+                    size="5",
+                ),
+                
+                rx.form(
+                    rx.vstack(
+                        rx.vstack(
+                            rx.text("Account Name", size="2", weight="bold"),
+                            rx.input(
+                                placeholder="e.g., Main Trading Account",
+                                name="account_name",
+                                type="text",
+                                required=True,
+                                max_width="500px",
+                                default_value=APIKeyState.account_name,
+                            ),
+                            rx.text(
+                                "A friendly name to identify this API key",
+                                size="1",
+                                color="gray",
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.vstack(
+                            rx.text("Exchange", size="2", weight="bold"),
+                            rx.select(
+                                ["hyperliquid", "binance (coming soon)", "lighter (coming soon)"],
+                                placeholder="Select exchange",
+                                name="exchange",
+                                default_value=APIKeyState.exchange,
+                                on_change=APIKeyState.set_exchange,
+                                max_width="300px",
+                            ),
+                            rx.text(
+                                "The exchange where this API key will be used",
+                                size="1",
+                                color="gray",
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.cond(
+                            APIKeyState.exchange != "hyperliquid",
+                            rx.vstack(
+                                rx.text("API Key", size="2", weight="bold"),
+                                rx.input(
+                                    placeholder="Enter your API Key",
+                                    name="api_key",
+                                    type="text",
+                                    required=True,
+                                    width="100%",
+                                    default_value=APIKeyState.api_key,
+                                ),
+                                width="100%",
+                                spacing="1",
+                            ),
+                        ),
+                        
+                        rx.vstack(
+                            rx.hstack(
+                                rx.text(
+                                    rx.cond(
+                                        APIKeyState.exchange == "hyperliquid",
+                                        "API Secret",
+                                        "API Secret",
+                                    ),
+                                    size="2",
+                                    weight="bold",
+                                ),
+                                rx.spacer(),
+                                rx.button(
+                                    rx.cond(APIKeyState.show_api_secret, "Hide", "Show"),
+                                    size="1",
+                                    variant="ghost",
+                                    on_click=APIKeyState.toggle_secret_visibility,
+                                ),
+                                width="100%",
+                                align="center",
+                            ),
+                            rx.input(
+                                placeholder=rx.cond(
+                                    APIKeyState.exchange == "hyperliquid",
+                                    "Enter your Hyperliquid API Secret",
+                                    "Enter your API Secret",
+                                ),
+                                name="api_secret",
+                                type=rx.cond(APIKeyState.show_api_secret, "text", "password"),
+                                required=True,
+                                width="100%",
+                                default_value=APIKeyState.api_secret,
+                            ),
+                            rx.cond(
+                                APIKeyState.exchange == "hyperliquid",
+                                rx.text(
+                                    "For Hyperliquid, only the API Secret is required (no API Key needed)",
+                                    size="1",
+                                    color="gray",
+                                ),
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.cond(
+                            APIKeyState.exchange == "hyperliquid",
+                            rx.vstack(
+                                rx.vstack(
+                                    rx.text("Wallet Address", size="2", weight="bold"),
+                                    rx.input(
+                                        placeholder="0x...",
+                                        name="wallet_address",
+                                        type="text",
+                                        required=True,
+                                        max_width="500px",
+                                        default_value=APIKeyState.wallet_address,
+                                    ),
+                                    rx.text(
+                                        "Your Hyperliquid wallet address (needed for balance/position queries)",
+                                        size="1",
+                                        color="gray",
+                                    ),
+                                    width="100%",
+                                    spacing="1",
+                                ),
+                                
+                                rx.vstack(
+                                    rx.hstack(
+                                        rx.checkbox(
+                                            "Master Account (Default Trading Address)",
+                                            checked=APIKeyState.is_master_account,
+                                            on_change=APIKeyState.set_is_master_account,
+                                        ),
+                                        spacing="2",
+                                        align="center",
+                                    ),
+                                    rx.input(
+                                        type="hidden",
+                                        name="is_master_account",
+                                        value=rx.cond(APIKeyState.is_master_account, "true", "false"),
+                                    ),
+                                    rx.text(
+                                        "Check if this is your main wallet. Uncheck if trading with a vault/sub-account.",
+                                        size="1",
+                                        color="gray",
+                                    ),
+                                    width="100%",
+                                    spacing="1",
+                                ),
+                                spacing="3",
+                                width="100%",
+                            ),
+                        ),
+                        
+                        rx.vstack(
+                            rx.text("Subaccount Name (Optional)", size="2", weight="bold"),
+                            rx.input(
+                                placeholder="e.g., default, trading, hedging",
+                                name="subaccount_name",
+                                type="text",
+                                max_width="400px",
+                                default_value=APIKeyState.subaccount_name,
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.vstack(
+                            rx.hstack(
+                                rx.text("Private Key (Optional)", size="2", weight="bold"),
+                                rx.spacer(),
+                                rx.button(
+                                    rx.cond(APIKeyState.show_private_key, "Hide", "Show"),
+                                    size="1",
+                                    variant="ghost",
+                                    on_click=APIKeyState.toggle_private_key_visibility,
+                                ),
+                                width="100%",
+                                align="center",
+                            ),
+                            rx.input(
+                                placeholder="For future use",
+                                name="private_key",
+                                type=rx.cond(APIKeyState.show_private_key, "text", "password"),
+                                width="100%",
+                                default_value=APIKeyState.private_key,
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.vstack(
+                            rx.text("Notes (Optional)", size="2", weight="bold"),
+                            rx.text_area(
+                                placeholder="Any additional notes about this configuration",
+                                name="notes",
+                                width="100%",
+                                default_value=APIKeyState.notes,
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.button(
+                            rx.cond(
+                                APIKeyState.is_editing,
+                                "Update API Key",
+                                "Add API Key",
+                            ),
+                            type="submit",
+                            size="3",
+                            width="100%",
+                            loading=APIKeyState.is_loading,
+                        ),
+                        
+                        spacing="4",
+                        width="100%",
+                    ),
+                    on_submit=APIKeyState.save_api_keys,
+                    reset_on_submit=False,
+                ),
+                
+                rx.divider(margin_top="1.5rem", margin_bottom="1.5rem"),
+                
+                rx.vstack(
+                    rx.text("Security Information", size="2", weight="bold"),
+                    rx.text("• All sensitive data is encrypted before storage", size="1", color="gray"),
+                    rx.text("• Keys are only accessible to your account", size="1", color="gray"),
+                    rx.text("• You can manage multiple accounts and subaccounts", size="1", color="gray"),
+                    spacing="1",
+                    align_items="start",
+                    width="100%",
+                ),
+                
+                spacing="3",
+                width="100%",
+            ),
+            width="100%",
+        ),
+        
+        spacing="4",
+        width="100%",
+    )

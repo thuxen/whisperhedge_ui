@@ -1,0 +1,47 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*/__pycache__/
+
+# Node modules
+node_modules/
+.npm
+.yarn
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Branding assets (custom logos, favicons)
+branding/assets/*.png
+branding/assets/*.svg
+branding/assets/*.ico
+branding/assets/*.jpg
+branding/assets/*.jpeg
+!branding/assets/README.md
+!branding/assets/.gitkeep
