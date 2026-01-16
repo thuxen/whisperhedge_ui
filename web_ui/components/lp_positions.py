@@ -236,6 +236,7 @@ def lp_positions_component() -> rx.Component:
                             "Fetch Position Data",
                             type="submit",
                             size="3",
+                            variant="soft",
                             width="100%",
                             loading=LPPositionState.is_fetching,
                         ),
@@ -692,7 +693,6 @@ def lp_positions_component() -> rx.Component:
                         rx.button(
                             "Save Position",
                             size="3",
-                            variant="soft",
                             on_click=LPPositionState.save_position,
                             width="50%",
                             loading=LPPositionState.is_loading,
