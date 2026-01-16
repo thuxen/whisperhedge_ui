@@ -103,7 +103,7 @@ class APIKeyState(rx.State):
                 self.is_loading = False
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             response = supabase.table("user_api_keys").select("*").eq("user_id", auth_state.user_id).order("created_at", desc=True).execute()
             
             if response.data:
@@ -128,7 +128,7 @@ class APIKeyState(rx.State):
                 self.api_keys = []
                 
         except Exception as e:
-            self.error_message = f"Error loading API keys: {str(e)}"
+            self.error_message = "Failed to load API keys. Please try again."
         finally:
             self.is_loading = False
     
@@ -174,8 +174,6 @@ class APIKeyState(rx.State):
         self.is_loading = True
         self.clear_messages()
         
-        print(f"DEBUG: Form data received: {form_data}")
-        
         account_name = form_data.get("account_name", "").strip()
         exchange = form_data.get("exchange", "hyperliquid").strip()
         api_key = form_data.get("api_key", "").strip()
@@ -192,8 +190,6 @@ class APIKeyState(rx.State):
         subaccount_name = form_data.get("subaccount_name", "").strip()
         private_key = form_data.get("private_key", "").strip()
         notes = form_data.get("notes", "").strip()
-        
-        print(f"DEBUG: is_master_account = {is_master_account}, type = {type(is_master_account)}")
         
         if not account_name:
             self.error_message = "Account name is required"
@@ -225,7 +221,7 @@ class APIKeyState(rx.State):
                 self.is_loading = False
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             encrypted_key = encrypt_value(api_key) if api_key else None
             encrypted_secret = encrypt_value(api_secret)
             encrypted_private_key = encrypt_value(private_key) if private_key else None
@@ -255,7 +251,7 @@ class APIKeyState(rx.State):
             self.clear_form()
             
         except Exception as e:
-            self.error_message = f"Error saving API keys: {str(e)}"
+            self.error_message = "Failed to save API keys. Please try again."
         finally:
             self.is_loading = False
     
@@ -272,7 +268,7 @@ class APIKeyState(rx.State):
                 self.is_loading = False
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             key_data = next((k for k in self.api_keys if k.id == key_id), None)
             account_name = key_data.account_name if key_data else "account"
             
@@ -285,7 +281,7 @@ class APIKeyState(rx.State):
                 self.clear_form()
             
         except Exception as e:
-            self.error_message = f"Error deleting API keys: {str(e)}"
+            self.error_message = "Failed to delete API keys. Please try again."
         finally:
             self.is_loading = False
     
@@ -297,7 +293,7 @@ class APIKeyState(rx.State):
             if not auth_state.is_authenticated or not auth_state.user_id:
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             
             key_data = next((k for k in self.api_keys if k.id == key_id), None)
             if key_data:
@@ -305,4 +301,4 @@ class APIKeyState(rx.State):
                 supabase.table("user_api_keys").update({"is_active": new_status}).eq("id", key_id).eq("user_id", auth_state.user_id).execute()
                 await self.load_api_keys()
         except Exception as e:
-            self.error_message = f"Error toggling status: {str(e)}"
+            self.error_message = "Failed to update status. Please try again."

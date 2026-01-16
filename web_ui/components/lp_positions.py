@@ -237,6 +237,7 @@ def lp_positions_component() -> rx.Component:
                             type="submit",
                             size="3",
                             width="100%",
+                            loading=LPPositionState.is_fetching,
                         ),
                         
                         spacing="4",
@@ -691,8 +692,10 @@ def lp_positions_component() -> rx.Component:
                         rx.button(
                             "Save Position",
                             size="3",
+                            variant="soft",
                             on_click=LPPositionState.save_position,
                             width="50%",
+                            loading=LPPositionState.is_loading,
                         ),
                         spacing="3",
                         width="100%",

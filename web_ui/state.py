@@ -6,6 +6,7 @@ class AuthState(rx.State):
     is_authenticated: bool = False
     user_email: str = ""
     user_id: str = ""
+    access_token: str = ""  # Store session token for RLS
     error_message: str = ""
     success_message: str = ""
     is_loading: bool = False
@@ -49,6 +50,7 @@ class AuthState(rx.State):
                     self.is_authenticated = True
                     self.user_email = email
                     self.user_id = response.user.id
+                    self.access_token = response.session.access_token
                     self.success_message = "Account created successfully! Redirecting to dashboard..."
                     return rx.redirect("/dashboard")
                 else:
@@ -57,7 +59,7 @@ class AuthState(rx.State):
             else:
                 self.error_message = "Failed to create account"
         except Exception as e:
-            self.error_message = f"Error: {str(e)}"
+            self.error_message = "An error occurred during sign up. Please try again."
         finally:
             self.is_loading = False
 
@@ -84,12 +86,13 @@ class AuthState(rx.State):
                 self.is_authenticated = True
                 self.user_email = email
                 self.user_id = response.user.id
+                self.access_token = response.session.access_token
                 self.success_message = "Successfully logged in!"
                 return rx.redirect("/dashboard")
             else:
                 self.error_message = "Invalid credentials"
         except Exception as e:
-            self.error_message = f"Error: {str(e)}"
+            self.error_message = "An error occurred during sign in. Please try again."
         finally:
             self.is_loading = False
 
@@ -100,7 +103,8 @@ class AuthState(rx.State):
             self.is_authenticated = False
             self.user_email = ""
             self.user_id = ""
+            self.access_token = ""
             self.success_message = "Successfully logged out"
             return rx.redirect("/")
         except Exception as e:
-            self.error_message = f"Error signing out: {str(e)}"
+            self.error_message = "An error occurred during sign out. Please try again."

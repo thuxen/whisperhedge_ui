@@ -19,9 +19,14 @@ CREATE TABLE IF NOT EXISTS user_api_keys (
     UNIQUE(user_id, account_name)
 );
 
--- Disable Row Level Security since we're controlling access in backend code
--- The backend filters all queries by user_id from the authenticated session
-ALTER TABLE user_api_keys DISABLE ROW LEVEL SECURITY;
+-- Enable Row Level Security to ensure users can only access their own data
+ALTER TABLE user_api_keys ENABLE ROW LEVEL SECURITY;
+
+-- Create policy: Users can only access their own API keys
+CREATE POLICY "Users can only access their own API keys"
+ON user_api_keys FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -56,8 +61,14 @@ CREATE TABLE IF NOT EXISTS lp_positions (
     UNIQUE(user_id, position_name)
 );
 
--- Disable Row Level Security for lp_positions (access controlled in backend)
-ALTER TABLE lp_positions DISABLE ROW LEVEL SECURITY;
+-- Enable Row Level Security for lp_positions
+ALTER TABLE lp_positions ENABLE ROW LEVEL SECURITY;
+
+-- Create policy: Users can only access their own LP positions
+CREATE POLICY "Users can only access their own LP positions"
+ON lp_positions FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 -- Create trigger to auto-update updated_at for lp_positions
 CREATE TRIGGER update_lp_positions_updated_at
@@ -125,8 +136,14 @@ CREATE TABLE IF NOT EXISTS position_configs (
     UNIQUE(user_id, nft_position_id, network)
 );
 
--- Disable RLS for position_configs (access controlled in backend)
-ALTER TABLE position_configs DISABLE ROW LEVEL SECURITY;
+-- Enable Row Level Security for position_configs
+ALTER TABLE position_configs ENABLE ROW LEVEL SECURITY;
+
+-- Create policy: Users can only access their own position configs
+CREATE POLICY "Users can only access their own position configs"
+ON position_configs FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 -- Create trigger to auto-update updated_at for position_configs
 CREATE TRIGGER update_position_configs_updated_at

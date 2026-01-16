@@ -176,35 +176,25 @@ class LPPositionState(rx.State):
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
             
-            print(f"DEBUG load_wallets: auth_state.is_authenticated = {auth_state.is_authenticated}")
-            print(f"DEBUG load_wallets: auth_state.user_id = {auth_state.user_id}")
-            
             if not auth_state.is_authenticated or not auth_state.user_id:
-                print("DEBUG load_wallets: Not authenticated")
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             response = supabase.table("user_api_keys").select("id,account_name,exchange").eq("user_id", auth_state.user_id).eq("is_active", True).execute()
-            print(f"DEBUG load_wallets: response.data = {response.data}")
             
             if response.data:
                 wallets = [f"{key['account_name']} ({key['exchange']})" for key in response.data]
-                print(f"DEBUG load_wallets: wallets = {wallets}")
                 # Store in cache
                 self._cached_wallets = wallets
                 # Auto-select first wallet if none selected
                 if wallets and not self.selected_hedge_wallet:
                     self.selected_hedge_wallet = wallets[0]
-                    print(f"DEBUG load_wallets: Auto-selected wallet = {self.selected_hedge_wallet}")
         except Exception as e:
-            print(f"Error loading wallets: {e}")
-            import traceback
-            traceback.print_exc()
+            pass
     
     @rx.var
     def available_wallets(self) -> list[str]:
         """Get list of available API keys for wallet selector"""
-        print(f"DEBUG available_wallets: Returning cached wallets = {self._cached_wallets}")
         return self._cached_wallets
     
     def clear_form(self):
@@ -298,7 +288,7 @@ class LPPositionState(rx.State):
                 yield rx.toast.error("Not authenticated", duration=3000)
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             position = next((p for p in self.lp_positions if p.id == position_id), None)
             position_name = position.position_name if position else "position"
             
@@ -310,7 +300,7 @@ class LPPositionState(rx.State):
             
             yield rx.toast.success(f"Deleted '{position_name}'!", duration=3000)
         except Exception as e:
-            yield rx.toast.error(f"Failed to delete: {str(e)}", duration=5000)
+            yield rx.toast.error("Failed to delete position. Please try again.", duration=5000)
         finally:
             self.is_loading = False
             self.loading_position_id = ""
@@ -328,7 +318,7 @@ class LPPositionState(rx.State):
                 self.is_loading = False
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             
             # Fetch positions for current user
             response = supabase.table("lp_positions").select("*").eq("user_id", auth_state.user_id).execute()
@@ -368,12 +358,13 @@ class LPPositionState(rx.State):
                 self.lp_positions = []
                 
         except Exception as e:
-            self.error_message = f"Error loading LP positions: {str(e)}"
+            self.error_message = "Failed to load positions. Please try again."
         finally:
             self.is_loading = False
 
     async def fetch_position_data(self, form_data: dict):
         """Fetch position data from blockchain before saving"""
+        self.is_fetching = True
         self.clear_messages()
         
         network = form_data.get("network", "ethereum").strip()
@@ -381,12 +372,11 @@ class LPPositionState(rx.State):
         
         if not nft_id:
             self.error_message = "NFT ID is required"
+            self.is_fetching = False
             return
         
         try:
             from .blockchain_utils import fetch_uniswap_position
-            
-            print(f"DEBUG: Fetching position data for NFT ID {nft_id} on {network}")
             
             # Fetch position data directly from blockchain (no API needed)
             self.fetched_position_data = await fetch_uniswap_position(network, nft_id)
@@ -410,9 +400,9 @@ class LPPositionState(rx.State):
             self.show_confirmation = True
             
         except Exception as e:
-            self.error_message = f"Error fetching position data: {str(e)}"
+            self.error_message = "Failed to fetch position data. Please check the NFT ID and network."
         finally:
-            pass
+            self.is_fetching = False
     
     async def save_position(self):
         """Save the confirmed position to database"""
@@ -438,7 +428,7 @@ class LPPositionState(rx.State):
                 self.is_loading = False
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             
             # Prepare lp_positions data (legacy table)
             lp_data = {
@@ -471,15 +461,17 @@ class LPPositionState(rx.State):
             await self.load_positions()
             yield rx.toast.success("Position saved successfully!", duration=3000)
         except Exception as e:
-            self.error_message = f"Error saving position: {str(e)}"
-            yield rx.toast.error(f"Failed to save: {str(e)}", duration=5000)
+            self.error_message = "Failed to save position. Please try again."
+            yield rx.toast.error("Failed to save position. Please try again.", duration=5000)
         finally:
             self.is_loading = False
     
     async def save_hedge_config(self, user_id: str, position_id: str):
         """Save hedge configuration to position_configs table"""
         try:
-            supabase = get_supabase_client()
+            from web_ui.state import AuthState
+            auth_state = await self.get_state(AuthState)
+            supabase = get_supabase_client(auth_state.access_token)
             
             # Get wallet ID from selected wallet name
             wallet_id = None
@@ -530,13 +522,15 @@ class LPPositionState(rx.State):
                 supabase.table("position_configs").insert(config_data).execute()
                 
         except Exception as e:
-            print(f"Error saving hedge config: {e}")
             # Don't fail the whole save if hedge config fails
+            pass
     
     async def load_hedge_config(self, position_id: str):
         """Load hedge configuration from position_configs table"""
         try:
-            supabase = get_supabase_client()
+            from web_ui.state import AuthState
+            auth_state = await self.get_state(AuthState)
+            supabase = get_supabase_client(auth_state.access_token)
             
             # Get position to find network and nft_id
             position = next((p for p in self.lp_positions if p.id == position_id), None)
@@ -569,7 +563,7 @@ class LPPositionState(rx.State):
                         self.selected_hedge_wallet = f"{wallet['account_name']} ({wallet['exchange']})"
                 
         except Exception as e:
-            print(f"Error loading hedge config: {e}")
+            pass
     
     async def toggle_active(self, position_id: str):
         try:
@@ -579,7 +573,7 @@ class LPPositionState(rx.State):
             if not auth_state.is_authenticated or not auth_state.user_id:
                 return
             
-            supabase = get_supabase_client()
+            supabase = get_supabase_client(auth_state.access_token)
             
             position = next((p for p in self.lp_positions if p.id == position_id), None)
             if position:
@@ -587,4 +581,4 @@ class LPPositionState(rx.State):
                 supabase.table("lp_positions").update({"is_active": new_status}).eq("id", position_id).eq("user_id", auth_state.user_id).execute()
                 await self.load_positions()
         except Exception as e:
-            self.error_message = f"Error toggling status: {str(e)}"
+            self.error_message = "Failed to update status. Please try again."
