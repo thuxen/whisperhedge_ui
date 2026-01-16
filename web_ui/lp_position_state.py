@@ -50,6 +50,10 @@ class LPPositionState(rx.State):
     loading_position_id: str = ""
     is_fetching: bool = False
     
+    # Temporary state for fetch handler
+    _fetch_network: str = ""
+    _fetch_nft_id: str = ""
+    
     hedge_ratio: int = 80
     selected_hedge_wallet: str = ""
     _cached_wallets: list[str] = []  # Cache for available wallets
@@ -362,28 +366,36 @@ class LPPositionState(rx.State):
         finally:
             self.is_loading = False
 
-    async def fetch_position_data(self, form_data: dict):
-        """Fetch position data from blockchain before saving"""
-        self.is_fetching = True
-        self.clear_messages()
+    def fetch_position_data_handler(self, form_data: dict):
+        """Immediate feedback handler for fetch position data"""
+        # Store form data in state for worker to use
+        self._fetch_network = form_data.get("network", "ethereum").strip()
+        self._fetch_nft_id = form_data.get("nft_id", "").strip()
         
-        network = form_data.get("network", "ethereum").strip()
-        nft_id = form_data.get("nft_id", "").strip()
-        
-        if not nft_id:
+        if not self._fetch_nft_id:
             self.error_message = "NFT ID is required"
-            self.is_fetching = False
             return
         
+        # Set loading state immediately
+        self.is_fetching = True
+        
+        # Return toast and chain to async worker
+        return [
+            rx.toast.info("Fetching position data...", duration=5000),
+            LPPositionState.fetch_position_data_worker
+        ]
+
+    async def fetch_position_data_worker(self):
+        """Async worker for fetching position data"""
         try:
             from .blockchain_utils import fetch_uniswap_position
             
             # Fetch position data directly from blockchain (no API needed)
-            self.fetched_position_data = await fetch_uniswap_position(network, nft_id)
+            self.fetched_position_data = await fetch_uniswap_position(self._fetch_network, self._fetch_nft_id)
             
             # Populate form fields with fetched data
-            self.network = network
-            self.nft_id = nft_id
+            self.network = self._fetch_network
+            self.nft_id = self._fetch_nft_id
             self.pool_address = self.fetched_position_data.get("pool_address", "")
             self.token0_symbol = self.fetched_position_data.get("token0_symbol", "")
             self.token1_symbol = self.fetched_position_data.get("token1_symbol", "")
@@ -393,39 +405,52 @@ class LPPositionState(rx.State):
             # Check if USD values are available
             if self.fetched_position_data.get("hl_price_available"):
                 self.success_message = "Position data fetched with USD values! Review and confirm to save."
+                yield rx.toast.success("Position fetched successfully!", duration=3000)
             else:
                 hl_error = self.fetched_position_data.get("hl_price_error", "")
                 self.success_message = f"Position data fetched (no USD values: {hl_error}). Review and confirm to save."
+                yield rx.toast.warning(f"Position fetched without USD values: {hl_error}", duration=5000)
             
             self.show_confirmation = True
             
         except Exception as e:
             self.error_message = "Failed to fetch position data. Please check the NFT ID and network."
+            yield rx.toast.error("Failed to fetch position data. Please check NFT ID/Network.", duration=5000)
         finally:
             self.is_fetching = False
+            # Clear temporary state
+            self._fetch_network = ""
+            self._fetch_nft_id = ""
     
-    async def save_position(self):
-        """Save the confirmed position to database"""
-        self.is_loading = True
-        self.clear_messages()
-        
+    def save_position_handler(self):
+        """Immediate feedback handler for save position"""
+        # Validation
         if not self.position_name:
             self.error_message = "Position name is required"
-            self.is_loading = False
             return
         
         if not self.nft_id:
             self.error_message = "NFT ID is required"
-            self.is_loading = False
             return
         
+        # Set loading state immediately
+        self.is_loading = True
+        
+        # Return toast and chain to async worker
+        return [
+            rx.toast.info("Saving position...", duration=5000),
+            LPPositionState.save_position_worker
+        ]
+
+    async def save_position_worker(self):
+        """Async worker for saving position"""
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
             
             if not auth_state.is_authenticated or not auth_state.user_id:
                 self.error_message = "Not authenticated"
-                self.is_loading = False
+                yield rx.toast.error("Not authenticated", duration=3000)
                 return
             
             supabase = get_supabase_client(auth_state.access_token)
