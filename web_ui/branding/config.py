@@ -14,7 +14,7 @@ class BrandConfig:
     APP_NAME = os.getenv("BRAND_APP_NAME", "WhisperHedge")
     COMPANY_NAME = os.getenv("BRAND_COMPANY_NAME", "WhisperHedge")
     DOMAIN = os.getenv("BRAND_DOMAIN", "whisperhedge.com")
-    TAGLINE = os.getenv("BRAND_TAGLINE", "Advanced Crypto Hedging Platform")
+    TAGLINE = os.getenv("BRAND_TAGLINE", "Liquidity Pool Hedging Simplified")
     
     # Logo Paths (optional - will fallback to text if files don't exist)
     LOGO_LIGHT = os.getenv("BRAND_LOGO_LIGHT", "/branding/assets/logo.png")

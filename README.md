@@ -37,6 +37,65 @@ A comprehensive Reflex-based web interface for managing cryptocurrency API keys,
    reflex run
    ```
 
+## Docker Deployment
+
+### Quick Start
+
+1. **Create production environment:**
+   ```bash
+   cp .env.production .env
+   # Edit .env with your actual values
+   ```
+
+2. **Deploy with Docker Compose:**
+   ```bash
+   ./deploy.sh
+   ```
+
+### Manual Docker Deployment
+
+1. **Build the image:**
+   ```bash
+   docker build -t whisperhedge-ui .
+   ```
+
+2. **Run the container:**
+   ```bash
+   docker run -d \
+     --name whisperhedge-ui \
+     -p 8000:8000 \
+     --env-file .env \
+     whisperhedge-ui
+   ```
+
+### SSL/HTTPS Setup (Optional)
+
+For production with SSL:
+
+1. **Get SSL certificates** (Let's Encrypt recommended)
+2. **Place certificates** in `ssl/` directory:
+   ```
+   ssl/cert.pem
+   ssl/key.pem
+   ```
+3. **Update nginx.conf** with your domain
+4. **Run with SSL profile:**
+   ```bash
+   docker-compose --profile ssl up -d
+   ```
+
+### Environment Variables
+
+Required for production:
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_KEY` - Your Supabase anon key  
+- `ENCRYPTION_KEY` - 32-byte encryption key
+
+Optional branding:
+- `BRAND_APP_NAME` - App name (default: WhisperHedge)
+- `BRAND_COMPANY_NAME` - Company name
+- `BRAND_DOMAIN` - Company domain
+
 ## Pages
 
 - `/` - Landing page with sign in/sign up options

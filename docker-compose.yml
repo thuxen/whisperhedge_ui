@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      # Optional branding
+      - BRAND_APP_NAME=${BRAND_APP_NAME:-WhisperHedge}
+      - BRAND_COMPANY_NAME=${BRAND_COMPANY_NAME:-WhisperHedge}
+      - BRAND_DOMAIN=${BRAND_DOMAIN:-whisperhedge.com}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add nginx for SSL termination
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+    profiles:
+      - ssl  # Only start with --profile ssl
