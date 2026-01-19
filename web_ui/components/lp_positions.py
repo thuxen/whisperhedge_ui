@@ -12,8 +12,8 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     rx.hstack(
                         rx.badge(position.network.title(), color_scheme="gray", variant="soft"),
                         rx.badge(
-                            rx.cond(position.is_active, "Active", "Inactive"),
-                            color_scheme=rx.cond(position.is_active, "green", "gray"),
+                            rx.cond(position.hedge_enabled, "Hedge Active", "Hedge Inactive"),
+                            color_scheme=rx.cond(position.hedge_enabled, "green", "red"),
                             variant="surface",
                         ),
                         spacing="2",
@@ -46,26 +46,11 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
             
             rx.divider(margin_top="0.75rem", margin_bottom="0.75rem"),
             
-            rx.hstack(
-                rx.vstack(
-                    rx.text("Position Value", size="1", color="gray", weight="medium"),
-                    rx.text(position.position_value_formatted, size="6", weight="bold", color="green"),
-                    spacing="1",
-                ),
-                rx.spacer(),
-                rx.vstack(
-                    rx.text("Hedge Strategy", size="1", color="gray", weight="medium", text_align="right"),
-                    rx.badge(
-                        position.hedge_details,
-                        color_scheme=rx.cond(position.hedge_enabled, "blue", "gray"),
-                        size="3",
-                        variant="soft",
-                    ),
-                    align_items="end",
-                    spacing="1",
-                ),
-                width="100%",
-                align="end",
+            rx.vstack(
+                rx.text("Position Value", size="1", color="gray", weight="medium"),
+                rx.text(position.position_value_formatted, size="6", weight="bold", color="green"),
+                spacing="1",
+                align_items="start",
             ),
             
             rx.box(height="0.5rem"),
@@ -77,18 +62,127 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     spacing="1",
                 ),
                 rx.vstack(
-                    rx.text("Fee Tier", size="1", color="gray"),
-                    rx.text(position.fee_tier, size="2", weight="medium"),
-                    spacing="1",
-                ),
-                rx.vstack(
                     rx.text("NFT ID", size="1", color="gray"),
                     rx.text(position.nft_id, size="2", weight="medium"),
                     spacing="1",
                 ),
-                columns="3",
+                rx.vstack(
+                    rx.text("API Key", size="1", color="gray"),
+                    rx.text(rx.cond(position.api_key_name != "", position.api_key_name, "Not assigned"), size="2", weight="medium"),
+                    spacing="1",
+                ),
+                rx.vstack(
+                    rx.text("Network", size="1", color="gray"),
+                    rx.text(position.network.title(), size="2", weight="medium"),
+                    spacing="1",
+                ),
+                columns="4",
                 spacing="4",
                 width="100%",
+            ),
+            
+            rx.box(height="0.5rem"),
+            
+            rx.vstack(
+                rx.text("Hedging Settings", size="1", color="gray", weight="bold"),
+                rx.grid(
+                    rx.vstack(
+                        rx.text("Tokens Hedged", size="1", color="gray"),
+                        rx.text(
+                            rx.cond(
+                                position.hedge_token0 & position.hedge_token1,
+                                "Both",
+                                rx.cond(
+                                    position.hedge_token0,
+                                    position.token0_symbol,
+                                    rx.cond(
+                                        position.hedge_token1,
+                                        position.token1_symbol,
+                                        "None"
+                                    )
+                                )
+                            ),
+                            size="2",
+                            weight="medium"
+                        ),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Target Ratio", size="1", color="gray"),
+                        rx.text(position.target_hedge_ratio.to(str) + "%", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Hedge Mode", size="1", color="gray"),
+                        rx.badge(
+                            rx.cond(
+                                position.use_dynamic_hedging,
+                                "Dynamic (" + position.dynamic_profile + ")",
+                                "Static"
+                            ),
+                            color_scheme=rx.cond(position.use_dynamic_hedging, "purple", "blue"),
+                            size="1",
+                        ),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Rebalance Cooldown", size="1", color="gray"),
+                        rx.text(position.rebalance_cooldown_hours.to(str) + "h", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    columns="4",
+                    spacing="3",
+                    width="100%",
+                ),
+                rx.grid(
+                    rx.vstack(
+                        rx.text("Delta Drift", size="1", color="gray"),
+                        rx.text(position.delta_drift_threshold_pct.to(str) + "%", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Down Threshold", size="1", color="gray"),
+                        rx.text((position.down_threshold * 100).to(str) + "%", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Bounce Threshold", size="1", color="gray"),
+                        rx.text((position.bounce_threshold * 100).to(str) + "%", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Lookback Hours", size="1", color="gray"),
+                        rx.text(position.lookback_hours.to(str) + "h", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    columns="4",
+                    spacing="3",
+                    width="100%",
+                    margin_top="0.5rem",
+                ),
+                rx.grid(
+                    rx.vstack(
+                        rx.text("Min Drift % Capital", size="1", color="gray"),
+                        rx.text((position.drift_min_pct_of_capital * 100).to(str) + "%", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    rx.vstack(
+                        rx.text("Max Hedge Drift", size="1", color="gray"),
+                        rx.text((position.max_hedge_drift_pct * 100).to(str) + "%", size="2", weight="medium"),
+                        spacing="1",
+                    ),
+                    rx.spacer(),
+                    rx.spacer(),
+                    columns="4",
+                    spacing="3",
+                    width="100%",
+                    margin_top="0.5rem",
+                ),
+                spacing="2",
+                width="100%",
+                padding="0.75rem",
+                background="var(--gray-2)",
+                border_radius="8px",
             ),
             
             rx.cond(
@@ -591,6 +685,73 @@ def lp_positions_component() -> rx.Component:
                                                         spacing="2",
                                                         width="100%",
                                                     ),
+                                                    
+                                                    rx.hstack(
+                                                        rx.vstack(
+                                                            rx.hstack(
+                                                                rx.text("Lookback Hours", size="1"),
+                                                                rx.tooltip(
+                                                                    rx.icon("info", size=14, color="gray"),
+                                                                    content="Pullback filter: How far back to look for momentum before hedging. Conservative=12h (more forgiving of trends), Balanced=6h, Aggressive=4h (quicker reaction)",
+                                                                ),
+                                                                spacing="1",
+                                                                align_items="center",
+                                                            ),
+                                                            rx.select(
+                                                                ["Aggressive (4h)", "Balanced (6h)", "Conservative (12h)"],
+                                                                value="Balanced (6h)",
+                                                                on_change=LPPositionState.set_lookback_hours,
+                                                                placeholder="Select lookback",
+                                                            ),
+                                                            rx.text("Momentum analysis window", size="1", color="gray"),
+                                                            spacing="1",
+                                                            width="100%",
+                                                        ),
+                                                        rx.vstack(
+                                                            rx.hstack(
+                                                                rx.text("Min Drift % of Capital", size="1"),
+                                                                rx.tooltip(
+                                                                    rx.icon("info", size=14, color="gray"),
+                                                                    content="Safety: Minimum drift size before hedging (as % of position). Conservative=10% (fewer tiny trades), Balanced=6%, Aggressive=4% (capture more small moves)",
+                                                                ),
+                                                                spacing="1",
+                                                                align_items="center",
+                                                            ),
+                                                            rx.select(
+                                                                ["Aggressive (4%)", "Balanced (6%)", "Conservative (10%)"],
+                                                                value="Balanced (6%)",
+                                                                on_change=LPPositionState.set_drift_min_pct_of_capital,
+                                                                placeholder="Select min drift",
+                                                            ),
+                                                            rx.text("Minimum position size threshold", size="1", color="gray"),
+                                                            spacing="1",
+                                                            width="100%",
+                                                        ),
+                                                        spacing="2",
+                                                        width="100%",
+                                                    ),
+                                                    
+                                                    rx.vstack(
+                                                        rx.hstack(
+                                                            rx.text("Max Hedge Drift %", size="1"),
+                                                            rx.tooltip(
+                                                                rx.icon("info", size=14, color="gray"),
+                                                                content="Safety: Maximum allowed delta drift before forcing a hedge. Conservative=70% (more drift allowed), Balanced=50%, Aggressive=40% (more frequent protection)",
+                                                            ),
+                                                            spacing="1",
+                                                            align_items="center",
+                                                        ),
+                                                        rx.select(
+                                                            ["Aggressive (40%)", "Balanced (50%)", "Conservative (70%)"],
+                                                            value="Balanced (50%)",
+                                                            on_change=LPPositionState.set_max_hedge_drift_pct,
+                                                            placeholder="Select max drift",
+                                                        ),
+                                                        rx.text("Maximum drift before forced hedge", size="1", color="gray"),
+                                                        spacing="1",
+                                                        width="100%",
+                                                    ),
+                                                    
                                                     spacing="2",
                                                     width="100%",
                                                 ),
@@ -603,9 +764,10 @@ def lp_positions_component() -> rx.Component:
                                                 rx.cond(
                                                     LPPositionState.use_dynamic_hedging,
                                                     rx.text(
-                                                        "Hedge amounts will be determined dynamically by the selected profile",
+                                                        "Not available with dynamic hedging",
                                                         size="2",
-                                                        color="blue",
+                                                        color="gray",
+                                                        font_style="italic",
                                                     ),
                                                     rx.vstack(
                                                         rx.cond(

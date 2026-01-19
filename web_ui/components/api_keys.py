@@ -22,15 +22,12 @@ def api_key_card(key: APIKeyData) -> rx.Component:
                 ),
                 rx.spacer(),
                 rx.hstack(
-                    rx.badge(
-                        rx.cond(key.is_active, "Active", "Inactive"),
-                        color_scheme=rx.cond(key.is_active, "green", "gray"),
-                    ),
                     rx.button(
                         "Edit",
                         size="2",
                         variant="soft",
                         on_click=lambda: APIKeyState.edit_api_key(key.id),
+                        loading=APIKeyState.loading_key_id == key.id,
                     ),
                     rx.button(
                         "Delete",
@@ -38,6 +35,7 @@ def api_key_card(key: APIKeyData) -> rx.Component:
                         variant="soft",
                         color_scheme="red",
                         on_click=lambda: APIKeyState.delete_api_key(key.id),
+                        loading=APIKeyState.loading_key_id == key.id,
                     ),
                     spacing="2",
                 ),
@@ -50,13 +48,43 @@ def api_key_card(key: APIKeyData) -> rx.Component:
                     key.wallet_address != "",
                     rx.text("Wallet: " + key.wallet_address[:10] + "..." + key.wallet_address[-8:], size="2", color="gray"),
                 ),
-                rx.cond(
-                    key.subaccount_name != "",
-                    rx.text("Subaccount: " + key.subaccount_name, size="2", color="gray"),
-                ),
+                # Subaccount name hidden from UI
+                # rx.cond(
+                #     key.subaccount_name != "",
+                #     rx.text("Subaccount: " + key.subaccount_name, size="2", color="gray"),
+                # ),
                 rx.cond(
                     key.notes != "",
                     rx.text("Notes: " + key.notes, size="2", color="gray"),
+                ),
+                # API Key Assignment Status
+                rx.hstack(
+                    rx.text("API key assigned:", size="2", color="gray"),
+                    rx.cond(
+                        key.is_in_use,
+                        rx.badge(
+                            "In Use",
+                            color_scheme="red",
+                            size="1",
+                        ),
+                        rx.badge(
+                            "Available",
+                            color_scheme="green",
+                            size="1",
+                        ),
+                    ),
+                    spacing="2",
+                    align_items="center",
+                ),
+                # Show position name on separate line if in use
+                rx.cond(
+                    key.is_in_use & (key.used_by_position != ""),
+                    rx.text(
+                        "Used by: " + key.used_by_position,
+                        size="2",
+                        color="gray",
+                        font_style="italic",
+                    ),
                 ),
                 spacing="1",
                 align_items="start",
@@ -72,7 +100,9 @@ def api_key_card(key: APIKeyData) -> rx.Component:
                     ),
                     size="2",
                     variant="soft",
+                    color_scheme="green",
                     on_click=lambda: APIKeyState.fetch_balance(key.id),
+                    loading=key.balance_loading,
                     disabled=key.balance_loading,
                 ),
                 rx.cond(
@@ -294,14 +324,10 @@ def api_keys_component() -> rx.Component:
                                 ),
                                 
                                 rx.vstack(
-                                    rx.hstack(
-                                        rx.checkbox(
-                                            "Master Account (Default Trading Address)",
-                                            checked=APIKeyState.is_master_account,
-                                            on_change=APIKeyState.set_is_master_account,
-                                        ),
-                                        spacing="2",
-                                        align="center",
+                                    rx.checkbox(
+                                        "Master Account (Default Trading Address)",
+                                        checked=APIKeyState.is_master_account,
+                                        on_change=APIKeyState.set_is_master_account,
                                     ),
                                     rx.input(
                                         type="hidden",
@@ -321,42 +347,44 @@ def api_keys_component() -> rx.Component:
                             ),
                         ),
                         
-                        rx.vstack(
-                            rx.text("Subaccount Name (Optional)", size="2", weight="bold"),
-                            rx.input(
-                                placeholder="e.g., default, trading, hedging",
-                                name="subaccount_name",
-                                type="text",
-                                max_width="400px",
-                                default_value=APIKeyState.subaccount_name,
-                            ),
-                            width="100%",
-                            spacing="1",
-                        ),
+                        # Subaccount Name field hidden from UI
+                        # rx.vstack(
+                        #     rx.text("Subaccount Name (Optional)", size="2", weight="bold"),
+                        #     rx.input(
+                        #         placeholder="e.g., default, trading, hedging",
+                        #         name="subaccount_name",
+                        #         type="text",
+                        #         max_width="400px",
+                        #         default_value=APIKeyState.subaccount_name,
+                        #     ),
+                        #     width="100%",
+                        #     spacing="1",
+                        # ),
                         
-                        rx.vstack(
-                            rx.hstack(
-                                rx.text("Private Key (Optional)", size="2", weight="bold"),
-                                rx.spacer(),
-                                rx.button(
-                                    rx.cond(APIKeyState.show_private_key, "Hide", "Show"),
-                                    size="1",
-                                    variant="ghost",
-                                    on_click=APIKeyState.toggle_private_key_visibility,
-                                ),
-                                width="100%",
-                                align="center",
-                            ),
-                            rx.input(
-                                placeholder="For future use",
-                                name="private_key",
-                                type=rx.cond(APIKeyState.show_private_key, "text", "password"),
-                                width="100%",
-                                default_value=APIKeyState.private_key,
-                            ),
-                            width="100%",
-                            spacing="1",
-                        ),
+                        # Private Key field hidden from UI
+                        # rx.vstack(
+                        #     rx.hstack(
+                        #         rx.text("Private Key (Optional)", size="2", weight="bold"),
+                        #         rx.spacer(),
+                        #         rx.button(
+                        #             rx.cond(APIKeyState.show_private_key, "Hide", "Show"),
+                        #             size="1",
+                        #             variant="ghost",
+                        #             on_click=APIKeyState.toggle_private_key_visibility,
+                        #         ),
+                        #         width="100%",
+                        #         align="center",
+                        #     ),
+                        #     rx.input(
+                        #         placeholder="For future use",
+                        #         name="private_key",
+                        #         type=rx.cond(APIKeyState.show_private_key, "text", "password"),
+                        #         width="100%",
+                        #         default_value=APIKeyState.private_key,
+                        #     ),
+                        #     width="100%",
+                        #     spacing="1",
+                        # ),
                         
                         rx.vstack(
                             rx.text("Notes (Optional)", size="2", weight="bold"),
@@ -370,22 +398,48 @@ def api_keys_component() -> rx.Component:
                             spacing="1",
                         ),
                         
-                        rx.button(
-                            rx.cond(
-                                APIKeyState.is_editing,
-                                "Update API Key",
-                                "Add API Key",
+                        # Show different button layouts based on edit mode
+                        rx.cond(
+                            APIKeyState.is_editing,
+                            # Edit mode: Cancel and Update buttons
+                            rx.hstack(
+                                rx.button(
+                                    "Cancel",
+                                    size="3",
+                                    variant="soft",
+                                    color_scheme="gray",
+                                    type="button",
+                                    on_click=APIKeyState.cancel_edit,
+                                    width="50%",
+                                ),
+                                rx.button(
+                                    "Update API Key",
+                                    type="submit",
+                                    size="3",
+                                    variant="soft",
+                                    color_scheme="blue",
+                                    width="50%",
+                                    loading=APIKeyState.is_loading,
+                                ),
+                                spacing="3",
+                                width="100%",
                             ),
-                            type="submit",
-                            size="3",
-                            width="100%",
-                            loading=APIKeyState.is_loading,
+                            # Add mode: Single Add button
+                            rx.button(
+                                "Add API Key",
+                                type="submit",
+                                size="3",
+                                variant="soft",
+                                color_scheme="blue",
+                                width="100%",
+                                loading=APIKeyState.is_loading,
+                            ),
                         ),
                         
                         spacing="4",
                         width="100%",
                     ),
-                    on_submit=APIKeyState.save_api_keys,
+                    on_submit=APIKeyState.save_api_keys_handler,
                     reset_on_submit=False,
                 ),
                 

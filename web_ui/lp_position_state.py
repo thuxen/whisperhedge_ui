@@ -21,6 +21,18 @@ class LPPositionData(BaseModel):
     hedge_enabled: bool = False
     target_hedge_ratio: float = 0.0
     hedge_details: str = "Disabled"
+    api_key_name: str = ""
+    hedge_token0: bool = True
+    hedge_token1: bool = True
+    use_dynamic_hedging: bool = False
+    dynamic_profile: str = "balanced"
+    rebalance_cooldown_hours: float = 8.0
+    delta_drift_threshold_pct: float = 0.38
+    down_threshold: float = -0.065
+    bounce_threshold: float = -0.038
+    lookback_hours: float = 6.0
+    drift_min_pct_of_capital: float = 0.06
+    max_hedge_drift_pct: float = 0.50
 
 
 class LPPositionState(rx.State):
@@ -45,6 +57,7 @@ class LPPositionState(rx.State):
     hedge_enabled: bool = False
     hedge_token0: bool = True
     hedge_token1: bool = True
+    selected_api_key_id: str = ""
     
     # Loading state
     loading_position_id: str = ""
@@ -65,6 +78,9 @@ class LPPositionState(rx.State):
     delta_drift_threshold_pct: float = 0.38
     down_threshold: float = -0.065
     bounce_threshold: float = -0.038
+    lookback_hours: float = 6.0
+    drift_min_pct_of_capital: float = 0.06
+    max_hedge_drift_pct: float = 0.50
     
     def clear_messages(self):
         self.error_message = ""
@@ -143,6 +159,33 @@ class LPPositionState(rx.State):
         }
         self.bounce_threshold = mapping.get(value, -0.038)
     
+    def set_lookback_hours(self, value: str):
+        # Parse "Level (Xh)" format
+        mapping = {
+            "Aggressive (4h)": 4.0,
+            "Balanced (6h)": 6.0,
+            "Conservative (12h)": 12.0
+        }
+        self.lookback_hours = mapping.get(value, 6.0)
+    
+    def set_drift_min_pct_of_capital(self, value: str):
+        # Parse "Level (X%)" format
+        mapping = {
+            "Aggressive (4%)": 0.04,
+            "Balanced (6%)": 0.06,
+            "Conservative (10%)": 0.10
+        }
+        self.drift_min_pct_of_capital = mapping.get(value, 0.06)
+    
+    def set_max_hedge_drift_pct(self, value: str):
+        # Parse "Level (X%)" format
+        mapping = {
+            "Aggressive (40%)": 0.40,
+            "Balanced (50%)": 0.50,
+            "Conservative (70%)": 0.70
+        }
+        self.max_hedge_drift_pct = mapping.get(value, 0.50)
+    
     @rx.var
     def hedge_ratio_display(self) -> str:
         """Display value for hedge ratio dropdown"""
@@ -163,7 +206,10 @@ class LPPositionState(rx.State):
         """Calculate estimated hedge amount for token0"""
         if not self.fetched_position_data or not self.hedge_enabled or not self.hedge_token0:
             return 0.0
-        delta = self.fetched_position_data.get('position_delta', 0.0)
+        # Use delta if available (for in-range positions), otherwise use token0_amount
+        delta = self.fetched_position_data.get('delta', 0.0)
+        if delta == 0.0:
+            delta = self.fetched_position_data.get('token0_amount', 0.0)
         return delta * (self.hedge_ratio / 100.0)
     
     @rx.var
@@ -175,7 +221,7 @@ class LPPositionState(rx.State):
         return token1_amount * (self.hedge_ratio / 100.0)
     
     async def load_wallets(self):
-        """Load available API keys for wallet selector"""
+        """Load available API keys for wallet selector - called on mount"""
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
@@ -184,11 +230,30 @@ class LPPositionState(rx.State):
                 return
             
             supabase = get_supabase_client(auth_state.access_token)
+            
+            # Get all active API keys
             response = supabase.table("user_api_keys").select("id,account_name,exchange").eq("user_id", auth_state.user_id).eq("is_active", True).execute()
             
             if response.data:
-                wallets = [f"{key['account_name']} ({key['exchange']})" for key in response.data]
-                # Store in cache
+                # Get API keys that are already in use by other positions
+                used_keys_response = supabase.table("position_configs").select("hl_api_key_id").eq("user_id", auth_state.user_id).execute()
+                used_key_ids = {config["hl_api_key_id"] for config in used_keys_response.data if config.get("hl_api_key_id")}
+                
+                # When editing, allow the current position's API key to appear
+                current_position_key_id = None
+                if self.is_editing and self.selected_position_id:
+                    current_config = supabase.table("position_configs").select("hl_api_key_id").eq("user_id", auth_state.user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+                    if current_config.data and current_config.data[0].get("hl_api_key_id"):
+                        current_position_key_id = current_config.data[0]["hl_api_key_id"]
+                
+                # Filter out used keys (except the current position's key when editing)
+                available_keys = [
+                    key for key in response.data 
+                    if key["id"] not in used_key_ids or key["id"] == current_position_key_id
+                ]
+                
+                wallets = [f"{key['account_name']} ({key['exchange']})" for key in available_keys]
+                # Store in cache for immediate use
                 self._cached_wallets = wallets
                 # Auto-select first wallet if none selected
                 if wallets and not self.selected_hedge_wallet:
@@ -202,6 +267,7 @@ class LPPositionState(rx.State):
         return self._cached_wallets
     
     def clear_form(self):
+        """Clear all form fields"""
         self.selected_position_id = ""
         self.position_name = ""
         self.network = "ethereum"
@@ -214,6 +280,47 @@ class LPPositionState(rx.State):
         self.is_editing = False
         self.show_confirmation = False
         self.fetched_position_data = {}
+        
+        # Clear hedge configuration
+        self.hedge_enabled = False
+        self.hedge_token0 = True
+        self.hedge_token1 = True
+        self.selected_api_key_id = ""
+        
+    async def check_api_key_availability(self, api_key_id: str) -> bool:
+        """Check if API key is available (not used by another position)"""
+        if not api_key_id:
+            return True  # No API key selected is always allowed
+        
+        try:
+            from web_ui.state import AuthState
+            auth_state = await self.get_state(AuthState)
+            
+            if not auth_state.is_authenticated or not auth_state.user_id:
+                return False
+            
+            supabase = get_supabase_client(auth_state.access_token)
+            
+            # Check if this API key is already used by another position
+            try:
+                result = supabase.table("position_configs").select("id").eq("hl_api_key_id", api_key_id).execute()
+                
+                # If editing, allow the same API key for the same position
+                if self.is_editing and self.selected_position_id:
+                    # Check if the existing usage is by this same position
+                    existing_result = supabase.table("position_configs").select("id").eq("hl_api_key_id", api_key_id).eq("position_name", self.position_name).execute()
+                    return len(existing_result.data) > 0
+                
+                # For new positions, API key must not be used by any other position
+                return len(result.data) == 0
+            except Exception as table_error:
+                # If position_configs table doesn't exist, assume API key is available
+                print(f"Warning: position_configs table not accessible: {table_error}")
+                return True
+            
+        except Exception as e:
+            print(f"Error checking API key availability: {e}")
+            return False
     
     def edit_position(self, position_id: str):
         """Immediate feedback handler"""
@@ -251,17 +358,28 @@ class LPPositionState(rx.State):
         self.fee_tier = position.fee_tier
         self.notes = position.notes
         self.is_editing = True
+        self.show_confirmation = True  # Show the full position form
 
         try:
-            # 3. Fetch remote data
-            form_data = {
-                "network": self.network,
-                "nft_id": self.nft_id
-            }
-            await self.fetch_position_data(form_data)
+            # 3. Load available API keys
+            await self.load_wallets()
+            
+            # 4. Fetch fresh blockchain data
+            from .blockchain_utils import fetch_uniswap_position
+            
+            self.fetched_position_data = await fetch_uniswap_position(self.network, self.nft_id)
+            
+            # Update fields with fresh blockchain data if available
+            if self.fetched_position_data:
+                self.pool_address = self.fetched_position_data.get("pool_address", self.pool_address)
+                self.token0_symbol = self.fetched_position_data.get("token0_symbol", self.token0_symbol)
+                self.token1_symbol = self.fetched_position_data.get("token1_symbol", self.token1_symbol)
+                self.fee_tier = self.fetched_position_data.get("fee_tier", self.fee_tier)
+            
+            # 5. Load hedge configuration
             await self.load_hedge_config(position_id)
             
-            yield rx.toast.success("Position data loaded!", duration=3000)
+            yield rx.toast.success("Position loaded for editing!", duration=3000)
         except Exception as e:
             yield rx.toast.error(f"Failed to load: {str(e)}", duration=5000)
         finally:
@@ -310,12 +428,14 @@ class LPPositionState(rx.State):
             self.loading_position_id = ""
 
     async def load_positions(self):
+        print("\n=== LOAD_POSITIONS START ===")
         self.is_loading = True
         self.clear_messages()
         
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
+            print(f"Auth state: authenticated={auth_state.is_authenticated}, user_id={auth_state.user_id}")
             
             if not auth_state.is_authenticated or not auth_state.user_id:
                 self.error_message = "Not authenticated"
@@ -325,18 +445,40 @@ class LPPositionState(rx.State):
             supabase = get_supabase_client(auth_state.access_token)
             
             # Fetch positions for current user
+            print(f"Fetching lp_positions for user_id={auth_state.user_id}")
             response = supabase.table("lp_positions").select("*").eq("user_id", auth_state.user_id).execute()
+            print(f"lp_positions response: {len(response.data) if response.data else 0} positions found")
             
             self.lp_positions = []
             if response.data:
                 # Fetch config data to merge
+                print(f"Fetching position_configs for user_id={auth_state.user_id}")
                 config_response = supabase.table("position_configs").select("*").eq("user_id", auth_state.user_id).execute()
-                config_map = {f"{c['network']}_{c['nft_id']}": c for c in config_response.data} if config_response.data else {}
+                print(f"position_configs response: {len(config_response.data) if config_response.data else 0} configs found")
+                
+                # Build config map using nft_id (actual column in database)
+                config_map = {}
+                if config_response.data:
+                    for c in config_response.data:
+                        nft_id = c.get('nft_id', '')
+                        print(f"Config: network={c.get('network')}, nft_id={nft_id}")
+                        if nft_id:
+                            config_map[f"{c['network']}_{nft_id}"] = c
+                print(f"Built config_map with {len(config_map)} entries")
+                
+                # Fetch API keys to get account names
+                api_keys_response = supabase.table("user_api_keys").select("id, account_name").eq("user_id", auth_state.user_id).execute()
+                api_key_map = {k["id"]: k["account_name"] for k in api_keys_response.data} if api_keys_response.data else {}
                 
                 for pos_data in response.data:
                     # Look up config
                     config_key = f"{pos_data['network']}_{pos_data['nft_id']}"
                     config = config_map.get(config_key, {})
+                    print(f"Position: network={pos_data['network']}, nft_id={pos_data['nft_id']}, config_found={bool(config)}")
+                    
+                    # Get API key name if assigned
+                    api_key_id = config.get("hl_api_key_id", "")
+                    api_key_name = api_key_map.get(api_key_id, "") if api_key_id else ""
                     
                     position = LPPositionData(
                         id=pos_data["id"],
@@ -356,13 +498,32 @@ class LPPositionState(rx.State):
                         hedge_enabled=config.get("hedge_enabled", False),
                         target_hedge_ratio=float(config.get("target_hedge_ratio", 0.0)),
                         hedge_details=f"Hedge: {int(float(config.get('target_hedge_ratio', 0.0)))}%" if config.get("hedge_enabled", False) else "Hedge: Disabled",
+                        api_key_name=api_key_name,
+                        hedge_token0=config.get("hedge_token0", True),
+                        hedge_token1=config.get("hedge_token1", True),
+                        use_dynamic_hedging=config.get("use_dynamic_hedging", False),
+                        dynamic_profile=config.get("dynamic_profile", "balanced"),
+                        rebalance_cooldown_hours=float(config.get("rebalance_cooldown_hours", 8.0)),
+                        delta_drift_threshold_pct=float(config.get("delta_drift_threshold_pct", 0.38)),
+                        down_threshold=float(config.get("down_threshold", -0.065)),
+                        bounce_threshold=float(config.get("bounce_threshold", -0.038)),
+                        lookback_hours=float(config.get("lookback_hours", 6.0)),
+                        drift_min_pct_of_capital=float(config.get("drift_min_pct_of_capital", 0.06)),
+                        max_hedge_drift_pct=float(config.get("max_hedge_drift_pct", 0.50)),
                     )
                     self.lp_positions.append(position)
             else:
                 self.lp_positions = []
                 
+            print(f"Successfully loaded {len(self.lp_positions)} positions")
+            print("=== LOAD_POSITIONS END ===\n")
         except Exception as e:
-            self.error_message = "Failed to load positions. Please try again."
+            print(f"\n!!! ERROR IN LOAD_POSITIONS !!!")
+            print(f"Error: {e}")
+            import traceback
+            traceback.print_exc()
+            print("!!! END ERROR !!!\n")
+            self.error_message = f"Failed to load positions: {str(e)}"
         finally:
             self.is_loading = False
 
@@ -433,6 +594,11 @@ class LPPositionState(rx.State):
             self.error_message = "NFT ID is required"
             return
         
+        # Check API key availability if hedge is enabled
+        if self.hedge_enabled and self.selected_api_key_id:
+            # This will be checked asynchronously in the worker
+            pass
+        
         # Set loading state immediately
         self.is_loading = True
         
@@ -452,6 +618,14 @@ class LPPositionState(rx.State):
                 self.error_message = "Not authenticated"
                 yield rx.toast.error("Not authenticated", duration=3000)
                 return
+            
+            # Check API key availability if hedge is enabled
+            if self.hedge_enabled and self.selected_api_key_id:
+                is_available = await self.check_api_key_availability(self.selected_api_key_id)
+                if not is_available:
+                    self.error_message = "Selected API key is already in use by another position"
+                    yield rx.toast.error("API key already in use by another position", duration=5000)
+                    return
             
             supabase = get_supabase_client(auth_state.access_token)
             
@@ -486,13 +660,18 @@ class LPPositionState(rx.State):
             await self.load_positions()
             yield rx.toast.success("Position saved successfully!", duration=3000)
         except Exception as e:
-            self.error_message = "Failed to save position. Please try again."
-            yield rx.toast.error("Failed to save position. Please try again.", duration=5000)
+            print(f"Error saving position: {e}")
+            import traceback
+            traceback.print_exc()
+            self.error_message = f"Failed to save position: {str(e)}"
+            yield rx.toast.error(f"Failed to save position: {str(e)}", duration=5000)
         finally:
             self.is_loading = False
     
     async def save_hedge_config(self, user_id: str, position_id: str):
         """Save hedge configuration to position_configs table"""
+        print("\n=== SAVE_HEDGE_CONFIG START ===")
+        print(f"user_id={user_id}, position_id={position_id}")
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
@@ -500,14 +679,25 @@ class LPPositionState(rx.State):
             
             # Get wallet ID from selected wallet name
             wallet_id = None
+            print(f"selected_hedge_wallet={self.selected_hedge_wallet}")
             if self.selected_hedge_wallet:
                 # Extract account name from "Account Name (Exchange)" format
                 account_name = self.selected_hedge_wallet.split(" (")[0]
+                print(f"Looking up API key: account_name={account_name}")
                 wallet_response = supabase.table("user_api_keys").select("id").eq("user_id", user_id).eq("account_name", account_name).execute()
                 if wallet_response.data:
                     wallet_id = wallet_response.data[0]["id"]
+                    print(f"Found wallet_id={wallet_id}")
+                else:
+                    print("No wallet found for account_name")
             
-            # Prepare position_configs data
+            # Check if config exists to preserve existing values when editing
+            print(f"Checking for existing config: network={self.network}, nft_id={self.nft_id}")
+            existing = supabase.table("position_configs").select("*").eq("user_id", user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+            existing_config = existing.data[0] if existing.data else {}
+            print(f"Existing config found: {bool(existing_config)}")
+            
+            # Prepare position_configs data (matching actual database schema)
             config_data = {
                 "user_id": user_id,
                 "position_name": self.position_name,
@@ -517,38 +707,63 @@ class LPPositionState(rx.State):
                 "nft_id": self.nft_id,
                 "pool_address": self.pool_address,
                 "token0_symbol": self.token0_symbol,
-                "token0_address": self.fetched_position_data.get("token0_address", ""),
+                "token0_address": self.fetched_position_data.get("token0_address", "") or existing_config.get("token0_address", ""),
                 "token1_symbol": self.token1_symbol,
-                "token1_address": self.fetched_position_data.get("token1_address", ""),
-                "fee_tier": int(self.fee_tier) if self.fee_tier and self.fee_tier.isdigit() else 3000,
-                "entry_price": self.fetched_position_data.get("current_price", 0),
-                "position_size_usd": float(self.fetched_position_data.get("position_value_usd", 0)),
+                "token1_address": self.fetched_position_data.get("token1_address", "") or existing_config.get("token1_address", ""),
+                "fee_tier": int(self.fee_tier) if self.fee_tier and self.fee_tier.isdigit() else 3000,  # INTEGER not VARCHAR
+                "entry_price": self.fetched_position_data.get("current_price", 0) or existing_config.get("entry_price", 0),
+                "position_size_usd": float(self.fetched_position_data.get("position_value_usd", 0)) or existing_config.get("position_size_usd", 0),
                 "hedge_enabled": self.hedge_enabled,
                 "hedge_token0": self.hedge_token0,
                 "hedge_token1": self.hedge_token1,
-                "target_hedge_ratio": float(self.hedge_ratio),
-                "hedge_wallet_id": wallet_id,
+                "target_hedge_ratio": float(self.hedge_ratio),  # Schema default is 80.00, store as-is
+                "hl_api_key_id": wallet_id,
                 "use_dynamic_hedging": self.use_dynamic_hedging,
                 "dynamic_profile": self.dynamic_profile,
                 "rebalance_cooldown_hours": float(self.rebalance_cooldown_hours),
-                "delta_drift_threshold_pct": float(self.delta_drift_threshold_pct),
+                "delta_drift_threshold_pct": float(self.delta_drift_threshold_pct),  # Schema default is 0.38, store as-is
                 "down_threshold": float(self.down_threshold),
                 "bounce_threshold": float(self.bounce_threshold),
+                "lookback_hours": float(self.lookback_hours),
+                "drift_min_pct_of_capital": float(self.drift_min_pct_of_capital),
+                "max_hedge_drift_pct": float(self.max_hedge_drift_pct),
+                "hedge_tokens": self.fetched_position_data.get("hedge_tokens", existing_config.get("hedge_tokens", {})),  # JSONB with HL metadata
             }
             
-            # Check if config exists for this position
-            existing = supabase.table("position_configs").select("id").eq("user_id", user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+            # Debug: Print numeric values to identify overflow
+            print(f"DEBUG - Numeric values:")
+            print(f"  entry_price: {config_data.get('entry_price')}")
+            print(f"  position_size_usd: {config_data.get('position_size_usd')}")
+            print(f"  target_hedge_ratio: {config_data.get('target_hedge_ratio')}")
+            print(f"  rebalance_cooldown_hours: {config_data.get('rebalance_cooldown_hours')}")
+            print(f"  delta_drift_threshold_pct: {config_data.get('delta_drift_threshold_pct')}")
+            print(f"  down_threshold: {config_data.get('down_threshold')}")
+            print(f"  bounce_threshold: {config_data.get('bounce_threshold')}")
+            print(f"  lookback_hours: {config_data.get('lookback_hours')}")
+            print(f"  drift_min_pct_of_capital: {config_data.get('drift_min_pct_of_capital')}")
+            print(f"  max_hedge_drift_pct: {config_data.get('max_hedge_drift_pct')}")
             
-            if existing.data:
+            # Update or insert based on whether config already exists
+            if existing_config:
                 # Update existing config
-                supabase.table("position_configs").update(config_data).eq("id", existing.data[0]["id"]).execute()
+                print(f"Updating existing config id={existing.data[0]['id']}")
+                result = supabase.table("position_configs").update(config_data).eq("id", existing.data[0]["id"]).execute()
+                print(f"Update result: {result}")
             else:
                 # Insert new config
-                supabase.table("position_configs").insert(config_data).execute()
+                print(f"Inserting new config with data keys: {list(config_data.keys())}")
+                result = supabase.table("position_configs").insert(config_data).execute()
+                print(f"Insert result: {result}")
+            print("=== SAVE_HEDGE_CONFIG END ===\n")
                 
         except Exception as e:
-            # Don't fail the whole save if hedge config fails
-            pass
+            print(f"\n!!! ERROR IN SAVE_HEDGE_CONFIG !!!")
+            print(f"Error: {e}")
+            import traceback
+            traceback.print_exc()
+            print("!!! END ERROR !!!\n")
+            # Re-raise to propagate error to parent
+            raise Exception(f"Failed to save hedge configuration: {str(e)}")
     
     async def load_hedge_config(self, position_id: str):
         """Load hedge configuration from position_configs table"""
@@ -581,8 +796,8 @@ class LPPositionState(rx.State):
                 self.bounce_threshold = float(config.get("bounce_threshold", -0.038))
                 
                 # Load wallet selection
-                if config.get("hedge_wallet_id"):
-                    wallet_response = supabase.table("user_api_keys").select("account_name,exchange").eq("id", config["hedge_wallet_id"]).execute()
+                if config.get("hl_api_key_id"):
+                    wallet_response = supabase.table("user_api_keys").select("account_name,exchange").eq("id", config["hl_api_key_id"]).execute()
                     if wallet_response.data:
                         wallet = wallet_response.data[0]
                         self.selected_hedge_wallet = f"{wallet['account_name']} ({wallet['exchange']})"

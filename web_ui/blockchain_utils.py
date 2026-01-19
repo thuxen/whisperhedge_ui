@@ -319,6 +319,7 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
         current_price = 0.0
         current_tick = 0
         sqrt_price_x96 = 0
+        current_price_raw = 0
         try:
             pool_contract = w3.eth.contract(
                 address=Web3.to_checksum_address(pool_address),
@@ -327,13 +328,19 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
             slot0 = pool_contract.functions.slot0().call()
             sqrt_price_x96 = slot0[0]
             current_tick = slot0[1]
-            current_price = (sqrt_price_x96 / (2**96)) ** 2
+            current_price_raw = (sqrt_price_x96 / (2**96)) ** 2
         except Exception as e:
             print(f"Error fetching pool price: {e}")
         
-        # Calculate price bounds from ticks
-        pa = tick_to_price(tick_lower)
-        pb = tick_to_price(tick_upper)
+        # Adjust for token decimals - applies to current_price, pa, and pb
+        decimal_adjustment = 10 ** (token1_decimals - token0_decimals)
+        current_price = current_price_raw / decimal_adjustment
+        
+        # Calculate price bounds from ticks (adjusted for decimals)
+        pa_raw = tick_to_price(tick_lower)
+        pb_raw = tick_to_price(tick_upper)
+        pa = pa_raw / decimal_adjustment
+        pb = pb_raw / decimal_adjustment
         
         # Calculate actual token amounts using Uniswap V3 formulas
         token0_amount_actual = 0.0
@@ -373,12 +380,15 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
             "token1_amount": token1_amount_actual,
         }
         
-        # Try to get USD values from Hyperliquid
+        # Try to get USD values and metadata from Hyperliquid
         try:
-            from .hl_utils import get_hl_token_price
+            from .hl_utils import get_hl_token_metadata
             
-            token0_price_usd = get_hl_token_price(token0_symbol)
-            token1_price_usd = get_hl_token_price(token1_symbol)
+            token0_metadata = get_hl_token_metadata(token0_symbol)
+            token1_metadata = get_hl_token_metadata(token1_symbol)
+            
+            token0_price_usd = token0_metadata['price'] if token0_metadata else None
+            token1_price_usd = token1_metadata['price'] if token1_metadata else None
             
             # Convert pool price (token ratio) to USD
             current_price_usd = 0.0
@@ -389,35 +399,61 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
                 # For pools like ENA/WETH, current_price is WETH per ENA (token1/token0)
                 # To get USD price of ENA: current_price * WETH_price
                 # To get USD price of WETH: just WETH_price
-                current_price_usd = round(current_price * token1_price_usd, 4)  # ENA price in USD, rounded to 4 decimals
+                current_price_usd = round(current_price * token1_price_usd, 4)  # Pool price in USD, rounded to 4 decimals
                 pa_usd = round(pa * token1_price_usd, 2)  # Lower bound in USD
                 pb_usd = round(pb * token1_price_usd, 2)  # Upper bound in USD
                 
-                # Calculate USD values using actual token amounts
-                token0_amount_usd = round(token0_amount_actual * current_price_usd, 2)  # ENA in USD
-                token1_amount_usd = round(token1_amount_actual * token1_price_usd, 2)  # WETH in USD
+                # Round token amounts to Hyperliquid sz_decimals for cleaner display
+                token0_sz_decimals = token0_metadata.get('sz_decimals', 8) if token0_metadata else 8
+                token1_sz_decimals = token1_metadata.get('sz_decimals', 8) if token1_metadata else 8
+                
+                token0_amount_rounded = round(token0_amount_actual, token0_sz_decimals)
+                token1_amount_rounded = round(token1_amount_actual, token1_sz_decimals)
+                
+                # Calculate USD values using ACTUAL Hyperliquid token prices (not pool ratios)
+                token0_amount_usd = round(token0_amount_rounded * token0_price_usd, 2)
+                token1_amount_usd = round(token1_amount_rounded * token1_price_usd, 2)
                 position_value_usd = round(token0_amount_usd + token1_amount_usd, 2)
                 
-                # Calculate percentage allocation
-                token0_pct = (token0_amount_usd / position_value_usd * 100) if position_value_usd > 0 else 0.0
-                token1_pct = (token1_amount_usd / position_value_usd * 100) if position_value_usd > 0 else 0.0
+                # Calculate percentage allocation (rounded to 1 decimal place)
+                token0_pct = round((token0_amount_usd / position_value_usd * 100), 1) if position_value_usd > 0 else 0.0
+                token1_pct = round((token1_amount_usd / position_value_usd * 100), 1) if position_value_usd > 0 else 0.0
                 
                 # Calculate delta (for hedging) - this is just token0 amount for in-range positions
-                delta = token0_amount_actual if current_tick >= tick_lower and current_tick <= tick_upper else 0.0
+                delta = token0_amount_rounded if current_tick >= tick_lower and current_tick <= tick_upper else 0.0
+                
+                # Prepare hedge_tokens JSONB data
+                hedge_tokens = {
+                    "token0": {
+                        "hl_symbol": token0_metadata.get('hl_symbol', '') if token0_metadata else '',
+                        "pool_symbol": token0_symbol,
+                        "sz_decimals": token0_sz_decimals,
+                        "price_decimals": token0_metadata.get('price_decimals', 5) if token0_metadata else 5
+                    },
+                    "token1": {
+                        "hl_symbol": token1_metadata.get('hl_symbol', '') if token1_metadata else '',
+                        "pool_symbol": token1_symbol,
+                        "sz_decimals": token1_sz_decimals,
+                        "price_decimals": token1_metadata.get('price_decimals', 5) if token1_metadata else 5
+                    }
+                }
                 
                 base_result.update({
-                    "token0_price_usd": current_price_usd,  # Token0 (ENA) price in USD
-                    "token1_price_usd": token1_price_usd,   # Token1 (WETH) price in USD
+                    "token0_amount": token0_amount_rounded,  # Rounded to HL decimals
+                    "token1_amount": token1_amount_rounded,  # Rounded to HL decimals
+                    "token0_price_usd": token0_price_usd,
+                    "token1_price_usd": token1_price_usd,
                     "current_price_usd": current_price_usd,
                     "pa_usd": pa_usd,
                     "pb_usd": pb_usd,
                     "token0_amount_usd": token0_amount_usd,
                     "token1_amount_usd": token1_amount_usd,
-                    "token0_pct": token0_pct,
-                    "token1_pct": token1_pct,
+                    "token0_pct": token0_pct,  # Rounded to 1 decimal
+                    "token1_pct": token1_pct,  # Rounded to 1 decimal
                     "position_value_usd": position_value_usd,
-                    "position_delta": delta,
+                    "delta": delta,
                     "hl_price_available": True,
+                    "hedge_tokens": hedge_tokens,  # JSONB data for database
                     "in_range": current_tick >= tick_lower and current_tick <= tick_upper,
                 })
             else:

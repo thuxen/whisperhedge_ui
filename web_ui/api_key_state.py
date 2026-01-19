@@ -22,6 +22,8 @@ class APIKeyData(BaseModel):
     available_balance: float = 0.0
     balance_loading: bool = False
     balance_error: str = ""
+    is_in_use: bool = False
+    used_by_position: str = ""
 
 
 class APIKeyState(rx.State):
@@ -37,6 +39,8 @@ class APIKeyState(rx.State):
     private_key: str = ""
     notes: str = ""
     is_loading: bool = False
+    loading_key_id: str = ""  # Track which key is being operated on
+    _save_form_data: dict = {}  # Temporary storage for save form data
     error_message: str = ""
     success_message: str = ""
     show_api_secret: bool = False
@@ -62,6 +66,7 @@ class APIKeyState(rx.State):
             self.wallet_address = ""
     
     def clear_form(self):
+        """Clear form and reset to add mode"""
         self.selected_key_id = ""
         self.account_name = ""
         self.exchange = "hyperliquid"
@@ -75,8 +80,19 @@ class APIKeyState(rx.State):
         self.is_editing = False
         self.show_api_secret = False
         self.show_private_key = False
+        self.clear_messages()
+    
+    def cancel_edit(self):
+        """Cancel editing with toast notification"""
+        self.clear_form()
+        return rx.toast.info("Cancelled editing", duration=2000)
     
     def edit_api_key(self, key_id: str):
+        """Immediate feedback handler for editing API key"""
+        # Set loading state immediately
+        self.loading_key_id = key_id
+        
+        # Find and populate form data
         key_data = next((k for k in self.api_keys if k.id == key_id), None)
         if key_data:
             self.selected_key_id = key_id
@@ -90,6 +106,16 @@ class APIKeyState(rx.State):
             self.private_key = key_data.private_key
             self.notes = key_data.notes
             self.is_editing = True
+        
+        # Clear loading state after a short delay (edit is instant)
+        return [
+            rx.toast.info("Loading API key for editing...", duration=1000),
+            APIKeyState.clear_edit_loading
+        ]
+    
+    def clear_edit_loading(self):
+        """Clear loading state for edit operation"""
+        self.loading_key_id = ""
     
     async def load_api_keys(self):
         self.is_loading = True
@@ -109,6 +135,17 @@ class APIKeyState(rx.State):
             if response.data:
                 self.api_keys = []
                 for key_data in response.data:
+                    # Check if this API key is used by any position
+                    try:
+                        position_response = supabase.table("position_configs").select("position_name").eq("hl_api_key_id", key_data["id"]).execute()
+                        used_by_position = position_response.data[0]["position_name"] if position_response.data else ""
+                        is_in_use = len(position_response.data) > 0
+                    except Exception as e:
+                        # If position_configs table doesn't exist or query fails, assume not in use
+                        print(f"Warning: Could not check API key usage: {e}")
+                        used_by_position = ""
+                        is_in_use = False
+                    
                     decrypted_key = APIKeyData(
                         id=key_data["id"],
                         account_name=key_data["account_name"],
@@ -122,6 +159,8 @@ class APIKeyState(rx.State):
                         notes=key_data.get("notes", ""),
                         is_active=key_data.get("is_active", True),
                         created_at=key_data["created_at"],
+                        is_in_use=is_in_use,
+                        used_by_position=used_by_position,
                     )
                     self.api_keys.append(decrypted_key)
             else:
@@ -132,17 +171,33 @@ class APIKeyState(rx.State):
         finally:
             self.is_loading = False
     
-    async def fetch_balance(self, key_id: str):
-        """Fetch Hyperliquid balance for a specific API key"""
+    def fetch_balance(self, key_id: str):
+        """Immediate feedback handler for fetching balance"""
+        # Find the key and get account name
+        key_data = next((k for k in self.api_keys if k.id == key_id), None)
+        if not key_data:
+            return
+        
+        # Set loading state immediately
+        key_data.balance_loading = True
+        key_data.balance_error = ""
+        # Reset balance values to ensure accurate status
+        key_data.account_value = 0.0
+        key_data.available_balance = 0.0
+        
+        # Return toast and chain to async worker
+        return [
+            rx.toast.info(f"Fetching balance for {key_data.account_name}...", duration=5000),
+            APIKeyState.fetch_balance_worker
+        ]
+    
+    async def fetch_balance_worker(self):
+        """Async worker for fetching balance"""
         try:
-            # Find the key
-            key_data = next((k for k in self.api_keys if k.id == key_id), None)
+            # Find the key that's being loaded
+            key_data = next((k for k in self.api_keys if k.balance_loading), None)
             if not key_data:
                 return
-            
-            # Update loading state
-            key_data.balance_loading = True
-            key_data.balance_error = ""
             
             # Fetch balance from Hyperliquid
             if key_data.exchange.lower() == "hyperliquid":
@@ -157,68 +212,89 @@ class APIKeyState(rx.State):
                 if balance_info:
                     key_data.account_value = balance_info['account_value']
                     key_data.available_balance = balance_info['available']
+                    yield rx.toast.success(f"Balance fetched for {key_data.account_name}", duration=3000)
                 else:
                     key_data.balance_error = "Failed to fetch balance"
+                    yield rx.toast.error(f"Failed to fetch balance for {key_data.account_name}", duration=5000)
             else:
                 key_data.balance_error = "Only Hyperliquid supported"
+                yield rx.toast.error("Only Hyperliquid is supported for balance checking", duration=5000)
             
             key_data.balance_loading = False
             
         except Exception as e:
-            key_data = next((k for k in self.api_keys if k.id == key_id), None)
+            key_data = next((k for k in self.api_keys if k.balance_loading), None)
             if key_data:
                 key_data.balance_loading = False
                 key_data.balance_error = f"Error: {str(e)}"
+                yield rx.toast.error(f"Error fetching balance: {str(e)}", duration=5000)
     
-    async def save_api_keys(self, form_data: dict):
-        self.is_loading = True
-        self.clear_messages()
-        
+    def save_api_keys_handler(self, form_data: dict):
+        """Immediate feedback handler for saving API keys"""
+        # Validation
         account_name = form_data.get("account_name", "").strip()
         exchange = form_data.get("exchange", "hyperliquid").strip()
         api_key = form_data.get("api_key", "").strip()
         api_secret = form_data.get("api_secret", "").strip()
         
-        # Handle checkbox - it might be a string "true"/"false" or boolean
-        is_master_checkbox = form_data.get("is_master_account", True)
-        if isinstance(is_master_checkbox, str):
-            is_master_account = is_master_checkbox.lower() == "true"
-        else:
-            is_master_account = bool(is_master_checkbox)
-        
-        wallet_address = form_data.get("wallet_address", "").strip()
-        subaccount_name = form_data.get("subaccount_name", "").strip()
-        private_key = form_data.get("private_key", "").strip()
-        notes = form_data.get("notes", "").strip()
-        
         if not account_name:
             self.error_message = "Account name is required"
-            self.is_loading = False
             return
         
         if not api_secret:
             self.error_message = "API Secret is required"
-            self.is_loading = False
             return
         
         if exchange == "hyperliquid":
-            if not wallet_address:
+            if not form_data.get("wallet_address", "").strip():
                 self.error_message = "Wallet address is required for Hyperliquid (needed for balance/position queries)"
-                self.is_loading = False
                 return
         else:
             if not api_key:
                 self.error_message = f"API Key is required for {exchange}"
-                self.is_loading = False
                 return
         
+        # Store form data for worker
+        self._save_form_data = form_data
+        
+        # Set loading state immediately
+        self.is_loading = True
+        
+        # Return toast and chain to async worker
+        action = "Updating" if self.is_editing else "Saving"
+        return [
+            rx.toast.info(f"{action} API key '{account_name}'...", duration=5000),
+            APIKeyState.save_api_keys_worker
+        ]
+    
+    async def save_api_keys_worker(self):
+        """Async worker for saving API keys"""
         try:
+            form_data = self._save_form_data
+            
+            account_name = form_data.get("account_name", "").strip()
+            exchange = form_data.get("exchange", "hyperliquid").strip()
+            api_key = form_data.get("api_key", "").strip()
+            api_secret = form_data.get("api_secret", "").strip()
+            
+            # Handle checkbox - it might be a string "true"/"false" or boolean
+            is_master_checkbox = form_data.get("is_master_account", True)
+            if isinstance(is_master_checkbox, str):
+                is_master_account = is_master_checkbox.lower() == "true"
+            else:
+                is_master_account = bool(is_master_checkbox)
+            
+            wallet_address = form_data.get("wallet_address", "").strip()
+            subaccount_name = form_data.get("subaccount_name", "").strip()
+            private_key = form_data.get("private_key", "").strip()
+            notes = form_data.get("notes", "").strip()
+            
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
             
             if not auth_state.is_authenticated or not auth_state.user_id:
                 self.error_message = "Not authenticated"
-                self.is_loading = False
+                yield rx.toast.error("Not authenticated", duration=3000)
                 return
             
             supabase = get_supabase_client(auth_state.access_token)
@@ -243,47 +319,67 @@ class APIKeyState(rx.State):
             if self.is_editing and self.selected_key_id:
                 supabase.table("user_api_keys").update(data).eq("id", self.selected_key_id).execute()
                 self.success_message = f"API keys for '{account_name}' updated successfully!"
+                yield rx.toast.success(f"'{account_name}' API key updated successfully!", duration=3000)
             else:
                 supabase.table("user_api_keys").insert(data).execute()
                 self.success_message = f"API keys for '{account_name}' saved successfully!"
+                yield rx.toast.success(f"'{account_name}' API key saved successfully!", duration=3000)
             
             await self.load_api_keys()
             self.clear_form()
             
         except Exception as e:
             self.error_message = "Failed to save API keys. Please try again."
+            yield rx.toast.error("Failed to save API key. Please try again.", duration=5000)
         finally:
             self.is_loading = False
+            self._save_form_data = {}
     
-    async def delete_api_key(self, key_id: str):
-        self.is_loading = True
-        self.clear_messages()
+    def delete_api_key(self, key_id: str):
+        """Immediate feedback handler for deleting API key"""
+        # Set loading state immediately
+        self.loading_key_id = key_id
         
+        # Get account name for toast message
+        key_data = next((k for k in self.api_keys if k.id == key_id), None)
+        account_name = key_data.account_name if key_data else "account"
+        
+        # Return toast and chain to async worker
+        return [
+            rx.toast.info(f"Deleting '{account_name}' API key...", duration=5000),
+            APIKeyState.delete_api_key_worker
+        ]
+    
+    async def delete_api_key_worker(self):
+        """Async worker for deleting API key"""
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
             
             if not auth_state.is_authenticated or not auth_state.user_id:
                 self.error_message = "Not authenticated"
-                self.is_loading = False
+                yield rx.toast.error("Not authenticated", duration=3000)
                 return
             
             supabase = get_supabase_client(auth_state.access_token)
-            key_data = next((k for k in self.api_keys if k.id == key_id), None)
+            key_data = next((k for k in self.api_keys if k.id == self.loading_key_id), None)
             account_name = key_data.account_name if key_data else "account"
             
-            supabase.table("user_api_keys").delete().eq("id", key_id).eq("user_id", auth_state.user_id).execute()
+            supabase.table("user_api_keys").delete().eq("id", self.loading_key_id).eq("user_id", auth_state.user_id).execute()
             
             self.success_message = f"API keys for '{account_name}' deleted successfully!"
             await self.load_api_keys()
             
-            if self.selected_key_id == key_id:
+            if self.selected_key_id == self.loading_key_id:
                 self.clear_form()
+            
+            yield rx.toast.success(f"'{account_name}' API key deleted successfully!", duration=3000)
             
         except Exception as e:
             self.error_message = "Failed to delete API keys. Please try again."
+            yield rx.toast.error("Failed to delete API key. Please try again.", duration=5000)
         finally:
-            self.is_loading = False
+            self.loading_key_id = ""
     
     async def toggle_active(self, key_id: str):
         try:

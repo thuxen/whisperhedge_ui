@@ -81,15 +81,15 @@ def get_hl_account_balance(wallet_address: str) -> Optional[Dict]:
         return None
 
 
-def get_hl_token_price(token_symbol: str) -> Optional[float]:
+def get_hl_token_metadata(token_symbol: str) -> Optional[Dict]:
     """
-    Get token price from Hyperliquid
+    Get token metadata from Hyperliquid including price and decimals
     
     Args:
         token_symbol: Token symbol (e.g., 'WETH', 'WBTC', 'LINK')
         
     Returns:
-        Token price in USD or None if not found
+        Dict with price, sz_decimals, hl_symbol or None if not found
     """
     try:
         # Map token symbol to Hyperliquid market symbol
@@ -108,13 +108,38 @@ def get_hl_token_price(token_symbol: str) -> Optional[float]:
         # Find the token in the universe using mapped symbol
         for i, asset in enumerate(universe):
             if asset.get('name') == hl_symbol:
+                metadata = {
+                    'hl_symbol': hl_symbol,
+                    'pool_symbol': token_symbol.upper(),
+                    'sz_decimals': asset.get('szDecimals', 8),  # Default to 8 if not found
+                    'price_decimals': 5,  # Hyperliquid uses 5 for most tokens
+                    'price': None
+                }
+                
+                # Get price if available
                 if i < len(asset_ctxs):
                     mark_px = asset_ctxs[i].get('markPx')
                     if mark_px:
-                        return float(mark_px)
+                        metadata['price'] = float(mark_px)
+                
+                return metadata
         
         return None
         
     except Exception as e:
-        print(f"Error fetching HL price for {token_symbol} (mapped to {hl_symbol}): {e}")
+        print(f"Error fetching HL metadata for {token_symbol} (mapped to {hl_symbol}): {e}")
         return None
+
+
+def get_hl_token_price(token_symbol: str) -> Optional[float]:
+    """
+    Get token price from Hyperliquid
+    
+    Args:
+        token_symbol: Token symbol (e.g., 'WETH', 'WBTC', 'LINK')
+        
+    Returns:
+        Token price in USD or None if not found
+    """
+    metadata = get_hl_token_metadata(token_symbol)
+    return metadata['price'] if metadata else None
