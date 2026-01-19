@@ -5,7 +5,6 @@ from .branding import brand_logo, BrandConfig
 
 def index() -> rx.Component:
     return rx.container(
-        rx.color_mode.button(position="top-right"),
         rx.vstack(
             brand_logo(size="landing", margin_bottom="2rem"),
             rx.text(

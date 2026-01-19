@@ -5,7 +5,6 @@ from ..branding import brand_logo
 
 def signup_page() -> rx.Component:
     return rx.container(
-        rx.color_mode.button(position="top-right"),
         rx.vstack(
             brand_logo(size="landing", margin_bottom="1rem"),
             rx.text("Create your account", size="4", color="gray", margin_bottom="2rem"),

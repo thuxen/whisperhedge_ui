@@ -71,6 +71,12 @@ class LPPositionState(rx.State):
     selected_hedge_wallet: str = ""
     _cached_wallets: list[str] = []  # Cache for available wallets
     
+    # Balance tracking for selected API key
+    selected_wallet_balance: float = 0.0
+    selected_wallet_available: float = 0.0
+    balance_loading: bool = False
+    balance_error: str = ""
+    
     # Dynamic hedging fields
     use_dynamic_hedging: bool = False
     dynamic_profile: str = "balanced"
@@ -112,6 +118,9 @@ class LPPositionState(rx.State):
     
     def set_hedge_wallet(self, value: str):
         self.selected_hedge_wallet = value
+        # Fetch balance for selected wallet
+        if value:
+            return LPPositionState.fetch_wallet_balance
     
     def set_dynamic_profile(self, value: str):
         self.dynamic_profile = value
@@ -258,6 +267,8 @@ class LPPositionState(rx.State):
                 # Auto-select first wallet if none selected
                 if wallets and not self.selected_hedge_wallet:
                     self.selected_hedge_wallet = wallets[0]
+                    # Auto-fetch balance for the selected wallet
+                    await self.fetch_wallet_balance()
         except Exception as e:
             pass
     
@@ -265,6 +276,61 @@ class LPPositionState(rx.State):
     def available_wallets(self) -> list[str]:
         """Get list of available API keys for wallet selector"""
         return self._cached_wallets
+    
+    async def fetch_wallet_balance(self):
+        """Fetch balance for selected wallet"""
+        try:
+            from web_ui.state import AuthState
+            from web_ui.hl_utils import get_hl_account_balance
+            
+            auth_state = await self.get_state(AuthState)
+            
+            if not auth_state.is_authenticated or not auth_state.user_id:
+                return
+            
+            if not self.selected_hedge_wallet:
+                return
+            
+            self.balance_loading = True
+            self.balance_error = ""
+            self.selected_wallet_balance = 0.0
+            self.selected_wallet_available = 0.0
+            
+            supabase = get_supabase_client(auth_state.access_token)
+            
+            # Extract account name from "Account Name (exchange)" format
+            account_name = self.selected_hedge_wallet.split(" (")[0]
+            
+            # Get API key details
+            response = supabase.table("user_api_keys").select("*").eq("user_id", auth_state.user_id).eq("account_name", account_name).execute()
+            
+            if response.data and len(response.data) > 0:
+                key_data = response.data[0]
+                
+                if key_data.get("exchange", "").lower() == "hyperliquid":
+                    wallet_address = key_data.get("wallet_address")
+                    
+                    if wallet_address:
+                        # Fetch balance using wallet address
+                        balance_info = get_hl_account_balance(wallet_address)
+                        
+                        if balance_info:
+                            self.selected_wallet_balance = balance_info['account_value']
+                            self.selected_wallet_available = balance_info['available']
+                        else:
+                            self.balance_error = "Failed to fetch balance"
+                    else:
+                        self.balance_error = "No wallet address"
+                else:
+                    self.balance_error = "Only Hyperliquid supported"
+            else:
+                self.balance_error = "API key not found"
+            
+            self.balance_loading = False
+            
+        except Exception as e:
+            self.balance_loading = False
+            self.balance_error = f"Error: {str(e)}"
     
     def clear_form(self):
         """Clear all form fields"""
@@ -286,6 +352,12 @@ class LPPositionState(rx.State):
         self.hedge_token0 = True
         self.hedge_token1 = True
         self.selected_api_key_id = ""
+        
+        # Clear balance tracking
+        self.selected_wallet_balance = 0.0
+        self.selected_wallet_available = 0.0
+        self.balance_loading = False
+        self.balance_error = ""
         
     async def check_api_key_availability(self, api_key_id: str) -> bool:
         """Check if API key is available (not used by another position)"""

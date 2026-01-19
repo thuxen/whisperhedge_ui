@@ -23,13 +23,6 @@ def dashboard_page() -> rx.Component:
                     
                     rx.box(
                         rx.vstack(
-                            rx.hstack(
-                                rx.color_mode.button(),
-                                position="absolute",
-                                top="1rem",
-                                right="1rem",
-                            ),
-                            
                             rx.box(
                                 rx.match(
                                     DashboardState.active_section,

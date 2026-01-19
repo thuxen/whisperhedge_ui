@@ -27,6 +27,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                         "Edit",
                         size="2",
                         variant="soft",
+                        color_scheme="blue",
                         on_click=lambda: LPPositionState.edit_position(position.id),
                         loading=LPPositionState.loading_position_id == position.id,
                     ),
@@ -321,8 +322,9 @@ def lp_positions_component() -> rx.Component:
                 rx.vstack(
                     rx.cond(
                         LPPositionState.lp_positions.length() > 0,
-                        rx.vstack(
+                        rx.grid(
                             rx.foreach(LPPositionState.lp_positions, lp_position_card),
+                            columns="2",
                             spacing="3",
                             width="100%",
                         ),
@@ -412,6 +414,7 @@ def lp_positions_component() -> rx.Component:
                             type="submit",
                             size="3",
                             variant="soft",
+                            color_scheme="blue",
                             width="100%",
                             loading=LPPositionState.is_fetching,
                         ),
@@ -577,10 +580,8 @@ def lp_positions_component() -> rx.Component:
                                         align_items="center",
                                     ),
                                     
-                                    rx.cond(
-                                        LPPositionState.hedge_enabled,
-                                        rx.vstack(
-                                            rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
+                                    rx.vstack(
+                                        rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
                                             
                                             rx.vstack(
                                                 rx.text("Hedge Wallet", size="2", weight="bold"),
@@ -595,6 +596,44 @@ def lp_positions_component() -> rx.Component:
                                                     "Hyperliquid wallet for hedge trades",
                                                     size="1",
                                                     color="gray",
+                                                ),
+                                                # Balance display
+                                                rx.cond(
+                                                    LPPositionState.selected_hedge_wallet != "",
+                                                    rx.cond(
+                                                        LPPositionState.balance_loading,
+                                                        rx.hstack(
+                                                            rx.spinner(size="1"),
+                                                            rx.text("Loading balance...", size="1", color="gray"),
+                                                            spacing="2",
+                                                            align_items="center",
+                                                        ),
+                                                        rx.cond(
+                                                            LPPositionState.balance_error != "",
+                                                            rx.text(
+                                                                LPPositionState.balance_error,
+                                                                size="1",
+                                                                color="red",
+                                                            ),
+                                                            rx.cond(
+                                                                LPPositionState.selected_wallet_balance > 0,
+                                                                rx.vstack(
+                                                                    rx.hstack(
+                                                                        rx.text("Account Value:", size="1", weight="bold"),
+                                                                        rx.text(f"${LPPositionState.selected_wallet_balance:,.2f}", size="1", color="green"),
+                                                                        spacing="2",
+                                                                    ),
+                                                                    rx.hstack(
+                                                                        rx.text("Available:", size="1", weight="bold"),
+                                                                        rx.text(f"${LPPositionState.selected_wallet_available:,.2f}", size="1", color="blue"),
+                                                                        spacing="2",
+                                                                    ),
+                                                                    spacing="0",
+                                                                    align_items="start",
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
                                                 ),
                                                 spacing="1",
                                                 width="100%",
@@ -883,7 +922,6 @@ def lp_positions_component() -> rx.Component:
                                             spacing="3",
                                             width="100%",
                                         ),
-                                    ),
                                     
                                     spacing="2",
                                     width="100%",

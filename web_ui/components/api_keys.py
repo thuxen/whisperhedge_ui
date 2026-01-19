@@ -142,6 +142,7 @@ def api_keys_component() -> rx.Component:
                             "Cancel",
                             size="2",
                             variant="soft",
+                            color_scheme="gray",
                             on_click=APIKeyState.clear_form,
                         ),
                     ),
