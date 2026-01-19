@@ -75,9 +75,17 @@ def get_hl_account_balance(wallet_address: str) -> Optional[Dict]:
         }
         
     except Exception as e:
-        print(f"Error fetching HL balance: {e}")
-        import traceback
-        traceback.print_exc()
+        # Handle different types of errors gracefully
+        error_msg = str(e)
+        if "422" in error_msg or "Failed to deserialize" in error_msg:
+            # Invalid API key or wallet address - common with test data
+            print(f"Invalid API key or wallet address - balance check failed")
+        elif "JSONDecodeError" in error_msg:
+            # API response parsing error
+            print(f"API response error - unable to fetch balance")
+        else:
+            # Other unexpected errors
+            print(f"Error fetching HL balance: {e}")
         return None
 
 

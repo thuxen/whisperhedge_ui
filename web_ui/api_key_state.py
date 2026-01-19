@@ -214,8 +214,13 @@ class APIKeyState(rx.State):
                     key_data.available_balance = balance_info['available']
                     yield rx.toast.success(f"Balance fetched for {key_data.account_name}", duration=3000)
                 else:
-                    key_data.balance_error = "Failed to fetch balance"
-                    yield rx.toast.error(f"Failed to fetch balance for {key_data.account_name}", duration=5000)
+                    # Check if it's likely an invalid API key/wallet
+                    if not key_data.wallet_address or len(key_data.wallet_address) < 10:
+                        key_data.balance_error = "Invalid wallet address"
+                        yield rx.toast.error(f"Invalid wallet address for {key_data.account_name}", duration=5000)
+                    else:
+                        key_data.balance_error = "Invalid API key or wallet"
+                        yield rx.toast.error(f"Invalid API key or wallet address for {key_data.account_name}", duration=5000)
             else:
                 key_data.balance_error = "Only Hyperliquid supported"
                 yield rx.toast.error("Only Hyperliquid is supported for balance checking", duration=5000)
