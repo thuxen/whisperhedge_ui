@@ -53,7 +53,7 @@ def dashboard_page() -> rx.Component:
                 width="100%",
                 height="100vh",
             ),
-            on_mount=[APIKeyState.load_api_keys, LPPositionState.load_positions],
+            on_mount=[APIKeyState.load_api_keys, LPPositionState.load_positions, LPPositionState.load_wallets],
         ),
         rx.center(
             rx.vstack(

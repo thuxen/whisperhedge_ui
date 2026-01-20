@@ -715,11 +715,16 @@ class LPPositionState(rx.State):
                 "is_active": True
             }
             
+            # Check if position already exists by unique constraint (user_id, network, nft_id)
+            existing_position = supabase.table("lp_positions").select("id").eq("user_id", auth_state.user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+            
             # Save to lp_positions table
-            if self.is_editing and self.selected_position_id:
-                supabase.table("lp_positions").update(lp_data).eq("id", self.selected_position_id).execute()
-                position_id = self.selected_position_id
+            if existing_position.data:
+                # Update existing position
+                position_id = existing_position.data[0]["id"]
+                supabase.table("lp_positions").update(lp_data).eq("id", position_id).execute()
             else:
+                # Insert new position
                 result = supabase.table("lp_positions").insert(lp_data).execute()
                 position_id = result.data[0]["id"] if result.data else None
             
