@@ -212,6 +212,20 @@ class APIKeyState(rx.State):
                 if balance_info:
                     key_data.account_value = balance_info['account_value']
                     key_data.available_balance = balance_info['available']
+                    
+                    # Save balance to database
+                    try:
+                        from web_ui.state import AuthState
+                        auth_state = await self.get_state(AuthState)
+                        supabase = get_supabase_client(auth_state.access_token)
+                        
+                        supabase.table("user_api_keys").update({
+                            "account_value": balance_info['account_value'],
+                            "available_balance": balance_info['available']
+                        }).eq("id", key_data.id).execute()
+                    except Exception as e:
+                        print(f"Failed to save balance to database: {e}")
+                    
                     yield rx.toast.success(f"Balance fetched for {key_data.account_name}", duration=3000)
                 else:
                     # Check if it's likely an invalid API key/wallet

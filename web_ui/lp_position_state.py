@@ -22,6 +22,9 @@ class LPPositionData(BaseModel):
     target_hedge_ratio: float = 0.0
     hedge_details: str = "Disabled"
     api_key_name: str = ""
+    api_account_value: float = 0.0
+    total_value_usd: float = 0.0
+    total_value_formatted: str = "$0.00"
     hedge_token0: bool = True
     hedge_token1: bool = True
     use_dynamic_hedging: bool = False
@@ -317,6 +320,15 @@ class LPPositionState(rx.State):
                         if balance_info:
                             self.selected_wallet_balance = balance_info['account_value']
                             self.selected_wallet_available = balance_info['available']
+                            
+                            # Save balance to database
+                            try:
+                                supabase.table("user_api_keys").update({
+                                    "account_value": balance_info['account_value'],
+                                    "available_balance": balance_info['available']
+                                }).eq("id", key_data["id"]).execute()
+                            except Exception as e:
+                                print(f"Failed to save balance to database: {e}")
                         else:
                             self.balance_error = "Failed to fetch balance"
                     else:
@@ -538,9 +550,9 @@ class LPPositionState(rx.State):
                             config_map[f"{c['network']}_{nft_id}"] = c
                 print(f"Built config_map with {len(config_map)} entries")
                 
-                # Fetch API keys to get account names
-                api_keys_response = supabase.table("user_api_keys").select("id, account_name").eq("user_id", auth_state.user_id).execute()
-                api_key_map = {k["id"]: k["account_name"] for k in api_keys_response.data} if api_keys_response.data else {}
+                # Fetch API keys to get account names and balances
+                api_keys_response = supabase.table("user_api_keys").select("id, account_name, account_value, available_balance").eq("user_id", auth_state.user_id).execute()
+                api_key_map = {k["id"]: {"name": k["account_name"], "balance": float(k.get("account_value", 0.0))} for k in api_keys_response.data} if api_keys_response.data else {}
                 
                 for pos_data in response.data:
                     # Look up config
@@ -548,9 +560,15 @@ class LPPositionState(rx.State):
                     config = config_map.get(config_key, {})
                     print(f"Position: network={pos_data['network']}, nft_id={pos_data['nft_id']}, config_found={bool(config)}")
                     
-                    # Get API key name if assigned
+                    # Get API key name and balance if assigned
                     api_key_id = config.get("hl_api_key_id", "")
-                    api_key_name = api_key_map.get(api_key_id, "") if api_key_id else ""
+                    api_key_info = api_key_map.get(api_key_id, {"name": "", "balance": 0.0})
+                    api_key_name = api_key_info["name"]
+                    api_account_value = api_key_info["balance"]
+                    
+                    # Calculate total value (LP position + API account)
+                    position_size_usd = float(config.get("position_size_usd", 0.0))
+                    total_value_usd = position_size_usd + api_account_value
                     
                     position = LPPositionData(
                         id=pos_data["id"],
@@ -565,12 +583,15 @@ class LPPositionState(rx.State):
                         notes=pos_data.get("notes", ""),
                         created_at=pos_data.get("created_at", ""),
                         # Populate new fields from config
-                        position_size_usd=float(config.get("position_size_usd", 0.0)),
-                        position_value_formatted=f"${float(config.get('position_size_usd', 0.0)):,.2f}",
+                        position_size_usd=position_size_usd,
+                        position_value_formatted=f"${position_size_usd:,.2f}",
                         hedge_enabled=config.get("hedge_enabled", False),
                         target_hedge_ratio=float(config.get("target_hedge_ratio", 0.0)),
                         hedge_details=f"Hedge: {int(float(config.get('target_hedge_ratio', 0.0)))}%" if config.get("hedge_enabled", False) else "Hedge: Disabled",
                         api_key_name=api_key_name,
+                        api_account_value=api_account_value,
+                        total_value_usd=total_value_usd,
+                        total_value_formatted=f"${total_value_usd:,.2f}",
                         hedge_token0=config.get("hedge_token0", True),
                         hedge_token1=config.get("hedge_token1", True),
                         use_dynamic_hedging=config.get("use_dynamic_hedging", False),
