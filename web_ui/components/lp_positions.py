@@ -1,6 +1,7 @@
 import reflex as rx
 from ..lp_position_state import LPPositionState, LPPositionData
 from ..config import AppConfig
+from .position_chart import position_value_chart
 
 
 def lp_position_card(position: LPPositionData) -> rx.Component:
@@ -23,6 +24,13 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                 ),
                 rx.spacer(),
                 rx.hstack(
+                    rx.button(
+                        "View Chart",
+                        size="2",
+                        variant="soft",
+                        color_scheme="green",
+                        on_click=lambda: LPPositionState.load_chart_data(position.position_config_id, 24),
+                    ),
                     rx.button(
                         "Edit",
                         size="2",
@@ -303,6 +311,9 @@ def lp_positions_component() -> rx.Component:
     return rx.fragment(
         # Toast provider for notifications
         rx.toast.provider(),
+        
+        # Position value chart dialog
+        position_value_chart(),
         
         rx.box(
             rx.vstack(

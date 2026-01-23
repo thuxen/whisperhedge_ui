@@ -5,6 +5,7 @@ from .auth import get_supabase_client
 
 class LPPositionData(BaseModel):
     id: str
+    position_config_id: str = ""
     position_name: str
     network: str
     nft_id: str
@@ -65,6 +66,13 @@ class LPPositionState(rx.State):
     # Loading state
     loading_position_id: str = ""
     is_fetching: bool = False
+    
+    # Chart data
+    chart_data: list = []
+    chart_loading: bool = False
+    chart_hours: int = 24
+    selected_chart_position_id: str = ""
+    show_chart: bool = False
     
     # Temporary state for fetch handler
     _fetch_network: str = ""
@@ -572,6 +580,7 @@ class LPPositionState(rx.State):
                     
                     position = LPPositionData(
                         id=pos_data["id"],
+                        position_config_id=config.get("id", ""),
                         position_name=pos_data["position_name"],
                         network=pos_data["network"],
                         nft_id=pos_data["nft_id"],
@@ -904,6 +913,47 @@ class LPPositionState(rx.State):
                 
         except Exception as e:
             pass
+    
+    async def load_chart_data(self, position_id: str, hours: int = 24):
+        """Load chart data for a position from QuestDB"""
+        try:
+            from web_ui.questdb_utils import get_position_value_history
+            
+            print(f"\n>>> load_chart_data called with position_id='{position_id}', hours={hours}")
+            
+            self.chart_loading = True
+            self.selected_chart_position_id = position_id
+            self.chart_hours = hours
+            
+            # Fetch data from QuestDB
+            print(f">>> Calling get_position_value_history...")
+            history = get_position_value_history(position_id, hours)
+            
+            print(f">>> Received {len(history)} data points from QuestDB")
+            print(f">>> Setting chart_data and opening dialog...")
+            
+            # Format for Reflex charts
+            self.chart_data = history
+            self.chart_loading = False
+            self.show_chart = True
+            
+            print(f">>> Chart state updated: chart_data length={len(self.chart_data)}, show_chart={self.show_chart}")
+            
+        except Exception as e:
+            print(f"❌ Error loading chart data: {e}")
+            import traceback
+            traceback.print_exc()
+            self.chart_loading = False
+            self.chart_data = []
+            self.show_chart = False
+    
+    def set_show_chart(self, value: bool):
+        """Setter for show_chart state variable"""
+        self.show_chart = value
+    
+    def close_chart(self):
+        """Close the chart dialog"""
+        self.show_chart = False
     
     async def toggle_active(self, position_id: str):
         try:
