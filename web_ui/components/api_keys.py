@@ -149,10 +149,30 @@ def api_keys_component() -> rx.Component:
                     width="100%",
                     align="center",
                 ),
-                rx.text(
-                    "Manage your exchange API credentials. You can add multiple accounts, subaccounts, and wallets.",
-                    size="2",
-                    color="gray",
+                rx.vstack(
+                    rx.text(
+                        "Manage your exchange API credentials for hedging operations.",
+                        size="2",
+                        color="gray",
+                    ),
+                    rx.text(
+                        "• Each LP position requires its own dedicated API key",
+                        size="2",
+                        color="gray",
+                    ),
+                    rx.text(
+                        "• Verify your credentials are working by clicking 'Check Balance' on any key",
+                        size="2",
+                        color="gray",
+                    ),
+                    rx.text(
+                        "• Ensure you select the correct account type (Master Account for main wallets, or uncheck for vault/sub-accounts)",
+                        size="2",
+                        color="gray",
+                    ),
+                    spacing="1",
+                    align_items="start",
+                    width="100%",
                 ),
                 spacing="2",
                 width="100%",
@@ -182,8 +202,9 @@ def api_keys_component() -> rx.Component:
         
         rx.cond(
             APIKeyState.api_keys.length() > 0,
-            rx.vstack(
+            rx.grid(
                 rx.foreach(APIKeyState.api_keys, api_key_card),
+                columns="2",
                 spacing="3",
                 width="100%",
             ),
@@ -441,7 +462,7 @@ def api_keys_component() -> rx.Component:
                         width="100%",
                     ),
                     on_submit=APIKeyState.save_api_keys_handler,
-                    reset_on_submit=False,
+                    reset_on_submit=True,
                 ),
                 
                 rx.divider(margin_top="1.5rem", margin_bottom="1.5rem"),

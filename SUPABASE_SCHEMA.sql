@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS position_configs (
     fee_tier INTEGER NOT NULL,
     entry_price NUMERIC,
     position_size_usd NUMERIC,
+    pa NUMERIC,
+    pb NUMERIC,
     
     -- Hedge Configuration
     hedge_enabled BOOLEAN DEFAULT false,

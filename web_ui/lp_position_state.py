@@ -790,6 +790,8 @@ class LPPositionState(rx.State):
                 "fee_tier": int(self.fee_tier) if self.fee_tier and self.fee_tier.isdigit() else 3000,  # INTEGER not VARCHAR
                 "entry_price": self.fetched_position_data.get("current_price", 0) or existing_config.get("entry_price", 0),
                 "position_size_usd": float(self.fetched_position_data.get("position_value_usd", 0)) or existing_config.get("position_size_usd", 0),
+                "pa": self.fetched_position_data.get("pa") or existing_config.get("pa"),
+                "pb": self.fetched_position_data.get("pb") or existing_config.get("pb"),
                 "hedge_enabled": self.hedge_enabled,
                 "hedge_token0": self.hedge_token0,
                 "hedge_token1": self.hedge_token1,
