@@ -168,9 +168,18 @@ class APIKeyState(rx.State):
             
             # Update overview stats
             await self._update_overview_stats()
+            
+            # Mark API keys as loaded for dashboard loading state
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_api_keys_loaded()
                 
         except Exception as e:
             self.error_message = "Failed to load API keys. Please try again."
+            # Mark as loaded even on error to prevent infinite loading
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_api_keys_loaded()
         finally:
             self.is_loading = False
     

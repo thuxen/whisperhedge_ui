@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS lp_positions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     position_name TEXT NOT NULL,
+    protocol TEXT NOT NULL,
     network TEXT NOT NULL,
     nft_id TEXT NOT NULL,
     pool_address TEXT NOT NULL,
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS lp_positions (
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
-    UNIQUE(user_id, network, nft_id)
+    UNIQUE(user_id, protocol, network, nft_id)
 );
 
 -- Indexes for lp_positions
@@ -65,6 +66,7 @@ CREATE TABLE IF NOT EXISTS position_configs (
     status TEXT DEFAULT 'active',
     
     -- LP Position Details
+    protocol TEXT NOT NULL,
     network TEXT NOT NULL,
     nft_id TEXT NOT NULL,
     pool_address TEXT NOT NULL,
@@ -105,7 +107,7 @@ CREATE TABLE IF NOT EXISTS position_configs (
     
     -- Constraints
     UNIQUE(user_id, position_name),
-    UNIQUE(user_id, nft_id, network)
+    UNIQUE(user_id, protocol, nft_id, network)
 );
 
 -- Indexes for position_configs

@@ -2,6 +2,7 @@ import reflex as rx
 from ..state import AuthState
 from ..api_key_state import APIKeyState
 from ..lp_position_state import LPPositionState
+from ..dashboard_loading_state import DashboardLoadingState
 from ..components import (
     sidebar,
     DashboardState,
@@ -55,7 +56,38 @@ def dashboard_page() -> rx.Component:
                 width="100%",
                 height="100vh",
             ),
-            on_mount=[APIKeyState.load_api_keys, LPPositionState.load_positions, LPPositionState.load_wallets],
+            
+            # Loading overlay
+            rx.cond(
+                DashboardLoadingState.is_loading_dashboard,
+                rx.box(
+                    rx.center(
+                        rx.vstack(
+                            rx.spinner(size="3"),
+                            rx.heading("Loading Dashboard...", size="6", margin_top="1rem"),
+                            rx.text("Fetching your positions and API keys", size="3", color="gray"),
+                            spacing="4",
+                            align="center",
+                        ),
+                        height="100vh",
+                    ),
+                    position="fixed",
+                    top="0",
+                    left="0",
+                    width="100vw",
+                    height="100vh",
+                    background="rgba(0, 0, 0, 0.7)",
+                    backdrop_filter="blur(8px)",
+                    z_index="9999",
+                ),
+            ),
+            
+            on_mount=[
+                DashboardLoadingState.reset_loading,
+                APIKeyState.load_api_keys,
+                LPPositionState.load_positions,
+                LPPositionState.load_wallets,
+            ],
         ),
         rx.center(
             rx.vstack(

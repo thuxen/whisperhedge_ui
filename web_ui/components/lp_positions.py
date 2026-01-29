@@ -11,7 +11,11 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                 rx.vstack(
                     rx.text(position.position_name, size="4", weight="bold"),
                     rx.hstack(
-                        rx.badge(position.network.title(), color_scheme="gray", variant="soft"),
+                        rx.badge(
+                            position.protocol.replace("_", " ").title() + " (" + position.network.title() + ")",
+                            color_scheme="gray",
+                            variant="soft"
+                        ),
                         rx.badge(
                             rx.cond(position.hedge_enabled, "Hedge Active", "Hedge Inactive"),
                             color_scheme=rx.cond(position.hedge_enabled, "green", "red"),
@@ -430,6 +434,26 @@ def lp_positions_component() -> rx.Component:
                 rx.form(
                     rx.vstack(
                         rx.vstack(
+                            rx.text("Protocol", size="2", weight="bold"),
+                            rx.select.root(
+                                rx.select.trigger(placeholder="Select protocol"),
+                                rx.select.content(
+                                    rx.select.item("Uniswap V3", value="uniswap_v3"),
+                                ),
+                                name="protocol",
+                                default_value=LPPositionState.protocol,
+                                max_width="250px",
+                            ),
+                            rx.text(
+                                "The DEX protocol (more protocols coming soon)",
+                                size="1",
+                                color="gray",
+                            ),
+                            width="100%",
+                            spacing="1",
+                        ),
+                        
+                        rx.vstack(
                             rx.text("Network", size="2", weight="bold"),
                             rx.select(
                                 ["ethereum", "arbitrum", "base", "polygon", "optimism"],
@@ -458,7 +482,7 @@ def lp_positions_component() -> rx.Component:
                                 default_value=LPPositionState.nft_id,
                             ),
                             rx.text(
-                                "The Uniswap V3 NFT position ID",
+                                "The NFT position ID for the selected protocol",
                                 size="1",
                                 color="gray",
                             ),
@@ -491,6 +515,11 @@ def lp_positions_component() -> rx.Component:
                             rx.heading("Position Details", size="4", margin_bottom="1rem"),
                             
                             rx.vstack(
+                                rx.hstack(
+                                    rx.text("Protocol:", weight="bold", size="2"),
+                                    rx.text(LPPositionState.protocol.replace("_", " ").title(), size="2"),
+                                    spacing="2",
+                                ),
                                 rx.hstack(
                                     rx.text("Network:", weight="bold", size="2"),
                                     rx.text(LPPositionState.network.title(), size="2"),

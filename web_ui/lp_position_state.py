@@ -7,6 +7,7 @@ class LPPositionData(BaseModel):
     id: str
     position_config_id: str = ""
     position_name: str
+    protocol: str = "uniswap_v3"
     network: str
     nft_id: str
     pool_address: str = ""
@@ -44,6 +45,7 @@ class LPPositionState(rx.State):
     lp_positions: list[LPPositionData] = []
     selected_position_id: str = ""
     position_name: str = ""
+    protocol: str = "uniswap_v3"
     network: str = "ethereum"
     nft_id: str = ""
     pool_address: str = ""
@@ -76,6 +78,7 @@ class LPPositionState(rx.State):
     show_chart: bool = False
     
     # Temporary state for fetch handler
+    _fetch_protocol: str = ""
     _fetch_network: str = ""
     _fetch_nft_id: str = ""
     
@@ -281,7 +284,16 @@ class LPPositionState(rx.State):
                     self.selected_hedge_wallet = wallets[0]
                     # Auto-fetch balance for the selected wallet
                     await self.fetch_wallet_balance()
+            
+            # Mark wallets as loaded for dashboard loading state
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_wallets_loaded()
         except Exception as e:
+            # Mark as loaded even on error to prevent infinite loading
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_wallets_loaded()
             pass
     
     @rx.var
@@ -549,14 +561,15 @@ class LPPositionState(rx.State):
                 config_response = supabase.table("position_configs").select("*").eq("user_id", auth_state.user_id).execute()
                 print(f"position_configs response: {len(config_response.data) if config_response.data else 0} configs found")
                 
-                # Build config map using nft_id (actual column in database)
+                # Build config map using protocol, network, and nft_id (actual columns in database)
                 config_map = {}
                 if config_response.data:
                     for c in config_response.data:
+                        protocol = c.get('protocol', 'uniswap_v3')
                         nft_id = c.get('nft_id', '')
-                        print(f"Config: network={c.get('network')}, nft_id={nft_id}")
+                        print(f"Config: protocol={protocol}, network={c.get('network')}, nft_id={nft_id}")
                         if nft_id:
-                            config_map[f"{c['network']}_{nft_id}"] = c
+                            config_map[f"{protocol}_{c['network']}_{nft_id}"] = c
                 print(f"Built config_map with {len(config_map)} entries")
                 
                 # Fetch API keys to get account names and balances
@@ -565,7 +578,8 @@ class LPPositionState(rx.State):
                 
                 for pos_data in response.data:
                     # Look up config
-                    config_key = f"{pos_data['network']}_{pos_data['nft_id']}"
+                    protocol = pos_data.get('protocol', 'uniswap_v3')
+                    config_key = f"{protocol}_{pos_data['network']}_{pos_data['nft_id']}"
                     config = config_map.get(config_key, {})
                     print(f"Position: network={pos_data['network']}, nft_id={pos_data['nft_id']}, config_found={bool(config)}")
                     
@@ -593,6 +607,7 @@ class LPPositionState(rx.State):
                         id=pos_data["id"],
                         position_config_id=config.get("id", ""),
                         position_name=pos_data["position_name"],
+                        protocol=pos_data.get("protocol", "uniswap_v3"),
                         network=pos_data["network"],
                         nft_id=pos_data["nft_id"],
                         pool_address=pos_data.get("pool_address", ""),
@@ -634,6 +649,11 @@ class LPPositionState(rx.State):
             
             # Update overview stats
             await self._update_overview_stats()
+            
+            # Mark positions as loaded for dashboard loading state
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_positions_loaded()
         except Exception as e:
             print(f"\n!!! ERROR IN LOAD_POSITIONS !!!")
             print(f"Error: {e}")
@@ -641,6 +661,10 @@ class LPPositionState(rx.State):
             traceback.print_exc()
             print("!!! END ERROR !!!\n")
             self.error_message = f"Failed to load positions: {str(e)}"
+            # Mark as loaded even on error to prevent infinite loading
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_positions_loaded()
         finally:
             self.is_loading = False
     
@@ -677,6 +701,7 @@ class LPPositionState(rx.State):
     def fetch_position_data_handler(self, form_data: dict):
         """Immediate feedback handler for fetch position data"""
         # Store form data in state for worker to use
+        self._fetch_protocol = form_data.get("protocol", "uniswap_v3").strip()
         self._fetch_network = form_data.get("network", "ethereum").strip()
         self._fetch_nft_id = form_data.get("nft_id", "").strip()
         
@@ -702,6 +727,7 @@ class LPPositionState(rx.State):
             self.fetched_position_data = await fetch_uniswap_position(self._fetch_network, self._fetch_nft_id)
             
             # Populate form fields with fetched data
+            self.protocol = self._fetch_protocol
             self.network = self._fetch_network
             self.nft_id = self._fetch_nft_id
             self.pool_address = self.fetched_position_data.get("pool_address", "")
@@ -780,6 +806,7 @@ class LPPositionState(rx.State):
             lp_data = {
                 "user_id": auth_state.user_id,
                 "position_name": self.position_name,
+                "protocol": self.protocol,
                 "network": self.network,
                 "nft_id": self.nft_id,
                 "pool_address": self.pool_address,
@@ -790,8 +817,8 @@ class LPPositionState(rx.State):
                 "is_active": True
             }
             
-            # Check if position already exists by unique constraint (user_id, network, nft_id)
-            existing_position = supabase.table("lp_positions").select("id").eq("user_id", auth_state.user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+            # Check if position already exists by unique constraint (user_id, protocol, network, nft_id)
+            existing_position = supabase.table("lp_positions").select("id").eq("user_id", auth_state.user_id).eq("protocol", self.protocol).eq("network", self.network).eq("nft_id", self.nft_id).execute()
             
             # Save to lp_positions table
             if existing_position.data:
@@ -844,8 +871,8 @@ class LPPositionState(rx.State):
                     print("No wallet found for account_name")
             
             # Check if config exists to preserve existing values when editing
-            print(f"Checking for existing config: network={self.network}, nft_id={self.nft_id}")
-            existing = supabase.table("position_configs").select("*").eq("user_id", user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+            print(f"Checking for existing config: protocol={self.protocol}, network={self.network}, nft_id={self.nft_id}")
+            existing = supabase.table("position_configs").select("*").eq("user_id", user_id).eq("protocol", self.protocol).eq("network", self.network).eq("nft_id", self.nft_id).execute()
             existing_config = existing.data[0] if existing.data else {}
             print(f"Existing config found: {bool(existing_config)}")
             
@@ -855,6 +882,7 @@ class LPPositionState(rx.State):
                 "position_name": self.position_name,
                 "notes": self.notes,
                 "status": "active",
+                "protocol": self.protocol,
                 "network": self.network,
                 "nft_id": self.nft_id,
                 "pool_address": self.pool_address,
