@@ -55,25 +55,57 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
             
             rx.divider(margin_top="0.75rem", margin_bottom="0.75rem"),
             
-            rx.vstack(
-                rx.text("Total Value (LP + Hedge Account)", size="1", color="gray", weight="medium"),
-                rx.text(position.total_value_formatted, size="6", weight="bold", color="green"),
-                rx.hstack(
-                    rx.text("LP:", size="1", color="gray"),
-                    rx.text(position.position_value_formatted, size="2", weight="medium"),
-                    rx.cond(
-                        position.api_account_value > 0,
-                        rx.hstack(
-                            rx.text("•", size="1", color="gray"),
-                            rx.text("Hedge:", size="1", color="gray"),
-                            rx.text(f"${position.api_account_value:,.2f}", size="2", weight="medium"),
-                            spacing="1",
+            rx.grid(
+                rx.vstack(
+                    rx.text("Total Value (LP + Hedge Account)", size="1", color="gray", weight="medium"),
+                    rx.text(position.total_value_formatted, size="6", weight="bold", color="green"),
+                    rx.hstack(
+                        rx.text("LP:", size="1", color="gray"),
+                        rx.text(position.position_value_formatted, size="2", weight="medium"),
+                        rx.cond(
+                            position.api_account_value > 0,
+                            rx.hstack(
+                                rx.text("•", size="1", color="gray"),
+                                rx.text("Hedge:", size="1", color="gray"),
+                                rx.text(f"${position.api_account_value:,.2f}", size="2", weight="medium"),
+                                spacing="1",
+                            ),
                         ),
+                        spacing="1",
                     ),
                     spacing="1",
+                    align_items="start",
                 ),
-                spacing="1",
-                align_items="start",
+                rx.vstack(
+                    rx.text("Status", size="1", color="gray", weight="medium"),
+                    rx.hstack(
+                        rx.text("Last Check:", size="2", color="gray"),
+                        rx.text(
+                            position.last_hedge_execution,
+                            size="2",
+                            weight="medium",
+                            color=rx.cond(position.last_hedge_execution == "Never", "gray", "green"),
+                        ),
+                        spacing="1",
+                        align_items="center",
+                    ),
+                    rx.hstack(
+                        rx.text("Last Hedge Adjustment:", size="2", color="gray"),
+                        rx.text(
+                            "Never",
+                            size="2",
+                            weight="medium",
+                            color="gray",
+                        ),
+                        spacing="1",
+                        align_items="center",
+                    ),
+                    spacing="2",
+                    align_items="start",
+                ),
+                columns="2",
+                spacing="4",
+                width="100%",
             ),
             
             rx.box(height="0.5rem"),

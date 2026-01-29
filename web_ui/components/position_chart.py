@@ -97,7 +97,8 @@ def position_value_chart() -> rx.Component:
                                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                                 rx.recharts.legend(),
                                 rx.recharts.tooltip(
-                                    label_formatter="function(value) { return new Date(value).toLocaleString(); }",
+                                    formatter="function(value, name, props) { return '$' + value.toFixed(2); }",
+                                    content="function(props) { if (!props.payload || props.payload.length === 0) return null; const data = props.payload[0].payload; return React.createElement('div', { style: { backgroundColor: 'white', border: '1px solid #ccc', padding: '10px', borderRadius: '4px' } }, [React.createElement('p', { style: { margin: '0 0 5px 0', fontWeight: 'bold' } }, data.timestamp), React.createElement('p', { style: { margin: '2px 0', color: '#8884d8' } }, 'LP Value: $' + (data.lp_value_usd || 0).toFixed(2)), React.createElement('p', { style: { margin: '2px 0', color: '#82ca9d' } }, 'Hedge Account: $' + (data.hl_account_value || 0).toFixed(2)), React.createElement('p', { style: { margin: '5px 0 0 0', fontWeight: 'bold', borderTop: '1px solid #ccc', paddingTop: '5px' } }, 'Total Position: $' + (data.total_value || 0).toFixed(2))]); }",
                                 ),
                                 data=LPPositionState.chart_data,
                                 width="100%",

@@ -52,6 +52,7 @@ def sidebar() -> rx.Component:
                 sidebar_item("API Keys", "api_keys", "key"),
                 sidebar_item("LP Positions", "lp_positions", "coins"),
                 sidebar_item("Bot Status", "bot_status", "activity"),
+                sidebar_item("FAQ / Info", "faq", "info"),
                 sidebar_item("Settings", "settings", "settings"),
                 spacing="2",
                 width="100%",

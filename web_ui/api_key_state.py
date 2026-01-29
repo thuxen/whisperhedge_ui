@@ -165,11 +165,44 @@ class APIKeyState(rx.State):
                     self.api_keys.append(decrypted_key)
             else:
                 self.api_keys = []
+            
+            # Update overview stats
+            await self._update_overview_stats()
                 
         except Exception as e:
             self.error_message = "Failed to load API keys. Please try again."
         finally:
             self.is_loading = False
+    
+    async def _update_overview_stats(self):
+        """Update overview statistics after loading API keys"""
+        try:
+            from web_ui.overview_state import OverviewState
+            from web_ui.lp_position_state import LPPositionState
+            
+            overview_state = await self.get_state(OverviewState)
+            lp_position_state = await self.get_state(LPPositionState)
+            
+            # Convert positions to dicts for the update method
+            positions_data = [
+                {
+                    'hedge_enabled': pos.hedge_enabled,
+                    'total_value_usd': pos.total_value_usd,
+                }
+                for pos in lp_position_state.lp_positions
+            ]
+            
+            # Convert API keys to dicts
+            api_keys_data = [
+                {
+                    'is_in_use': key.is_in_use,
+                }
+                for key in self.api_keys
+            ]
+            
+            overview_state.update_stats(positions_data, api_keys_data)
+        except Exception as e:
+            print(f"Error updating overview stats from API keys: {e}")
     
     def fetch_balance(self, key_id: str):
         """Immediate feedback handler for fetching balance"""

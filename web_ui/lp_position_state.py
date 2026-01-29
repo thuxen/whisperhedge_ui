@@ -37,6 +37,7 @@ class LPPositionData(BaseModel):
     lookback_hours: float = 6.0
     drift_min_pct_of_capital: float = 0.06
     max_hedge_drift_pct: float = 0.50
+    last_hedge_execution: str = "Never"
 
 
 class LPPositionState(rx.State):
@@ -578,6 +579,16 @@ class LPPositionState(rx.State):
                     position_size_usd = float(config.get("position_size_usd", 0.0))
                     total_value_usd = position_size_usd + api_account_value
                     
+                    # Get last hedge execution time from QuestDB
+                    last_hedge_time_str = "Never"
+                    if config.get("id"):
+                        try:
+                            from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
+                            last_hedge_dt = get_last_hedge_execution(config["id"])
+                            last_hedge_time_str = format_time_ago(last_hedge_dt)
+                        except Exception as e:
+                            print(f"Error fetching last hedge execution for position {config.get('id')}: {e}")
+                    
                     position = LPPositionData(
                         id=pos_data["id"],
                         position_config_id=config.get("id", ""),
@@ -612,6 +623,7 @@ class LPPositionState(rx.State):
                         lookback_hours=float(config.get("lookback_hours", 6.0)),
                         drift_min_pct_of_capital=float(config.get("drift_min_pct_of_capital", 0.06)),
                         max_hedge_drift_pct=float(config.get("max_hedge_drift_pct", 0.50)),
+                        last_hedge_execution=last_hedge_time_str,
                     )
                     self.lp_positions.append(position)
             else:
@@ -619,6 +631,9 @@ class LPPositionState(rx.State):
                 
             print(f"Successfully loaded {len(self.lp_positions)} positions")
             print("=== LOAD_POSITIONS END ===\n")
+            
+            # Update overview stats
+            await self._update_overview_stats()
         except Exception as e:
             print(f"\n!!! ERROR IN LOAD_POSITIONS !!!")
             print(f"Error: {e}")
@@ -628,6 +643,36 @@ class LPPositionState(rx.State):
             self.error_message = f"Failed to load positions: {str(e)}"
         finally:
             self.is_loading = False
+    
+    async def _update_overview_stats(self):
+        """Update overview statistics after loading positions"""
+        try:
+            from web_ui.overview_state import OverviewState
+            from web_ui.api_key_state import APIKeyState
+            
+            overview_state = await self.get_state(OverviewState)
+            api_key_state = await self.get_state(APIKeyState)
+            
+            # Convert positions to dicts for the update method
+            positions_data = [
+                {
+                    'hedge_enabled': pos.hedge_enabled,
+                    'total_value_usd': pos.total_value_usd,
+                }
+                for pos in self.lp_positions
+            ]
+            
+            # Convert API keys to dicts
+            api_keys_data = [
+                {
+                    'is_in_use': key.is_in_use,
+                }
+                for key in api_key_state.api_keys
+            ]
+            
+            overview_state.update_stats(positions_data, api_keys_data)
+        except Exception as e:
+            print(f"Error updating overview stats: {e}")
 
     def fetch_position_data_handler(self, form_data: dict):
         """Immediate feedback handler for fetch position data"""

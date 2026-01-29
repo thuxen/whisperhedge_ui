@@ -75,18 +75,18 @@ def get_position_value_history(position_id: str, hours: int = 24) -> List[Dict]:
         # Convert to list of dicts with formatted data
         history = []
         for i, row in enumerate(results):
-            # Format timestamp as HH:MM for chart display
+            # Format timestamp as dd-mm HH:MM for chart display
             if row['timestamp']:
                 dt = row['timestamp']
-                timestamp_display = f"{dt.hour:02d}:{dt.minute:02d}"
+                timestamp_display = f"{dt.day:02d}-{dt.month:02d} {dt.hour:02d}:{dt.minute:02d}"
             else:
                 timestamp_display = ""
             
             history.append({
                 'timestamp': timestamp_display,
-                'lp_value_usd': float(row['lp_value_usd']) if row['lp_value_usd'] else 0.0,
-                'hl_account_value': float(row['hl_account_value']) if row['hl_account_value'] else 0.0,
-                'total_value': float(row['total_value']) if row['total_value'] else 0.0,
+                'lp_value_usd': round(float(row['lp_value_usd']), 2) if row['lp_value_usd'] else 0.0,
+                'hl_account_value': round(float(row['hl_account_value']), 2) if row['hl_account_value'] else 0.0,
+                'total_value': round(float(row['total_value']), 2) if row['total_value'] else 0.0,
             })
             if i < 3:  # Print first 3 rows for debugging
                 print(f"Row {i+1}: {history[-1]}")
@@ -148,3 +148,74 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
     except Exception as e:
         print(f"Error fetching latest position values: {e}")
         return None
+
+
+def get_last_hedge_execution(position_id: str) -> Optional[datetime]:
+    """
+    Get the timestamp of the last hedge execution for a position.
+    Returns the most recent entry from hedge_state table.
+    
+    Args:
+        position_id: The position ID to query
+    
+    Returns:
+        datetime of last hedge execution, or None if no hedge data exists
+    """
+    try:
+        conn = get_questdb_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        query = """
+            SELECT time as timestamp
+            FROM hedge_state
+            WHERE position_id = %s
+            ORDER BY time DESC
+            LIMIT 1
+        """
+        
+        cursor.execute(query, (position_id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result and result['timestamp']:
+            return result['timestamp']
+        
+        return None
+        
+    except Exception as e:
+        print(f"Error fetching last hedge execution: {e}")
+        return None
+
+
+def format_time_ago(dt: Optional[datetime]) -> str:
+    """
+    Format a datetime as a human-readable 'time ago' string.
+    
+    Args:
+        dt: datetime to format
+    
+    Returns:
+        String like "5 seconds ago", "2 hours ago", "Never"
+    """
+    if dt is None:
+        return "Never"
+    
+    now = datetime.utcnow()
+    diff = now - dt
+    
+    seconds = diff.total_seconds()
+    
+    if seconds < 60:
+        secs = int(seconds)
+        return f"{secs} second{'s' if secs != 1 else ''} ago"
+    elif seconds < 3600:  # Less than 1 hour
+        minutes = int(seconds / 60)
+        return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+    elif seconds < 86400:  # Less than 1 day
+        hours = int(seconds / 3600)
+        return f"{hours} hour{'s' if hours != 1 else ''} ago"
+    else:  # 1 day or more
+        days = int(seconds / 86400)
+        return f"{days} day{'s' if days != 1 else ''} ago"

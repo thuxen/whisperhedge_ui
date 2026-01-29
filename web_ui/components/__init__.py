@@ -6,6 +6,7 @@ from .sections import (
     api_keys_section,
     lp_positions_section,
     bot_status_section,
+    faq_section,
     settings_section,
 )
 
@@ -17,5 +18,6 @@ __all__ = [
     "api_keys_section",
     "lp_positions_section",
     "bot_status_section",
+    "faq_section",
     "settings_section",
 ]
