@@ -3,18 +3,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def get_current_host():
+    """Get current host from environment variables"""
+    # Check REFLEX_DOMAIN first (used on VPS), then fallback to HOST or VERCEL_URL
+    return os.getenv('REFLEX_DOMAIN', os.getenv('HOST', os.getenv('VERCEL_URL', '')))
+
+def is_whisperhedge_domain():
+    """Check if current domain is whisperhedge.com"""
+    host = get_current_host()
+    return 'whisperhedge.com' in host
+
 class BrandConfig:
     """
     Centralized branding configuration.
-    All values can be overridden via environment variables.
-    Safe defaults ensure the app always works.
+    Domain-based branding with fallback to whitelabel.
     """
     
-    # Company Information
-    APP_NAME = os.getenv("BRAND_APP_NAME", "WhisperHedge")
-    COMPANY_NAME = os.getenv("BRAND_COMPANY_NAME", "WhisperHedge")
-    DOMAIN = os.getenv("BRAND_DOMAIN", "whisperhedge.com")
-    TAGLINE = os.getenv("BRAND_TAGLINE", "Liquidity Pool Hedging Simplified")
+    # Company Information - dynamically set based on domain
+    APP_NAME = "WhisperHedge" if is_whisperhedge_domain() else "White Label"
+    COMPANY_NAME = "WhisperHedge" if is_whisperhedge_domain() else "White Label"
+    DOMAIN = "whisperhedge.com" if is_whisperhedge_domain() else ""
+    TAGLINE = "Liquidity Pool Hedging Simplified" if is_whisperhedge_domain() else "Automated Hedging Platform"
     
     # Logo Paths (optional - will fallback to text if files don't exist)
     LOGO_LIGHT = os.getenv("BRAND_LOGO_LIGHT", "/branding/assets/logo.png")
@@ -28,9 +37,9 @@ class BrandConfig:
     LOGO_HEIGHT_LANDING = os.getenv("BRAND_LOGO_HEIGHT_LANDING", "48px")
     LOGO_HEIGHT_SIDEBAR = os.getenv("BRAND_LOGO_HEIGHT_SIDEBAR", "28px")
     
-    # Contact & Support
-    SUPPORT_EMAIL = os.getenv("BRAND_SUPPORT_EMAIL", "support@whisperhedge.com")
-    DOCS_URL = os.getenv("BRAND_DOCS_URL", "https://docs.whisperhedge.com")
+    # Contact & Support - dynamically set based on domain
+    SUPPORT_EMAIL = "support@whisperhedge.com" if is_whisperhedge_domain() else "support@example.com"
+    DOCS_URL = "https://docs.whisperhedge.com" if is_whisperhedge_domain() else ""
     
     # Theme Colors (optional overrides)
     PRIMARY_COLOR = os.getenv("BRAND_PRIMARY_COLOR", "")
