@@ -1,7 +1,7 @@
 import reflex as rx
 from ..state import AuthState
 from ..config import AppConfig
-from ..branding import brand_logo
+from ..branding import brand_logo, COLORS
 
 
 class DashboardState(rx.State):
@@ -24,11 +24,11 @@ def sidebar_item(label: str, section: str, icon: str = "circle") -> rx.Component
         on_click=lambda: DashboardState.set_section(section),
         padding="0.75rem 1rem",
         border_radius="0.5rem",
-        background=rx.cond(is_active, "var(--accent-3)", "transparent"),
-        color=rx.cond(is_active, "var(--accent-11)", "var(--gray-11)"),
+        background=rx.cond(is_active, COLORS.ACCENT_PRIMARY, "transparent"),
+        color=rx.cond(is_active, COLORS.TEXT_PRIMARY, COLORS.TEXT_SECONDARY),
         cursor="pointer",
         _hover={
-            "background": rx.cond(is_active, "var(--accent-4)", "var(--gray-3)"),
+            "background": rx.cond(is_active, COLORS.ACCENT_PRIMARY_HOVER, COLORS.BACKGROUND_ELEVATED),
         },
         width="100%",
     )
@@ -39,12 +39,12 @@ def sidebar() -> rx.Component:
         rx.vstack(
             rx.vstack(
                 brand_logo(size="sidebar", margin_bottom="0.5rem"),
-                rx.text("Dashboard", size="2", color="gray"),
+                rx.text("Dashboard", size="2", color=COLORS.TEXT_MUTED),
                 spacing="1",
                 align_items="start",
                 width="100%",
                 padding_bottom="1rem",
-                border_bottom="1px solid var(--gray-5)",
+                border_bottom=f"1px solid {COLORS.BORDER_DEFAULT}",
             ),
             
             rx.vstack(
@@ -65,8 +65,8 @@ def sidebar() -> rx.Component:
                 rx.divider(),
                 rx.hstack(
                     rx.vstack(
-                        rx.text(AuthState.user_email, size="2", weight="bold"),
-                        rx.text("Logged in", size="1", color="gray"),
+                        rx.text(AuthState.user_email, size="2", weight="bold", color=COLORS.TEXT_PRIMARY),
+                        rx.text("Logged in", size="1", color=COLORS.TEXT_MUTED),
                         spacing="0",
                         align_items="start",
                     ),
@@ -92,8 +92,8 @@ def sidebar() -> rx.Component:
         ),
         width="280px",
         height="100vh",
-        border_right="1px solid var(--gray-5)",
+        border_right=f"1px solid {COLORS.BORDER_DEFAULT}",
         position="sticky",
         top="0",
-        background="var(--color-panel)",
+        background=COLORS.BACKGROUND_SURFACE,
     )

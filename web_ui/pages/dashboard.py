@@ -3,6 +3,7 @@ from ..state import AuthState
 from ..api_key_state import APIKeyState
 from ..lp_position_state import LPPositionState
 from ..dashboard_loading_state import DashboardLoadingState
+from ..branding import COLORS
 from ..components import (
     sidebar,
     DashboardState,
@@ -47,6 +48,7 @@ def dashboard_page() -> rx.Component:
                         flex="1",
                         overflow_y="auto",
                         height="100vh",
+                        background=COLORS.BACKGROUND_PRIMARY,
                     ),
                     
                     spacing="0",
@@ -63,9 +65,9 @@ def dashboard_page() -> rx.Component:
                 rx.box(
                     rx.center(
                         rx.vstack(
-                            rx.spinner(size="3"),
-                            rx.heading("Loading Dashboard...", size="6", margin_top="1rem"),
-                            rx.text("Fetching your positions and API keys", size="3", color="gray"),
+                            rx.spinner(size="3", color=COLORS.ACCENT_PRIMARY),
+                            rx.heading("Loading Dashboard...", size="6", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
+                            rx.text("Fetching your positions and API keys", size="3", color=COLORS.TEXT_SECONDARY),
                             spacing="4",
                             align="center",
                         ),
@@ -76,7 +78,7 @@ def dashboard_page() -> rx.Component:
                     left="0",
                     width="100vw",
                     height="100vh",
-                    background="rgba(0, 0, 0, 0.7)",
+                    background="rgba(2, 6, 23, 0.95)",
                     backdrop_filter="blur(8px)",
                     z_index="9999",
                 ),
@@ -89,17 +91,27 @@ def dashboard_page() -> rx.Component:
                 LPPositionState.load_wallets,
             ],
         ),
-        rx.center(
-            rx.vstack(
-                rx.heading("Access Denied", size="8"),
-                rx.text("Please log in to access the dashboard.", size="4", color="gray"),
-                rx.link(
-                    rx.button("Go to Login", size="3"),
-                    href="/login",
+        rx.box(
+            rx.center(
+                rx.vstack(
+                    rx.heading("Access Denied", size="8", color=COLORS.TEXT_PRIMARY),
+                    rx.text("Please log in to access the dashboard.", size="4", color=COLORS.TEXT_SECONDARY),
+                    rx.link(
+                        rx.button(
+                            "Go to Login",
+                            size="3",
+                            background=COLORS.BUTTON_PRIMARY_BG,
+                            color=COLORS.BUTTON_PRIMARY_TEXT,
+                            _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                        ),
+                        href="/login",
+                    ),
+                    spacing="4",
+                    align="center",
                 ),
-                spacing="4",
-                align="center",
+                height="100vh",
             ),
-            height="100vh",
+            background=COLORS.BACKGROUND_PRIMARY,
+            min_height="100vh",
         ),
     )
