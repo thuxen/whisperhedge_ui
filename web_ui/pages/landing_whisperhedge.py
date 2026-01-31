@@ -19,6 +19,13 @@ def navbar() -> rx.Component:
                     _hover={"color": COLORS.NAVBAR_LINK_HOVER},
                 ),
                 rx.link(
+                    "How it works",
+                    href="#how-it-works",
+                    size="3",
+                    color=COLORS.NAVBAR_LINK,
+                    _hover={"color": COLORS.NAVBAR_LINK_HOVER},
+                ),
+                rx.link(
                     "Pricing",
                     href="#pricing",
                     size="3",
@@ -74,7 +81,7 @@ def hero_section() -> rx.Component:
         rx.container(
             rx.vstack(
                 rx.heading(
-                    "Stop Losing Your LP Gains to Market Swings.",
+                    "Intelligent Protection for Liquidity Pool Positions.",
                     size="9",
                     weight="bold",
                     text_align="center",
@@ -82,7 +89,7 @@ def hero_section() -> rx.Component:
                     color=COLORS.TEXT_PRIMARY,
                 ),
                 rx.text(
-                    "WhisperHedge provides intelligent, asymmetric protection for concentrated liquidity. We don't just \"cover the position\"—we optimize your exposure so you keep your fees without getting liquidated by volatility.",
+                    "Stop watching your fee earnings get swallowed by market volatility. WhisperHedge automates price-risk defense for your pool positions, mitigating Impermanent Loss and protecting your principal capital while you provide liquidity.",
                     size="5",
                     color=COLORS.TEXT_SECONDARY,
                     text_align="center",
@@ -105,49 +112,78 @@ def hero_section() -> rx.Component:
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background=COLORS.BACKGROUND_PRIMARY,
     )
 
 
 def problem_section() -> rx.Component:
-    """Section explaining why perfect hedging loses money"""
+    """The Hidden Cost of Liquidity: Impermanent Loss"""
     return rx.box(
         rx.container(
             rx.vstack(
                 rx.heading(
-                    "Why \"Perfect Hedging\" is a Losing Game.",
+                    "The Hidden Cost of Liquidity: Impermanent Loss.",
                     size="8",
                     weight="bold",
                     text_align="center",
-                    margin_bottom="2rem",
+                    margin_bottom="3rem",
                     color=COLORS.TEXT_PRIMARY,
                 ),
-                rx.text(
-                    "Most bots try to maintain a 0-delta position. Between funding fees and rebalancing costs, you're usually paying away your entire yield just to stay \"neutral.\"",
-                    size="5",
-                    color=COLORS.TEXT_SECONDARY,
-                    text_align="center",
+                rx.vstack(
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "The Problem",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.ACCENT_WARNING,
+                            ),
+                            rx.text(
+                                "Being a Liquidity Provider is a race against price divergence. When the market moves, your pool's asset ratio shifts—forcing you to sell the winners and buy the losers. This 'Impermanent Loss' often exceeds the fees you collect, leaving you with less value than if you had simply held your tokens.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "The WhisperHedge Fix",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.ACCENT_SUCCESS,
+                            ),
+                            rx.text(
+                                "We don't just 'watch' your position; we defend its value. By opening automated, strategic offsets, we neutralize the downside of price divergence, ensuring your fee earnings stay in your pocket rather than covering your losses.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    spacing="4",
+                    width="100%",
                     max_width="50rem",
-                    margin_bottom="1.5rem",
                 ),
-                rx.text(
-                    "The WhisperHedge Difference:",
-                    size="5",
-                    weight="bold",
-                    text_align="center",
-                    margin_bottom="1rem",
-                    color=COLORS.TEXT_PRIMARY,
-                ),
-                rx.text(
-                    "We specialize in Precision Hedging. Our algorithms focus on mitigating the \"tail risk\"—the big moves that actually hurt—while leaving you room to capture the upside of the yield.",
-                    size="5",
-                    color=COLORS.TEXT_SECONDARY,
-                    text_align="center",
-                    max_width="50rem",
-                ),
-                spacing="4",
+                spacing="5",
                 align="center",
-                padding_y="6rem",
+                padding_top="4rem",
+                padding_bottom="0",
             ),
             size="4",
         ),
@@ -155,35 +191,40 @@ def problem_section() -> rx.Component:
     )
 
 
-def features_section() -> rx.Component:
-    """Key features section"""
+def risk_protection_section() -> rx.Component:
+    """Risk Protection - Smaller Drawdowns with Upside Exposure"""
     return rx.box(
         rx.container(
             rx.vstack(
+                rx.box(
+                    width="100%",
+                    height="1px",
+                    background=COLORS.BORDER_SUBTLE,
+                    margin_y="2rem",
+                ),
                 rx.heading(
-                    "Key Features",
+                    "Smaller Drawdowns. Steady Fees. Upside Intact.",
                     size="8",
                     weight="bold",
                     text_align="center",
                     margin_bottom="3rem",
-                    id="features",
                     color=COLORS.TEXT_PRIMARY,
                 ),
                 rx.vstack(
-                    # Feature 1: Asymmetric Protection
                     rx.box(
                         rx.vstack(
                             rx.heading(
-                                "Asymmetric Protection",
-                                size="6",
+                                "The Safety Buffer",
+                                size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
-                                color=COLORS.TEXT_PRIMARY,
+                                color=COLORS.ACCENT_PRIMARY,
                             ),
                             rx.text(
-                                "Instead of a rigid 1:1 hedge, WhisperHedge uses calculated under-hedging to reduce your \"bleed\" during flat markets.",
+                                "Crypto markets are volatile. WhisperHedge creates a safety buffer by reducing your exposure to wild price swings while you continue collecting LP fees. You're protected from the worst drawdowns without sacrificing your position entirely.",
                                 size="4",
                                 color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
                             ),
                             align="start",
                         ),
@@ -191,21 +232,22 @@ def features_section() -> rx.Component:
                         border_radius="8px",
                         border=f"1px solid {COLORS.CARD_BORDER}",
                         background=COLORS.CARD_BG,
+                        width="100%",
                     ),
-                    # Feature 2: Dynamic Range Tracking
                     rx.box(
                         rx.vstack(
                             rx.heading(
-                                "Dynamic Range Tracking",
-                                size="6",
+                                "Keep Your Upside",
+                                size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
-                                color=COLORS.TEXT_PRIMARY,
+                                color=COLORS.ACCENT_SUCCESS,
                             ),
                             rx.text(
-                                "Automatically adjusts your protection levels as your LP position moves through its price ticks.",
+                                "Unlike full delta-neutral strategies that cap your gains, our strategic under-hedging lets you participate in market upside. You maintain exposure to positive price action while having a defensive layer against crashes—earning fees with confidence.",
                                 size="4",
                                 color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
                             ),
                             align="start",
                         ),
@@ -213,50 +255,110 @@ def features_section() -> rx.Component:
                         border_radius="8px",
                         border=f"1px solid {COLORS.CARD_BORDER}",
                         background=COLORS.CARD_BG,
+                        width="100%",
                     ),
-                    # Feature 3: Funding-Aware Execution
+                    spacing="4",
+                    width="100%",
+                    max_width="50rem",
+                ),
+                spacing="5",
+                align="center",
+                padding_y="4rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_SURFACE,
+    )
+
+
+def how_it_works_section() -> rx.Component:
+    """How It Works - Simplified 2-step workflow"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                rx.heading(
+                    "How It Works",
+                    size="8",
+                    weight="bold",
+                    text_align="center",
+                    margin_bottom="3rem",
+                    id="how-it-works",
+                    color=COLORS.TEXT_PRIMARY,
+                ),
+                rx.hstack(
+                    # Step 1
                     rx.box(
                         rx.vstack(
+                            rx.box(
+                                rx.text("1", size="8", weight="bold", color=COLORS.ACCENT_PRIMARY),
+                                width="4rem",
+                                height="4rem",
+                                display="flex",
+                                align_items="center",
+                                justify_content="center",
+                                border_radius="50%",
+                                background=COLORS.BACKGROUND_ELEVATED,
+                                margin_bottom="1.5rem",
+                            ),
                             rx.heading(
-                                "Funding-Aware Execution",
-                                size="6",
+                                "Strategic Calibration",
+                                size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
                                 color=COLORS.TEXT_PRIMARY,
                             ),
                             rx.text(
-                                "The bot monitors perp funding rates; it won't open a hedge that costs more than the LP is earning.",
-                                size="4",
+                                "Our system calculates your real-time exposure and the 'cost-to-protect.'",
+                                size="3",
                                 color=COLORS.TEXT_SECONDARY,
+                                text_align="center",
+                                line_height="1.6",
                             ),
-                            align="start",
+                            align="center",
+                            spacing="3",
                         ),
-                        padding="2rem",
+                        padding="2.5rem",
                         border_radius="8px",
                         border=f"1px solid {COLORS.CARD_BORDER}",
                         background=COLORS.CARD_BG,
+                        flex="1",
                     ),
-                    # Feature 4: Capital Efficiency
+                    # Step 2
                     rx.box(
                         rx.vstack(
+                            rx.box(
+                                rx.text("2", size="8", weight="bold", color=COLORS.ACCENT_PRIMARY),
+                                width="4rem",
+                                height="4rem",
+                                display="flex",
+                                align_items="center",
+                                justify_content="center",
+                                border_radius="50%",
+                                background=COLORS.BACKGROUND_ELEVATED,
+                                margin_bottom="1.5rem",
+                            ),
                             rx.heading(
-                                "Capital Efficiency",
-                                size="6",
+                                "Automated Defense",
+                                size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
                                 color=COLORS.TEXT_PRIMARY,
                             ),
                             rx.text(
-                                "Keep your collateral working. We calculate the minimum necessary margin to protect your range, freeing up your capital for other plays.",
-                                size="4",
+                                "The bot manages a flexible hedge on a perpetual exchange that adapts as your pool moves, focusing on capital preservation over rigid symmetry.",
+                                size="3",
                                 color=COLORS.TEXT_SECONDARY,
+                                text_align="center",
+                                line_height="1.6",
                             ),
-                            align="start",
+                            align="center",
+                            spacing="3",
                         ),
-                        padding="2rem",
+                        padding="2.5rem",
                         border_radius="8px",
                         border=f"1px solid {COLORS.CARD_BORDER}",
                         background=COLORS.CARD_BG,
+                        flex="1",
                     ),
                     spacing="4",
                     width="100%",
@@ -267,6 +369,354 @@ def features_section() -> rx.Component:
             size="4",
         ),
         background=COLORS.BACKGROUND_PRIMARY,
+    )
+
+
+def comparison_table_section() -> rx.Component:
+    """Comparison table - What are we actually doing?"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                rx.heading(
+                    "What are we actually doing?",
+                    size="8",
+                    weight="bold",
+                    text_align="center",
+                    margin_bottom="3rem",
+                    color=COLORS.TEXT_PRIMARY,
+                ),
+                rx.box(
+                    rx.table.root(
+                        rx.table.header(
+                            rx.table.row(
+                                rx.table.column_header_cell("Scenario", color=COLORS.TEXT_PRIMARY),
+                                rx.table.column_header_cell("Without WhisperHedge", color=COLORS.TEXT_PRIMARY),
+                                rx.table.column_header_cell("With WhisperHedge", color=COLORS.TEXT_PRIMARY),
+                            ),
+                        ),
+                        rx.table.body(
+                            rx.table.row(
+                                rx.table.cell("Market drops 20%", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("You lose 20% of LP value", color=COLORS.ACCENT_WARNING),
+                                rx.table.cell("Hedge offsets most of the loss", color=COLORS.ACCENT_SUCCESS),
+                            ),
+                            rx.table.row(
+                                rx.table.cell("Market stays flat", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("You earn LP fees", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("You earn LP fees minus small hedge cost", color=COLORS.TEXT_SECONDARY),
+                            ),
+                            rx.table.row(
+                                rx.table.cell("Market pumps 30%", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("You gain on LP value", color=COLORS.ACCENT_SUCCESS),
+                                rx.table.cell("Reduced gain, but protected from crashes", color=COLORS.TEXT_SECONDARY),
+                            ),
+                        ),
+                        variant="surface",
+                        size="3",
+                    ),
+                    padding="2rem",
+                    border_radius="8px",
+                    border=f"1px solid {COLORS.CARD_BORDER}",
+                    background=COLORS.CARD_BG,
+                    width="100%",
+                ),
+                spacing="5",
+                padding_y="6rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_SURFACE,
+    )
+
+
+def pricing_section() -> rx.Component:
+    """Pricing tiers comparison table"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                rx.heading(
+                    "Pricing",
+                    size="8",
+                    weight="bold",
+                    text_align="center",
+                    margin_bottom="3rem",
+                    id="pricing",
+                    color=COLORS.TEXT_PRIMARY,
+                ),
+                rx.box(
+                    rx.table.root(
+                        rx.table.header(
+                            rx.table.row(
+                                rx.table.column_header_cell("Feature", color=COLORS.TEXT_PRIMARY),
+                                rx.table.column_header_cell("Starter", color=COLORS.TEXT_PRIMARY),
+                                rx.table.column_header_cell("Pro", color=COLORS.TEXT_PRIMARY),
+                                rx.table.column_header_cell("Elite", color=COLORS.TEXT_PRIMARY),
+                            ),
+                        ),
+                        rx.table.body(
+                            rx.table.row(
+                                rx.table.cell("Monthly Fee", color=COLORS.TEXT_SECONDARY, weight="bold"),
+                                rx.table.cell("$0 (Free)", color=COLORS.ACCENT_SUCCESS),
+                                rx.table.cell("$49", color=COLORS.TEXT_PRIMARY),
+                                rx.table.cell("$199", color=COLORS.TEXT_PRIMARY),
+                            ),
+                            rx.table.row(
+                                rx.table.cell("Managed TVL", color=COLORS.TEXT_SECONDARY, weight="bold"),
+                                rx.table.cell("Up to $2,500", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("Up to $50,000", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("Unlimited", color=COLORS.ACCENT_SUCCESS),
+                            ),
+                            rx.table.row(
+                                rx.table.cell("Hedge Logic", color=COLORS.TEXT_SECONDARY, weight="bold"),
+                                rx.table.cell("Standard Delta", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("Strategic Under-Hedge", color=COLORS.ACCENT_PRIMARY),
+                                rx.table.cell("Strategic Under-Hedge", color=COLORS.ACCENT_PRIMARY),
+                            ),
+                            rx.table.row(
+                                rx.table.cell("Update Frequency", color=COLORS.TEXT_SECONDARY, weight="bold"),
+                                rx.table.cell("5 Minutes", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("30 Seconds", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("Real-time (Sub-sec)", color=COLORS.ACCENT_SUCCESS),
+                            ),
+                            rx.table.row(
+                                rx.table.cell("Overage Charge", color=COLORS.TEXT_SECONDARY, weight="bold"),
+                                rx.table.cell("N/A (Hard Cap)", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("0.05% on vol > $50k", color=COLORS.TEXT_SECONDARY),
+                                rx.table.cell("Included", color=COLORS.ACCENT_SUCCESS),
+                            ),
+                        ),
+                        variant="surface",
+                        size="3",
+                    ),
+                    padding="2rem",
+                    border_radius="8px",
+                    border=f"1px solid {COLORS.CARD_BORDER}",
+                    background=COLORS.CARD_BG,
+                    width="100%",
+                ),
+                spacing="5",
+                padding_y="6rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_PRIMARY,
+    )
+
+
+def strategic_underhedging_section() -> rx.Component:
+    """Why Delta-Neutral is a Mathematical Trap"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                rx.box(
+                    width="100%",
+                    height="1px",
+                    background=COLORS.BORDER_SUBTLE,
+                    margin_y="2rem",
+                ),
+                rx.heading(
+                    "Why \"Delta-Neutral\" is a Mathematical Trap.",
+                    size="8",
+                    weight="bold",
+                    text_align="center",
+                    margin_bottom="3rem",
+                    color=COLORS.TEXT_PRIMARY,
+                ),
+                rx.vstack(
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "The Problem with 100% Hedging",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.ACCENT_WARNING,
+                            ),
+                            rx.text(
+                                "Most bots chase 'Perfect Zero' delta, but LP positions are dynamic. Maintaining 100% neutrality forces constant rebalancing—locking in IL and bleeding fees with every tick. You end up hedging away your entire profit.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "The WhisperHedge Approach",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.ACCENT_SUCCESS,
+                            ),
+                            rx.text(
+                                "We utilize Strategic Under-Hedging. Our algorithms understand that a pool is a moving target. We provide enough protection to survive the crashes without the hyper-active rebalancing that bleeds your account dry. We optimize for Net Profit, not theoretical neutrality.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2.5rem",
+                        border_radius="8px",
+                        border=f"2px solid {COLORS.ACCENT_PRIMARY}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    spacing="4",
+                    width="100%",
+                    max_width="50rem",
+                ),
+                spacing="5",
+                align="center",
+                padding_top="4rem",
+                padding_bottom="0",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_SURFACE,
+    )
+
+
+def footer() -> rx.Component:
+    """Footer section with links and copyright"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                # Top section with links
+                rx.hstack(
+                    # Company column
+                    rx.vstack(
+                        rx.heading(
+                            "WhisperHedge",
+                            size="5",
+                            weight="bold",
+                            margin_bottom="1rem",
+                            color=COLORS.TEXT_PRIMARY,
+                        ),
+                        rx.text(
+                            "Intelligent protection for liquidity pool positions.",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                            max_width="15rem",
+                        ),
+                        align="start",
+                        spacing="2",
+                    ),
+                    # Product column
+                    rx.vstack(
+                        rx.heading(
+                            "Product",
+                            size="4",
+                            weight="bold",
+                            margin_bottom="1rem",
+                            color=COLORS.TEXT_PRIMARY,
+                        ),
+                        rx.link("Features", href="#features", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("How it works", href="#how-it-works", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Pricing", href="#pricing", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Documentation", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        align="start",
+                        spacing="2",
+                    ),
+                    # Company column
+                    rx.vstack(
+                        rx.heading(
+                            "Company",
+                            size="4",
+                            weight="bold",
+                            margin_bottom="1rem",
+                            color=COLORS.TEXT_PRIMARY,
+                        ),
+                        rx.link("About Us", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Blog", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Careers", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Contact", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        align="start",
+                        spacing="2",
+                    ),
+                    # Legal column
+                    rx.vstack(
+                        rx.heading(
+                            "Legal",
+                            size="4",
+                            weight="bold",
+                            margin_bottom="1rem",
+                            color=COLORS.TEXT_PRIMARY,
+                        ),
+                        rx.link("Privacy Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Terms of Service", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        rx.link("Cookie Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                        align="start",
+                        spacing="2",
+                    ),
+                    justify="between",
+                    width="100%",
+                    spacing="8",
+                ),
+                # Divider
+                rx.box(
+                    width="100%",
+                    height="1px",
+                    background=COLORS.BORDER_SUBTLE,
+                    margin_y="2rem",
+                ),
+                # Bottom section with copyright and social
+                rx.hstack(
+                    rx.text(
+                        f"© {2026} WhisperHedge. All rights reserved.",
+                        size="2",
+                        color=COLORS.TEXT_MUTED,
+                    ),
+                    rx.hstack(
+                        rx.link(
+                            "Twitter",
+                            href="#",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                            _hover={"color": COLORS.TEXT_PRIMARY},
+                        ),
+                        rx.link(
+                            "Discord",
+                            href="#",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                            _hover={"color": COLORS.TEXT_PRIMARY},
+                        ),
+                        rx.link(
+                            "GitHub",
+                            href="#",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                            _hover={"color": COLORS.TEXT_PRIMARY},
+                        ),
+                        rx.link(
+                            "Telegram",
+                            href="#",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                            _hover={"color": COLORS.TEXT_PRIMARY},
+                        ),
+                        spacing="6",
+                    ),
+                    justify="between",
+                    width="100%",
+                    align="center",
+                ),
+                spacing="6",
+                padding_y="4rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_SURFACE,
+        border_top=f"1px solid {COLORS.BORDER_DEFAULT}",
+        width="100%",
     )
 
 
@@ -281,6 +731,11 @@ def whisperhedge_landing() -> rx.Component:
         navbar(),
         hero_section(),
         problem_section(),
-        features_section(),
+        strategic_underhedging_section(),
+        risk_protection_section(),
+        how_it_works_section(),
+        pricing_section(),
+        comparison_table_section(),
+        footer(),
         width="100%",
     )
