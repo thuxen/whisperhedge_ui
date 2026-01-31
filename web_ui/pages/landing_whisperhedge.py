@@ -80,8 +80,14 @@ def hero_section() -> rx.Component:
     return rx.box(
         rx.container(
             rx.vstack(
+                rx.badge(
+                    "AUTOMATED HEDGING BOT FOR LIQUIDITY PROVIDERS",
+                    size="2",
+                    color_scheme="blue",
+                    margin_bottom="1rem",
+                ),
                 rx.heading(
-                    "Intelligent Protection for Liquidity Pool Positions.",
+                    "Automate Your LP Defense. Maximize Fee Retention.",
                     size="9",
                     weight="bold",
                     text_align="center",
@@ -89,7 +95,7 @@ def hero_section() -> rx.Component:
                     color=COLORS.TEXT_PRIMARY,
                 ),
                 rx.text(
-                    "Stop watching your fee earnings get swallowed by market volatility. WhisperHedge automates price-risk defense for your pool positions, mitigating Impermanent Loss and protecting your principal capital while you provide liquidity.",
+                    "WhisperHedge is an automated bot that protects your liquidity pool positions from Impermanent Loss. We execute strategic hedges on Hyperliquid while you continue earning fees—no manual intervention required.",
                     size="5",
                     color=COLORS.TEXT_SECONDARY,
                     text_align="center",
@@ -98,7 +104,7 @@ def hero_section() -> rx.Component:
                 ),
                 rx.link(
                     rx.button(
-                        "Secure Your Position",
+                        "Secure My LP Position",
                         size="4",
                         background=COLORS.BUTTON_PRIMARY_BG,
                         color=COLORS.BUTTON_PRIMARY_TEXT,
@@ -108,7 +114,8 @@ def hero_section() -> rx.Component:
                 ),
                 spacing="5",
                 align="center",
-                padding_y="6rem",
+                padding_top="4rem",
+                padding_bottom="6rem",
             ),
             size="4",
         ),
@@ -180,10 +187,20 @@ def problem_section() -> rx.Component:
                     width="100%",
                     max_width="50rem",
                 ),
+                rx.link(
+                    rx.button(
+                        "Secure My LP Position",
+                        size="4",
+                        background=COLORS.BUTTON_PRIMARY_BG,
+                        color=COLORS.BUTTON_PRIMARY_TEXT,
+                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                    ),
+                    href="/signup",
+                ),
                 spacing="5",
                 align="center",
                 padding_top="4rem",
-                padding_bottom="0",
+                padding_bottom="2rem",
             ),
             size="4",
         ),
@@ -268,6 +285,141 @@ def risk_protection_section() -> rx.Component:
             size="4",
         ),
         background=COLORS.BACKGROUND_SURFACE,
+    )
+
+
+def features_section() -> rx.Component:
+    """Features section - What the bot does"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                rx.heading(
+                    "What WhisperHedge Does",
+                    size="8",
+                    weight="bold",
+                    text_align="center",
+                    margin_bottom="3rem",
+                    id="features",
+                    color=COLORS.TEXT_PRIMARY,
+                ),
+                rx.vstack(
+                    # Feature 1
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "🤖 Automated Position Monitoring",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.text(
+                                "Our bot continuously tracks your LP positions across Uniswap V3, Aerodrome, and PancakeSwap. It calculates your real-time exposure and delta as prices move, ensuring you're always protected.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    # Feature 2
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "⚡ Fully Decentralized Hedging",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.text(
+                                "WhisperHedge automatically opens and adjusts offsetting positions on Hyperliquid, a decentralized perpetual exchange. Your LP positions on DEXs like Uniswap V3 and your hedges are completely decentralized—no KYC, no centralized custody. We use strategic under-hedging to protect against crashes while minimizing funding costs.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    # Feature 3
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "📊 Funding-Aware Optimization",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.text(
+                                "The bot monitors perpetual funding rates in real-time. It won't open a hedge that costs more than your LP is earning, ensuring your net profit stays positive. Smart rebalancing only when necessary.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    # Feature 4
+                    rx.box(
+                        rx.vstack(
+                            rx.heading(
+                                "🔐 Non-Custodial & Secure",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.ACCENT_SUCCESS,
+                            ),
+                            rx.text(
+                                "We never touch your funds. WhisperHedge executes trades via restricted API keys on your preferred perpetual exchange with withdrawal permissions disabled. Your principal stays in your control at all times.",
+                                size="4",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"2px solid {COLORS.ACCENT_SUCCESS}",
+                        background=COLORS.CARD_BG,
+                        width="100%",
+                    ),
+                    spacing="4",
+                    width="100%",
+                    max_width="50rem",
+                ),
+                rx.link(
+                    rx.button(
+                        "Start Protecting My Yield",
+                        size="4",
+                        background=COLORS.BUTTON_PRIMARY_BG,
+                        color=COLORS.BUTTON_PRIMARY_TEXT,
+                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                    ),
+                    href="/signup",
+                ),
+                spacing="5",
+                align="center",
+                padding_y="6rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_PRIMARY,
     )
 
 
@@ -493,6 +645,23 @@ def pricing_section() -> rx.Component:
                     border=f"1px solid {COLORS.CARD_BORDER}",
                     background=COLORS.CARD_BG,
                     width="100%",
+                ),
+                rx.text(
+                    "Pro tier overage: 0.05% fee applies only to managed volume exceeding $50,000.",
+                    size="2",
+                    color=COLORS.TEXT_MUTED,
+                    text_align="center",
+                    margin_top="1rem",
+                ),
+                rx.link(
+                    rx.button(
+                        "Start Protecting My Yield",
+                        size="4",
+                        background=COLORS.BUTTON_PRIMARY_BG,
+                        color=COLORS.BUTTON_PRIMARY_TEXT,
+                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                    ),
+                    href="/signup",
                 ),
                 spacing="5",
                 padding_y="6rem",
@@ -733,6 +902,7 @@ def whisperhedge_landing() -> rx.Component:
         problem_section(),
         strategic_underhedging_section(),
         risk_protection_section(),
+        features_section(),
         how_it_works_section(),
         pricing_section(),
         comparison_table_section(),
