@@ -1,5 +1,11 @@
 import reflex as rx
 from ..branding import brand_logo, BrandConfig, COLORS
+from .landing_whisperhedge_mobile import (
+    mobile_strategic_philosophy_section,
+    mobile_features_section,
+    mobile_how_it_works_section,
+    mobile_pricing_section,
+)
 
 
 def navbar() -> rx.Component:
@@ -167,7 +173,24 @@ def risk_automation_section() -> rx.Component:
 
 
 def strategic_philosophy_section() -> rx.Component:
-    """The WhisperHedge Strategic Philosophy"""
+    """The WhisperHedge Strategic Philosophy - Responsive version"""
+    return rx.box(
+        # Desktop version (hidden on mobile)
+        rx.box(
+            desktop_strategic_philosophy_content(),
+            display=["none", "none", "block"],
+        ),
+        # Mobile version (hidden on desktop)
+        rx.box(
+            mobile_strategic_philosophy_section(),
+            display=["block", "block", "none"],
+        ),
+        background="transparent",
+    )
+
+
+def desktop_strategic_philosophy_content() -> rx.Component:
+    """Desktop version of Strategic Philosophy section"""
     return rx.box(
         rx.container(
             rx.vstack(
@@ -349,7 +372,24 @@ def strategic_philosophy_section() -> rx.Component:
 
 
 def features_section() -> rx.Component:
-    """Core Features section - Engineered for Performance, Built for Security"""
+    """Core Features section - Responsive version"""
+    return rx.box(
+        # Desktop version (hidden on mobile)
+        rx.box(
+            desktop_features_content(),
+            display=["none", "none", "block"],
+        ),
+        # Mobile version (hidden on desktop)
+        rx.box(
+            mobile_features_section(),
+            display=["block", "block", "none"],
+        ),
+        background=COLORS.BACKGROUND_PRIMARY,
+    )
+
+
+def desktop_features_content() -> rx.Component:
+    """Desktop version of Core Features section"""
     return rx.box(
         rx.container(
             rx.vstack(
@@ -715,7 +755,24 @@ def features_section() -> rx.Component:
 
 
 def how_it_works_section() -> rx.Component:
-    """How It Works - Three steps to institutional-grade LP protection"""
+    """How It Works - Responsive version"""
+    return rx.box(
+        # Desktop version (hidden on mobile)
+        rx.box(
+            desktop_how_it_works_content(),
+            display=["none", "none", "block"],
+        ),
+        # Mobile version (hidden on desktop)
+        rx.box(
+            mobile_how_it_works_section(),
+            display=["block", "block", "none"],
+        ),
+        background=COLORS.BACKGROUND_PRIMARY,
+    )
+
+
+def desktop_how_it_works_content() -> rx.Component:
+    """Desktop version of How It Works section"""
     return rx.box(
         rx.container(
             rx.vstack(
@@ -931,7 +988,24 @@ def comparison_table_section() -> rx.Component:
 
 
 def pricing_section() -> rx.Component:
-    """Simple, Transparent Pricing - 4-tier grid"""
+    """Simple, Transparent Pricing - Responsive version"""
+    return rx.box(
+        # Desktop version (hidden on mobile)
+        rx.box(
+            desktop_pricing_content(),
+            display=["none", "none", "block"],
+        ),
+        # Mobile version (hidden on desktop)
+        rx.box(
+            mobile_pricing_section(),
+            display=["block", "block", "none"],
+        ),
+        background=COLORS.BACKGROUND_PRIMARY,
+    )
+
+
+def desktop_pricing_content() -> rx.Component:
+    """Desktop version of Pricing section"""
     return rx.box(
         rx.container(
             rx.vstack(
@@ -984,7 +1058,7 @@ def pricing_section() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "1 Position",
+                                    "1 LP Position",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
@@ -1044,7 +1118,7 @@ def pricing_section() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "3 Positions",
+                                    "3 LPPositions",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
@@ -1117,7 +1191,7 @@ def pricing_section() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "10 Positions",
+                                    "10 LP Positions",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
@@ -1183,7 +1257,7 @@ def pricing_section() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "Unlimited Positions",
+                                    "Unlimited LP Positions",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
