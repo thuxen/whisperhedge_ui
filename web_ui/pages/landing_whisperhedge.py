@@ -1365,7 +1365,7 @@ def desktop_pricing_content() -> rx.Component:
                 # Whale custom solution link
                 rx.box(
                     rx.text(
-                        "Need a custom solution for $10M+ TVL? ",
+                        "Need a custom solution for $5M+ TVL? ",
                         rx.link(
                             "Talk to our team.",
                             href="/contact",
