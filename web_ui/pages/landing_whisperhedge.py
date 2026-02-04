@@ -587,7 +587,7 @@ def desktop_features_content() -> rx.Component:
                                     margin_bottom="0.5rem",
                                 ),
                                 rx.text(
-                                    "Ethereum",
+                                    "All Chains",
                                     size="1",
                                     color=COLORS.TEXT_MUTED,
                                 ),
@@ -1079,6 +1079,17 @@ def desktop_pricing_content() -> rx.Component:
                                 align="start",
                                 spacing="2",
                             ),
+                            rx.link(
+                                rx.button(
+                                    "Get Started",
+                                    size="3",
+                                    variant="outline",
+                                    width="100%",
+                                    margin_top="1rem",
+                                ),
+                                href="/signup",
+                                width="100%",
+                            ),
                             align="start",
                             spacing="3",
                         ),
@@ -1143,6 +1154,17 @@ def desktop_pricing_content() -> rx.Component:
                                 ),
                                 align="start",
                                 spacing="2",
+                            ),
+                            rx.link(
+                                rx.button(
+                                    "Get Started",
+                                    size="3",
+                                    variant="outline",
+                                    width="100%",
+                                    margin_top="1rem",
+                                ),
+                                href="/signup",
+                                width="100%",
                             ),
                             align="start",
                             spacing="3",
@@ -1217,6 +1239,19 @@ def desktop_pricing_content() -> rx.Component:
                                 align="start",
                                 spacing="2",
                             ),
+                            rx.link(
+                                rx.button(
+                                    "Get Started",
+                                    size="3",
+                                    background=COLORS.BUTTON_PRIMARY_BG,
+                                    color=COLORS.BUTTON_PRIMARY_TEXT,
+                                    _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                                    width="100%",
+                                    margin_top="1rem",
+                                ),
+                                href="/signup",
+                                width="100%",
+                            ),
                             align="start",
                             spacing="3",
                         ),
@@ -1284,6 +1319,19 @@ def desktop_pricing_content() -> rx.Component:
                                 align="start",
                                 spacing="2",
                             ),
+                            rx.link(
+                                rx.button(
+                                    "Get Started",
+                                    size="3",
+                                    background=COLORS.BUTTON_PRIMARY_BG,
+                                    color=COLORS.BUTTON_PRIMARY_TEXT,
+                                    _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                                    width="100%",
+                                    margin_top="1rem",
+                                ),
+                                href="/signup",
+                                width="100%",
+                            ),
                             align="start",
                             spacing="3",
                         ),
@@ -1300,6 +1348,62 @@ def desktop_pricing_content() -> rx.Component:
                         "768px": {"columns": "2", "spacing": "4"},
                         "1024px": {"columns": "4", "spacing": "4"},
                     },
+                ),
+                # Whale custom solution link
+                rx.box(
+                    rx.text(
+                        "Need a custom solution for $10M+ TVL? ",
+                        rx.link(
+                            "Talk to our team.",
+                            href="/contact",
+                            color=COLORS.ACCENT_PRIMARY,
+                            text_decoration="underline",
+                            _hover={"color": COLORS.BUTTON_PRIMARY_HOVER},
+                        ),
+                        size="2",
+                        color=COLORS.TEXT_SECONDARY,
+                        text_align="center",
+                    ),
+                    margin_top="2rem",
+                    width="100%",
+                ),
+                # Trust/Safety Footer
+                rx.hstack(
+                    rx.hstack(
+                        rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(16, 185, 129, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m9 12 2 2 4-4'></path><circle cx='12' cy='12' r='10'></circle></svg>"),
+                        rx.text(
+                            "No Credit Card Required for Free Tier",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.hstack(
+                        rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(16, 185, 129, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'></path><path d='M3 3v5h5'></path></svg>"),
+                        rx.text(
+                            "Cancel or Upgrade Anytime",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.hstack(
+                        rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(16, 185, 129, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'></path><path d='m9 12 2 2 4-4'></path></svg>"),
+                        rx.text(
+                            "Non-Custodial: We never touch your private keys",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    spacing="6",
+                    justify="center",
+                    wrap="wrap",
+                    margin_top="3rem",
+                    width="100%",
                 ),
                 # Disclaimer footer
                 rx.box(
