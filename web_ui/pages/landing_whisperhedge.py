@@ -344,133 +344,354 @@ def strategic_philosophy_section() -> rx.Component:
 
 
 def features_section() -> rx.Component:
-    """Features section - What the bot does"""
+    """Core Features section - Engineered for Performance, Built for Security"""
     return rx.box(
         rx.container(
             rx.vstack(
                 rx.heading(
-                    "What WhisperHedge Does",
+                    "Core Features",
                     size="8",
                     weight="bold",
                     text_align="center",
-                    margin_bottom="3rem",
+                    margin_bottom="1rem",
                     id="features",
                     color=COLORS.TEXT_PRIMARY,
                 ),
-                rx.vstack(
-                    # Feature 1
+                rx.text(
+                    "Engineered for Performance. Built for Security.",
+                    size="4",
+                    color=COLORS.TEXT_SECONDARY,
+                    text_align="center",
+                    margin_bottom="4rem",
+                ),
+                rx.grid(
+                    # Feature 1: Smart Exposure Management
                     rx.box(
                         rx.vstack(
+                            # BarChart3 Icon
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v18h18'></path><path d='M18 17V9'></path><path d='M13 17V5'></path><path d='M8 17v-3'></path></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
                             rx.heading(
-                                "🤖 Automated Position Monitoring",
+                                "Smart Exposure Management",
                                 size="5",
                                 weight="bold",
-                                margin_bottom="1rem",
                                 color=COLORS.TEXT_PRIMARY,
+                                margin_bottom="1rem",
                             ),
                             rx.text(
-                                "Our bot continuously tracks your LP positions across Uniswap V3, Aerodrome, and PancakeSwap. It calculates your real-time exposure and delta as prices move, ensuring you're always protected.",
-                                size="4",
+                                "We don't chase \"Perfect Zero\" delta. WhisperHedge monitors your pool's active tick-range and maintains a flexible, asymmetric hedge. You get robust protection against catastrophic price divergence without the constant rebalancing fees that eat your yield.",
+                                size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 line_height="1.7",
                             ),
                             align="start",
+                            spacing="2",
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
                     ),
-                    # Feature 2
+                    # Feature 2: Native Hyperliquid Integration
                     rx.box(
                         rx.vstack(
+                            # Zap Icon
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'></polygon></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
+                            rx.hstack(
+                                rx.heading(
+                                    "Native Hyperliquid Integration",
+                                    size="5",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.badge(
+                                    "Decentralized",
+                                    size="1",
+                                    color_scheme="blue",
+                                ),
+                                spacing="2",
+                                align="center",
+                                margin_bottom="1rem",
+                            ),
+                            rx.text(
+                                "Experience the power of the world's leading decentralized perp exchange. By anchoring our engine to Hyperliquid, we provide institutional-grade execution speed and deep liquidity, all while keeping your hedging strategy entirely on-chain and transparent.",
+                                size="3",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.7",
+                            ),
+                            align="start",
+                            spacing="2",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                    ),
+                    # Feature 3: Net-Profit Optimization
+                    rx.box(
+                        rx.vstack(
+                            # Coins Icon
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='8' cy='8' r='6'></circle><path d='M18.09 10.37A6 6 0 1 1 10.34 18'></path><path d='M7 6h1v4'></path><path d='m16.71 13.88.7.71-2.82 2.82'></path></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
                             rx.heading(
-                                "⚡ Fully Decentralized Hedging",
+                                "Net-Profit Optimization",
                                 size="5",
                                 weight="bold",
-                                margin_bottom="1rem",
                                 color=COLORS.TEXT_PRIMARY,
+                                margin_bottom="1rem",
                             ),
                             rx.text(
-                                "WhisperHedge automatically opens and adjusts offsetting positions on Hyperliquid, a decentralized perpetual exchange. Your LP positions on DEXs like Uniswap V3 and your hedges are completely decentralized—no KYC, no centralized custody. We use strategic under-hedging to protect against crashes while minimizing funding costs.",
-                                size="4",
+                                "Most bots hedge blindly. WhisperHedge is funding-aware; it constantly monitors perp funding rates against your LP fee generation. If a hedge becomes too expensive to maintain, the algorithm optimizes your position to ensure you stay in the green.",
+                                size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 line_height="1.7",
                             ),
                             align="start",
+                            spacing="2",
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
                     ),
-                    # Feature 3
+                    # Feature 4: Zero-Touch Architecture
                     rx.box(
                         rx.vstack(
+                            # ShieldCheck Icon (emerald color)
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(16, 185, 129, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'></path><path d='m9 12 2 2 4-4'></path></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
                             rx.heading(
-                                "📊 Funding-Aware Optimization",
+                                "Zero-Touch Architecture",
                                 size="5",
                                 weight="bold",
+                                color="#10B981",
                                 margin_bottom="1rem",
-                                color=COLORS.TEXT_PRIMARY,
                             ),
                             rx.text(
-                                "The bot monitors perpetual funding rates in real-time. It won't open a hedge that costs more than your LP is earning, ensuring your net profit stays positive. Smart rebalancing only when necessary.",
-                                size="4",
+                                "We never connect to your wallet or touch your principal. By simply referencing your public LP position, WhisperHedge manages your defense via restricted, trade-only API keys. Your funds stay exactly where they belong—under your total control.",
+                                size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 line_height="1.7",
                             ),
                             align="start",
+                            spacing="2",
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
                     ),
-                    # Feature 4
-                    rx.box(
-                        rx.vstack(
-                            rx.heading(
-                                "🔐 Non-Custodial & Secure",
-                                size="5",
-                                weight="bold",
-                                margin_bottom="1rem",
-                                color=COLORS.ACCENT_SUCCESS,
-                            ),
-                            rx.text(
-                                "We never touch your funds. WhisperHedge executes trades via restricted API keys on your preferred perpetual exchange with withdrawal permissions disabled. Your principal stays in your control at all times.",
-                                size="4",
-                                color=COLORS.TEXT_SECONDARY,
-                                line_height="1.7",
-                            ),
-                            align="start",
-                        ),
-                        padding="2rem",
-                        border_radius="8px",
-                        border=f"2px solid {COLORS.ACCENT_SUCCESS}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
-                    ),
+                    columns="2",
                     spacing="4",
                     width="100%",
-                    max_width="50rem",
+                    responsive={
+                        "0px": {"columns": "1"},
+                        "768px": {"columns": "2"},
+                    },
                 ),
-                rx.link(
-                    rx.button(
-                        "Start Protecting My Yield",
-                        size="4",
-                        background=COLORS.BUTTON_PRIMARY_BG,
-                        color=COLORS.BUTTON_PRIMARY_TEXT,
-                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                # DEX Coverage Section
+                rx.vstack(
+                    rx.heading(
+                        "Broad DEX Coverage",
+                        size="7",
+                        weight="bold",
+                        text_align="center",
+                        margin_bottom="0.5rem",
+                        color=COLORS.TEXT_PRIMARY,
                     ),
-                    href="/signup",
+                    rx.text(
+                        "Protecting liquidity across the most active venues in DeFi.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        text_align="center",
+                        margin_bottom="2rem",
+                    ),
+                    rx.hstack(
+                        # Uniswap V3 - Live
+                        rx.box(
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.heading(
+                                        "Uniswap V3",
+                                        size="4",
+                                        weight="bold",
+                                        color=COLORS.TEXT_PRIMARY,
+                                    ),
+                                    rx.badge(
+                                        rx.hstack(
+                                            rx.html("<span style='display:inline-block;width:6px;height:6px;background:#10B981;border-radius:50%;animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;'></span><style>@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }</style>"),
+                                            rx.text("LIVE", size="1"),
+                                            spacing="1",
+                                            align="center",
+                                        ),
+                                        color_scheme="green",
+                                        size="1",
+                                    ),
+                                    spacing="2",
+                                    align="center",
+                                    margin_bottom="0.5rem",
+                                ),
+                                rx.text(
+                                    "Ethereum",
+                                    size="1",
+                                    color=COLORS.TEXT_MUTED,
+                                ),
+                                align="center",
+                                spacing="1",
+                            ),
+                            padding="1.5rem",
+                            border_radius="8px",
+                            border=f"1px solid #10B981",
+                            background="rgba(15, 23, 42, 0.6)",
+                        ),
+                        # Uniswap V4 - Coming Soon
+                        rx.box(
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.heading(
+                                        "Uniswap V4",
+                                        size="4",
+                                        weight="bold",
+                                        color="#64748B",
+                                    ),
+                                    rx.badge(
+                                        "SOON",
+                                        color_scheme="gray",
+                                        size="1",
+                                    ),
+                                    spacing="2",
+                                    align="center",
+                                    margin_bottom="0.5rem",
+                                ),
+                                rx.text(
+                                    "Ethereum",
+                                    size="1",
+                                    color="#475569",
+                                ),
+                                align="center",
+                                spacing="1",
+                            ),
+                            padding="1.5rem",
+                            border_radius="8px",
+                            border=f"1px solid #334155",
+                            background="rgba(15, 23, 42, 0.6)",
+                            opacity="0.7",
+                        ),
+                        # Aerodrome - Coming Soon
+                        rx.box(
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.heading(
+                                        "Aerodrome",
+                                        size="4",
+                                        weight="bold",
+                                        color="#64748B",
+                                    ),
+                                    rx.badge(
+                                        "SOON",
+                                        color_scheme="gray",
+                                        size="1",
+                                    ),
+                                    spacing="2",
+                                    align="center",
+                                    margin_bottom="0.5rem",
+                                ),
+                                rx.text(
+                                    "Base",
+                                    size="1",
+                                    color="#475569",
+                                ),
+                                align="center",
+                                spacing="1",
+                            ),
+                            padding="1.5rem",
+                            border_radius="8px",
+                            border=f"1px solid #334155",
+                            background="rgba(15, 23, 42, 0.6)",
+                            opacity="0.7",
+                        ),
+                        # Raydium - Coming Soon
+                        rx.box(
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.heading(
+                                        "Raydium",
+                                        size="4",
+                                        weight="bold",
+                                        color="#64748B",
+                                    ),
+                                    rx.badge(
+                                        "SOON",
+                                        color_scheme="gray",
+                                        size="1",
+                                    ),
+                                    spacing="2",
+                                    align="center",
+                                    margin_bottom="0.5rem",
+                                ),
+                                rx.text(
+                                    "Solana",
+                                    size="1",
+                                    color="#475569",
+                                ),
+                                align="center",
+                                spacing="1",
+                            ),
+                            padding="1.5rem",
+                            border_radius="8px",
+                            border=f"1px solid #334155",
+                            background="rgba(15, 23, 42, 0.6)",
+                            opacity="0.7",
+                        ),
+                        # Orca - Coming Soon
+                        rx.box(
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.heading(
+                                        "Orca",
+                                        size="4",
+                                        weight="bold",
+                                        color="#64748B",
+                                    ),
+                                    rx.badge(
+                                        "SOON",
+                                        color_scheme="gray",
+                                        size="1",
+                                    ),
+                                    spacing="2",
+                                    align="center",
+                                    margin_bottom="0.5rem",
+                                ),
+                                rx.text(
+                                    "Solana",
+                                    size="1",
+                                    color="#475569",
+                                ),
+                                align="center",
+                                spacing="1",
+                            ),
+                            padding="1.5rem",
+                            border_radius="8px",
+                            border=f"1px solid #334155",
+                            background="rgba(15, 23, 42, 0.6)",
+                            opacity="0.7",
+                        ),
+                        spacing="3",
+                        wrap="wrap",
+                        justify="center",
+                    ),
+                    align="center",
+                    spacing="3",
+                    margin_top="4rem",
                 ),
                 spacing="5",
                 align="center",
@@ -483,7 +704,7 @@ def features_section() -> rx.Component:
 
 
 def how_it_works_section() -> rx.Component:
-    """How It Works - Simplified 2-step workflow"""
+    """How It Works - Three steps to institutional-grade LP protection"""
     return rx.box(
         rx.container(
             rx.vstack(
@@ -492,34 +713,36 @@ def how_it_works_section() -> rx.Component:
                     size="8",
                     weight="bold",
                     text_align="center",
-                    margin_bottom="3rem",
+                    margin_bottom="1rem",
                     id="how-it-works",
                     color=COLORS.TEXT_PRIMARY,
                 ),
+                rx.text(
+                    "Three steps to institutional-grade LP protection.",
+                    size="4",
+                    color=COLORS.TEXT_SECONDARY,
+                    text_align="center",
+                    margin_bottom="4rem",
+                ),
                 rx.hstack(
-                    # Step 1
+                    # Step 1: Reference Your Position
                     rx.box(
                         rx.vstack(
+                            # Fingerprint Icon
                             rx.box(
-                                rx.text("1", size="8", weight="bold", color=COLORS.ACCENT_PRIMARY),
-                                width="4rem",
-                                height="4rem",
-                                display="flex",
-                                align_items="center",
-                                justify_content="center",
-                                border_radius="50%",
-                                background=COLORS.BACKGROUND_ELEVATED,
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4'></path><path d='M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2'></path><path d='M17.29 21.02c.12-.6.43-2.3.5-3.02'></path><path d='M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4'></path><path d='M8.65 22c.21-.66.45-1.32.57-2'></path><path d='M14 13.12c0 2.38 0 6.38-1 8.88'></path><path d='M2 16h.01'></path><path d='M21.8 16c.2-2 .131-5.354 0-6'></path><path d='M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2'></path></svg>"),
                                 margin_bottom="1.5rem",
                             ),
                             rx.heading(
-                                "Strategic Calibration",
+                                "Reference Your Position",
                                 size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
                                 color=COLORS.TEXT_PRIMARY,
+                                text_align="center",
                             ),
                             rx.text(
-                                "Our system calculates your real-time exposure and the 'cost-to-protect.'",
+                                "Input your specific Liquidity Pool Position ID. WhisperHedge doesn't need to scan your entire wallet or request a connection. We simply pull the real-time on-chain data for that specific position to calculate your exposure.",
                                 size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 text_align="center",
@@ -528,36 +751,40 @@ def how_it_works_section() -> rx.Component:
                             align="center",
                             spacing="3",
                         ),
-                        padding="2.5rem",
+                        padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
                         flex="1",
                     ),
-                    # Step 2
+                    # Arrow connector
+                    rx.box(
+                        rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='5' y1='12' x2='19' y2='12'></line><polyline points='12 5 19 12 12 19'></polyline></svg>"),
+                        display="flex",
+                        align_items="center",
+                        responsive={
+                            "0px": {"display": "none"},
+                            "768px": {"display": "flex"},
+                        },
+                    ),
+                    # Step 2: Link Your Defense
                     rx.box(
                         rx.vstack(
+                            # Key Icon
                             rx.box(
-                                rx.text("2", size="8", weight="bold", color=COLORS.ACCENT_PRIMARY),
-                                width="4rem",
-                                height="4rem",
-                                display="flex",
-                                align_items="center",
-                                justify_content="center",
-                                border_radius="50%",
-                                background=COLORS.BACKGROUND_ELEVATED,
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='7.5' cy='15.5' r='5.5'></circle><path d='m21 2-9.6 9.6'></path><path d='m15.5 7.5 3 3L22 7l-3-3'></path></svg>"),
                                 margin_bottom="1.5rem",
                             ),
                             rx.heading(
-                                "Automated Defense",
+                                "Link Your Defense",
                                 size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
                                 color=COLORS.TEXT_PRIMARY,
+                                text_align="center",
                             ),
                             rx.text(
-                                "The bot manages a flexible hedge on a perpetual exchange that adapts as your pool moves, focusing on capital preservation over rigid symmetry.",
+                                "Generate a restricted, trade-only API key on Hyperliquid and ensure your account has sufficient collateral. Your funds stay in your Hyperliquid account—WhisperHedge simply uses the API to execute the necessary defensive offsets.",
                                 size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 text_align="center",
@@ -566,17 +793,64 @@ def how_it_works_section() -> rx.Component:
                             align="center",
                             spacing="3",
                         ),
-                        padding="2.5rem",
+                        padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
                         flex="1",
                     ),
-                    spacing="4",
+                    # Arrow connector
+                    rx.box(
+                        rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='5' y1='12' x2='19' y2='12'></line><polyline points='12 5 19 12 12 19'></polyline></svg>"),
+                        display="flex",
+                        align_items="center",
+                        responsive={
+                            "0px": {"display": "none"},
+                            "768px": {"display": "flex"},
+                        },
+                    ),
+                    # Step 3: Activate Automation
+                    rx.box(
+                        rx.vstack(
+                            # Activity/Play Icon
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 12h-4l-3 9L9 3l-3 9H2'></path></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
+                            rx.heading(
+                                "Activate Automation",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                                text_align="center",
+                            ),
+                            rx.text(
+                                "Choose between Manual tactical hedging or our Dynamic automated engine. Once live, the system monitors price ticks and funding rates 24/7, adjusting your hedge to defend your principal while you collect fees.",
+                                size="3",
+                                color=COLORS.TEXT_SECONDARY,
+                                text_align="center",
+                                line_height="1.6",
+                            ),
+                            align="center",
+                            spacing="3",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                        flex="1",
+                    ),
+                    spacing="3",
                     width="100%",
+                    align="center",
+                    responsive={
+                        "0px": {"flex_direction": "column"},
+                        "768px": {"flex_direction": "row"},
+                    },
                 ),
                 spacing="5",
+                align="center",
                 padding_y="6rem",
             ),
             size="4",
@@ -644,89 +918,318 @@ def comparison_table_section() -> rx.Component:
 
 
 def pricing_section() -> rx.Component:
-    """Pricing tiers comparison table"""
+    """Simple, Transparent Pricing - 4-tier grid"""
     return rx.box(
         rx.container(
             rx.vstack(
                 rx.heading(
-                    "Pricing",
+                    "Simple, Transparent Pricing",
                     size="8",
                     weight="bold",
                     text_align="center",
-                    margin_bottom="3rem",
+                    margin_bottom="1rem",
                     id="pricing",
                     color=COLORS.TEXT_PRIMARY,
                 ),
+                rx.text(
+                    "Professional protection that scales with your liquidity.",
+                    size="4",
+                    color=COLORS.TEXT_SECONDARY,
+                    text_align="center",
+                    margin_bottom="4rem",
+                ),
+                rx.grid(
+                    # Tier 1: FREE
+                    rx.box(
+                        rx.vstack(
+                            rx.text(
+                                "FREE",
+                                size="2",
+                                weight="bold",
+                                color=COLORS.TEXT_SECONDARY,
+                                text_transform="uppercase",
+                                letter_spacing="0.1em",
+                                margin_bottom="1rem",
+                            ),
+                            rx.hstack(
+                                rx.heading(
+                                    "$0",
+                                    size="8",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "/mo",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="end",
+                                spacing="1",
+                                margin_bottom="1rem",
+                            ),
+                            rx.divider(margin_y="1rem"),
+                            rx.vstack(
+                                rx.text(
+                                    "1 Position",
+                                    size="3",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "$2,500 TVL Hard Cap",
+                                    size="2",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    margin_bottom="1rem",
+                                ),
+                                rx.vstack(
+                                    rx.text("✓ Standard Execution", size="2", color=COLORS.TEXT_SECONDARY),
+                                    rx.text("✓ Hyperliquid Integration", size="2", color=COLORS.TEXT_SECONDARY),
+                                    rx.text("✓ All Strategies", size="2", color=COLORS.TEXT_SECONDARY),
+                                    align="start",
+                                    spacing="2",
+                                ),
+                                align="start",
+                                spacing="2",
+                            ),
+                            align="start",
+                            spacing="3",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                    ),
+                    # Tier 2: HOBBY
+                    rx.box(
+                        rx.vstack(
+                            rx.text(
+                                "HOBBY",
+                                size="2",
+                                weight="bold",
+                                color=COLORS.TEXT_SECONDARY,
+                                text_transform="uppercase",
+                                letter_spacing="0.1em",
+                                margin_bottom="1rem",
+                            ),
+                            rx.hstack(
+                                rx.heading(
+                                    "$19.99",
+                                    size="8",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "/mo",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="end",
+                                spacing="1",
+                                margin_bottom="1rem",
+                            ),
+                            rx.divider(margin_y="1rem"),
+                            rx.vstack(
+                                rx.text(
+                                    "3 Positions",
+                                    size="3",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "$10,000 Included TVL",
+                                    size="2",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                rx.text(
+                                    "0.1% (10 bps) on excess TVL",
+                                    size="2",
+                                    color=COLORS.TEXT_MUTED,
+                                    font_style="italic",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.vstack(
+                                    rx.text("✓ Standard Execution", size="2", color=COLORS.TEXT_SECONDARY),
+                                    rx.text("✓ Email Alerts", size="2", color=COLORS.TEXT_SECONDARY),
+                                    align="start",
+                                    spacing="2",
+                                ),
+                                align="start",
+                                spacing="2",
+                            ),
+                            align="start",
+                            spacing="3",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                    ),
+                    # Tier 3: PRO (Most Popular)
+                    rx.box(
+                        rx.vstack(
+                            rx.hstack(
+                                rx.text(
+                                    "PRO",
+                                    size="2",
+                                    weight="bold",
+                                    color=COLORS.ACCENT_PRIMARY,
+                                    text_transform="uppercase",
+                                    letter_spacing="0.1em",
+                                ),
+                                rx.badge(
+                                    "Most Popular",
+                                    color_scheme="blue",
+                                    size="1",
+                                ),
+                                spacing="2",
+                                margin_bottom="1rem",
+                            ),
+                            rx.hstack(
+                                rx.heading(
+                                    "$49.99",
+                                    size="8",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "/mo",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="end",
+                                spacing="1",
+                                margin_bottom="1rem",
+                            ),
+                            rx.divider(margin_y="1rem"),
+                            rx.vstack(
+                                rx.text(
+                                    "10 Positions",
+                                    size="3",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "$50,000 Included TVL",
+                                    size="2",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                rx.text(
+                                    "0.05% (5 bps) on excess TVL",
+                                    size="2",
+                                    color=COLORS.TEXT_MUTED,
+                                    font_style="italic",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.vstack(
+                                    rx.text("✓ Priority Execution", size="2", color=COLORS.ACCENT_PRIMARY, weight="bold"),
+                                    rx.text("✓ Multi-DEX Roadmap Access", size="2", color=COLORS.TEXT_SECONDARY),
+                                    align="start",
+                                    spacing="2",
+                                ),
+                                align="start",
+                                spacing="2",
+                            ),
+                            align="start",
+                            spacing="3",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"2px solid {COLORS.ACCENT_PRIMARY}",
+                        background="rgba(15, 23, 42, 0.4)",
+                        box_shadow="0 0 20px rgba(59, 130, 246, 0.3)",
+                    ),
+                    # Tier 4: ELITE
+                    rx.box(
+                        rx.vstack(
+                            rx.text(
+                                "ELITE",
+                                size="2",
+                                weight="bold",
+                                color="#D4AF37",
+                                text_transform="uppercase",
+                                letter_spacing="0.1em",
+                                margin_bottom="1rem",
+                            ),
+                            rx.hstack(
+                                rx.heading(
+                                    "$149.99",
+                                    size="8",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "/mo",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="end",
+                                spacing="1",
+                                margin_bottom="1rem",
+                            ),
+                            rx.divider(margin_y="1rem"),
+                            rx.vstack(
+                                rx.text(
+                                    "Unlimited Positions",
+                                    size="3",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "$250,000 Included TVL",
+                                    size="2",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                rx.text(
+                                    "0.05% (5 bps) on excess TVL",
+                                    size="2",
+                                    color=COLORS.TEXT_MUTED,
+                                    font_style="italic",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.vstack(
+                                    rx.text("✓ Elite Priority Calculation Engine", size="2", color="#D4AF37", weight="bold"),
+                                    rx.text("   (Top-of-queue rebalancing)", size="1", color="#B8960F", font_style="italic"),
+                                    rx.text("✓ Direct Dev Support", size="2", color=COLORS.TEXT_SECONDARY),
+                                    align="start",
+                                    spacing="2",
+                                ),
+                                align="start",
+                                spacing="2",
+                            ),
+                            align="start",
+                            spacing="3",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #D4AF37",
+                        background="rgba(15, 23, 42, 0.4)",
+                    ),
+                    columns="4",
+                    spacing="4",
+                    width="100%",
+                    responsive={
+                        "0px": {"columns": "1"},
+                        "768px": {"columns": "2"},
+                        "1024px": {"columns": "4"},
+                    },
+                ),
+                # Disclaimer footer
                 rx.box(
-                    rx.table.root(
-                        rx.table.header(
-                            rx.table.row(
-                                rx.table.column_header_cell("Feature", color=COLORS.TEXT_PRIMARY),
-                                rx.table.column_header_cell("Starter", color=COLORS.TEXT_PRIMARY),
-                                rx.table.column_header_cell("Pro", color=COLORS.TEXT_PRIMARY),
-                                rx.table.column_header_cell("Elite", color=COLORS.TEXT_PRIMARY),
-                            ),
-                        ),
-                        rx.table.body(
-                            rx.table.row(
-                                rx.table.cell("Monthly Fee", color=COLORS.TEXT_SECONDARY, weight="bold"),
-                                rx.table.cell("$0 (Free)", color=COLORS.ACCENT_SUCCESS),
-                                rx.table.cell("$49", color=COLORS.TEXT_PRIMARY),
-                                rx.table.cell("$199", color=COLORS.TEXT_PRIMARY),
-                            ),
-                            rx.table.row(
-                                rx.table.cell("Managed TVL", color=COLORS.TEXT_SECONDARY, weight="bold"),
-                                rx.table.cell("Up to $2,500", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("Up to $50,000", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("Unlimited", color=COLORS.ACCENT_SUCCESS),
-                            ),
-                            rx.table.row(
-                                rx.table.cell("Hedge Logic", color=COLORS.TEXT_SECONDARY, weight="bold"),
-                                rx.table.cell("Standard Delta", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("Strategic Under-Hedge", color=COLORS.ACCENT_PRIMARY),
-                                rx.table.cell("Strategic Under-Hedge", color=COLORS.ACCENT_PRIMARY),
-                            ),
-                            rx.table.row(
-                                rx.table.cell("Update Frequency", color=COLORS.TEXT_SECONDARY, weight="bold"),
-                                rx.table.cell("5 Minutes", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("30 Seconds", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("Real-time (Sub-sec)", color=COLORS.ACCENT_SUCCESS),
-                            ),
-                            rx.table.row(
-                                rx.table.cell("Overage Charge", color=COLORS.TEXT_SECONDARY, weight="bold"),
-                                rx.table.cell("N/A (Hard Cap)", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("0.05% on vol > $50k", color=COLORS.TEXT_SECONDARY),
-                                rx.table.cell("Included", color=COLORS.ACCENT_SUCCESS),
-                            ),
-                        ),
-                        variant="surface",
-                        size="3",
+                    rx.text(
+                        "Overage charges are calculated based on your average monthly managed TVL and billed at the end of each cycle. Priority Calculation ensures your positions are analyzed and rebalanced first during high-volatility events.",
+                        size="2",
+                        color=COLORS.TEXT_MUTED,
+                        text_align="center",
+                        line_height="1.6",
                     ),
                     padding="2rem",
                     border_radius="8px",
-                    border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                    background="rgba(15, 23, 42, 0.5)",
-                    backdrop_filter="blur(12px)",
-                    width="100%",
-                ),
-                rx.text(
-                    "Pro tier overage: 0.05% fee applies only to managed volume exceeding $50,000.",
-                    size="2",
-                    color=COLORS.TEXT_MUTED,
-                    text_align="center",
-                    margin_top="1rem",
-                ),
-                rx.link(
-                    rx.button(
-                        "Start Protecting My Yield",
-                        size="4",
-                        background=COLORS.BUTTON_PRIMARY_BG,
-                        color=COLORS.BUTTON_PRIMARY_TEXT,
-                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
-                    ),
-                    href="/signup",
+                    background="rgba(15, 23, 42, 0.3)",
+                    border=f"1px solid #1E293B",
+                    margin_top="3rem",
                 ),
                 spacing="5",
+                align="center",
                 padding_y="6rem",
             ),
             size="4",
