@@ -1118,7 +1118,7 @@ def desktop_pricing_content() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "3 LPPositions",
+                                    "3 LP Positions",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
