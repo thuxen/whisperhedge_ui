@@ -12,13 +12,14 @@ def navbar() -> rx.Component:
     """Navigation bar for WhisperHedge landing page"""
     return rx.box(
         rx.hstack(
-            # Left: Logo/Name (clickable link to top)
-            rx.link(
+            # Left: Logo/Name (clickable to top, no link styling)
+            rx.box(
                 brand_logo(size="navbar"),
-                href="#",
+                on_click=rx.redirect("#"),
+                cursor="pointer",
             ),
             
-            # Center: Nav links
+            # Center: Nav links (hidden on mobile)
             rx.hstack(
                 rx.link(
                     "Features",
@@ -43,9 +44,10 @@ def navbar() -> rx.Component:
                 ),
                 spacing="6",
                 align="center",
+                display=["none", "none", "flex"],
             ),
             
-            # Right: Login and Free Trial buttons
+            # Right: Login and Free Trial buttons (hidden on mobile)
             rx.hstack(
                 rx.link(
                     rx.button(
@@ -68,6 +70,17 @@ def navbar() -> rx.Component:
                 ),
                 spacing="4",
                 align="center",
+                display=["none", "none", "flex"],
+            ),
+            
+            # Mobile: Hamburger menu button (shown only on mobile)
+            rx.box(
+                rx.button(
+                    rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='3' y1='12' x2='21' y2='12'></line><line x1='3' y1='6' x2='21' y2='6'></line><line x1='3' y1='18' x2='21' y2='18'></line></svg>"),
+                    variant="ghost",
+                    size="3",
+                ),
+                display=["block", "block", "none"],
             ),
             
             justify="between",
@@ -1437,75 +1450,153 @@ def footer() -> rx.Component:
         rx.container(
             rx.vstack(
                 # Top section with links
-                rx.hstack(
-                    # Company column
-                    rx.vstack(
-                        rx.heading(
-                            "WhisperHedge",
-                            size="5",
-                            weight="bold",
-                            margin_bottom="1rem",
-                            color=COLORS.TEXT_PRIMARY,
+                rx.box(
+                    # Desktop: Horizontal layout
+                    rx.hstack(
+                        # Company column
+                        rx.vstack(
+                            rx.heading(
+                                "WhisperHedge",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.text(
+                                "Intelligent protection for liquidity pool positions.",
+                                size="2",
+                                color=COLORS.TEXT_SECONDARY,
+                                max_width="15rem",
+                            ),
+                            align="start",
+                            spacing="2",
                         ),
-                        rx.text(
-                            "Intelligent protection for liquidity pool positions.",
-                            size="2",
-                            color=COLORS.TEXT_SECONDARY,
-                            max_width="15rem",
+                        # Product column
+                        rx.vstack(
+                            rx.heading(
+                                "Product",
+                                size="4",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.link("Features", href="#features", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("How it works", href="#how-it-works", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Pricing", href="#pricing", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Documentation", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            align="start",
+                            spacing="2",
+                        ),
+                        # Company column
+                        rx.vstack(
+                            rx.heading(
+                                "Company",
+                                size="4",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.link("About Us", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Blog", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Careers", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Contact", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            align="start",
+                            spacing="2",
+                        ),
+                        # Legal column
+                        rx.vstack(
+                            rx.heading(
+                                "Legal",
+                                size="4",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.link("Privacy Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Terms of Service", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Cookie Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            align="start",
+                            spacing="2",
+                        ),
+                        justify="between",
+                        width="100%",
+                        spacing="8",
+                        display=["none", "none", "flex"],
+                    ),
+                    # Mobile: Vertical layout
+                    rx.vstack(
+                        # Company column
+                        rx.vstack(
+                            rx.heading(
+                                "WhisperHedge",
+                                size="5",
+                                weight="bold",
+                                margin_bottom="0.5rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.text(
+                                "Intelligent protection for liquidity pool positions.",
+                                size="2",
+                                color=COLORS.TEXT_SECONDARY,
+                            ),
+                            align="start",
+                            spacing="2",
+                            margin_bottom="2rem",
+                        ),
+                        # Product column
+                        rx.vstack(
+                            rx.heading(
+                                "Product",
+                                size="4",
+                                weight="bold",
+                                margin_bottom="0.5rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.link("Features", href="#features", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("How it works", href="#how-it-works", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Pricing", href="#pricing", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Documentation", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            align="start",
+                            spacing="2",
+                            margin_bottom="2rem",
+                        ),
+                        # Company column
+                        rx.vstack(
+                            rx.heading(
+                                "Company",
+                                size="4",
+                                weight="bold",
+                                margin_bottom="0.5rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.link("About Us", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Blog", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Careers", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Contact", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            align="start",
+                            spacing="2",
+                            margin_bottom="2rem",
+                        ),
+                        # Legal column
+                        rx.vstack(
+                            rx.heading(
+                                "Legal",
+                                size="4",
+                                weight="bold",
+                                margin_bottom="0.5rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.link("Privacy Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Terms of Service", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            rx.link("Cookie Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
+                            align="start",
+                            spacing="2",
                         ),
                         align="start",
-                        spacing="2",
+                        width="100%",
+                        spacing="3",
+                        display=["flex", "flex", "none"],
                     ),
-                    # Product column
-                    rx.vstack(
-                        rx.heading(
-                            "Product",
-                            size="4",
-                            weight="bold",
-                            margin_bottom="1rem",
-                            color=COLORS.TEXT_PRIMARY,
-                        ),
-                        rx.link("Features", href="#features", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("How it works", href="#how-it-works", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Pricing", href="#pricing", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Documentation", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        align="start",
-                        spacing="2",
-                    ),
-                    # Company column
-                    rx.vstack(
-                        rx.heading(
-                            "Company",
-                            size="4",
-                            weight="bold",
-                            margin_bottom="1rem",
-                            color=COLORS.TEXT_PRIMARY,
-                        ),
-                        rx.link("About Us", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Blog", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Careers", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Contact", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        align="start",
-                        spacing="2",
-                    ),
-                    # Legal column
-                    rx.vstack(
-                        rx.heading(
-                            "Legal",
-                            size="4",
-                            weight="bold",
-                            margin_bottom="1rem",
-                            color=COLORS.TEXT_PRIMARY,
-                        ),
-                        rx.link("Privacy Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Terms of Service", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        rx.link("Cookie Policy", href="#", size="2", color=COLORS.TEXT_SECONDARY, _hover={"color": COLORS.TEXT_PRIMARY}),
-                        align="start",
-                        spacing="2",
-                    ),
-                    justify="between",
-                    width="100%",
-                    spacing="8",
                 ),
                 # Divider
                 rx.box(
