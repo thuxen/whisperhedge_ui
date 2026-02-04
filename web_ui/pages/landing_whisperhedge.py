@@ -163,168 +163,179 @@ def risk_automation_section() -> rx.Component:
     )
 
 
-def problem_section() -> rx.Component:
-    """The Hidden Cost of Liquidity: Impermanent Loss"""
+def strategic_philosophy_section() -> rx.Component:
+    """The WhisperHedge Strategic Philosophy"""
     return rx.box(
         rx.container(
             rx.vstack(
                 rx.heading(
-                    "The Hidden Cost of Liquidity: Impermanent Loss.",
+                    "The WhisperHedge Philosophy",
                     size="8",
                     weight="bold",
                     text_align="center",
-                    margin_bottom="3rem",
+                    margin_bottom="1rem",
                     color=COLORS.TEXT_PRIMARY,
                 ),
-                rx.vstack(
-                    rx.box(
-                        rx.vstack(
-                            rx.heading(
-                                "The Problem",
-                                size="5",
-                                weight="bold",
-                                margin_bottom="1rem",
-                                color=COLORS.ACCENT_WARNING,
-                            ),
-                            rx.text(
-                                "Being a Liquidity Provider is a race against price divergence. When the market moves, your pool's asset ratio shifts—forcing you to sell the winners and buy the losers. This 'Impermanent Loss' often exceeds the fees you collect, leaving you with less value than if you had simply held your tokens.",
-                                size="4",
-                                color=COLORS.TEXT_SECONDARY,
-                                line_height="1.7",
-                            ),
-                            align="start",
-                        ),
-                        padding="2rem",
-                        border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
-                    ),
-                    rx.box(
-                        rx.vstack(
-                            rx.heading(
-                                "The WhisperHedge Fix",
-                                size="5",
-                                weight="bold",
-                                margin_bottom="1rem",
-                                color=COLORS.ACCENT_SUCCESS,
-                            ),
-                            rx.text(
-                                "We don't just 'watch' your position; we defend its value. By opening automated, strategic offsets, we neutralize the downside of price divergence, ensuring your fee earnings stay in your pocket rather than covering your losses.",
-                                size="4",
-                                color=COLORS.TEXT_SECONDARY,
-                                line_height="1.7",
-                            ),
-                            align="start",
-                        ),
-                        padding="2rem",
-                        border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
-                    ),
-                    spacing="4",
-                    width="100%",
-                    max_width="50rem",
-                ),
-                rx.link(
-                    rx.button(
-                        "Secure My LP Position",
-                        size="4",
-                        background=COLORS.BUTTON_PRIMARY_BG,
-                        color=COLORS.BUTTON_PRIMARY_TEXT,
-                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
-                    ),
-                    href="/signup",
-                ),
-                spacing="5",
-                align="center",
-                padding_top="4rem",
-                padding_bottom="2rem",
-            ),
-            size="4",
-        ),
-        background="transparent",
-    )
-
-
-def risk_protection_section() -> rx.Component:
-    """Risk Protection - Smaller Drawdowns with Upside Exposure"""
-    return rx.box(
-        rx.container(
-            rx.vstack(
-                rx.box(
-                    width="100%",
-                    height="1px",
-                    background=COLORS.BORDER_SUBTLE,
-                    margin_y="2rem",
-                ),
-                rx.heading(
-                    "Smaller Drawdowns. Steady Fees. Upside Intact.",
-                    size="8",
-                    weight="bold",
+                rx.text(
+                    "Why we abandoned standard delta-neutral strategies for something smarter.",
+                    size="4",
+                    color=COLORS.TEXT_SECONDARY,
                     text_align="center",
-                    margin_bottom="3rem",
-                    color=COLORS.TEXT_PRIMARY,
+                    margin_bottom="4rem",
                 ),
-                rx.vstack(
+                rx.grid(
+                    # Card 1: Stop the "Rebalance Bleed"
                     rx.box(
                         rx.vstack(
-                            rx.heading(
-                                "The Safety Buffer",
-                                size="5",
+                            # Icon placeholder - Shield
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'></path></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
+                            rx.text(
+                                "STRATEGY 01",
+                                size="1",
                                 weight="bold",
-                                margin_bottom="1rem",
                                 color=COLORS.ACCENT_PRIMARY,
+                                letter_spacing="0.1em",
+                                text_transform="uppercase",
+                                margin_bottom="0.5rem",
                             ),
-                            rx.text(
-                                "Crypto markets are volatile. WhisperHedge creates a safety buffer by reducing your exposure to wild price swings while you continue collecting LP fees. You're protected from the worst drawdowns without sacrificing your position entirely.",
-                                size="4",
-                                color=COLORS.TEXT_SECONDARY,
-                                line_height="1.7",
-                            ),
-                            align="start",
-                        ),
-                        padding="2rem",
-                        border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
-                    ),
-                    rx.box(
-                        rx.vstack(
                             rx.heading(
-                                "Keep Your Upside",
+                                "Stop the \"Rebalance Bleed\"",
                                 size="5",
                                 weight="bold",
+                                color=COLORS.TEXT_PRIMARY,
                                 margin_bottom="1rem",
-                                color=COLORS.ACCENT_SUCCESS,
                             ),
                             rx.text(
-                                "Unlike full delta-neutral strategies that cap your gains, our strategic under-hedging lets you participate in market upside. You maintain exposure to positive price action while having a defensive layer against crashes—earning fees with confidence.",
-                                size="4",
+                                "The Delta-Neutral Trap",
+                                size="3",
+                                weight="bold",
                                 color=COLORS.TEXT_SECONDARY,
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.text(
+                                "Chasing a static 0-delta in a dynamic pool is a losing game. Most bots force you to rebalance on every tick, turning \"Impermanent\" loss into \"Permanent\" loss through constant slippage and fees. We allow for strategic variance, protecting your upside while defending the core.",
+                                size="2",
+                                color="#94A3B8",
                                 line_height="1.7",
                             ),
                             align="start",
+                            spacing="2",
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                        _hover={"border": "1px solid rgba(59, 130, 246, 0.5)"},
+                        transition="border 0.3s ease",
                     ),
+                    # Card 2: Defend Your Principal
+                    rx.box(
+                        rx.vstack(
+                            # Icon placeholder - Scale
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='3' x2='12' y2='21'></line><path d='M8 9l4-4 4 4'></path><path d='M16 15l-4 4-4-4'></path></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
+                            rx.text(
+                                "STRATEGY 02",
+                                size="1",
+                                weight="bold",
+                                color=COLORS.ACCENT_PRIMARY,
+                                letter_spacing="0.1em",
+                                text_transform="uppercase",
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.heading(
+                                "Defend Your Principal",
+                                size="5",
+                                weight="bold",
+                                color=COLORS.TEXT_PRIMARY,
+                                margin_bottom="1rem",
+                            ),
+                            rx.text(
+                                "Real-Time IL Mitigation",
+                                size="3",
+                                weight="bold",
+                                color=COLORS.TEXT_SECONDARY,
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.text(
+                                "Impermanent Loss is the \"invisible tax\" on LPs. WhisperHedge identifies price divergence early and opens targeted offsets on perpetual exchanges. We don't just watch your position go out of range; we defend the value of the tokens you started with.",
+                                size="2",
+                                color="#94A3B8",
+                                line_height="1.7",
+                            ),
+                            align="start",
+                            spacing="2",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                        _hover={"border": "1px solid rgba(59, 130, 246, 0.5)"},
+                        transition="border 0.3s ease",
+                    ),
+                    # Card 3: Master the Volatility
+                    rx.box(
+                        rx.vstack(
+                            # Icon placeholder - Trend Down
+                            rx.box(
+                                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='rgba(59, 130, 246, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 6 13.5 15.5 8.5 10.5 1 18'></polyline><polyline points='17 6 23 6 23 12'></polyline></svg>"),
+                                margin_bottom="1.5rem",
+                            ),
+                            rx.text(
+                                "STRATEGY 03",
+                                size="1",
+                                weight="bold",
+                                color=COLORS.ACCENT_PRIMARY,
+                                letter_spacing="0.1em",
+                                text_transform="uppercase",
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.heading(
+                                "Master the Volatility",
+                                size="5",
+                                weight="bold",
+                                color=COLORS.TEXT_PRIMARY,
+                                margin_bottom="1rem",
+                            ),
+                            rx.text(
+                                "Optimized Drawdowns",
+                                size="3",
+                                weight="bold",
+                                color=COLORS.TEXT_SECONDARY,
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.text(
+                                "Market crashes shouldn't wipe out months of fee accumulation. By using asymmetric under-hedging, we provide a mathematical safety net that softens the impact of \"black swan\" events without the high overhead costs of a traditional 1:1 hedge.",
+                                size="2",
+                                color="#94A3B8",
+                                line_height="1.7",
+                            ),
+                            align="start",
+                            spacing="2",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                        _hover={"border": "1px solid rgba(59, 130, 246, 0.5)"},
+                        transition="border 0.3s ease",
+                    ),
+                    columns="3",
                     spacing="4",
                     width="100%",
-                    max_width="50rem",
+                    responsive={
+                        "0px": {"columns": "1"},
+                        "768px": {"columns": "3"},
+                    },
                 ),
                 spacing="5",
                 align="center",
-                padding_y="4rem",
+                padding_y="6rem",
             ),
             size="4",
         ),
@@ -724,89 +735,6 @@ def pricing_section() -> rx.Component:
     )
 
 
-def strategic_underhedging_section() -> rx.Component:
-    """Why Delta-Neutral is a Mathematical Trap"""
-    return rx.box(
-        rx.container(
-            rx.vstack(
-                rx.box(
-                    width="100%",
-                    height="1px",
-                    background=COLORS.BORDER_SUBTLE,
-                    margin_y="2rem",
-                ),
-                rx.heading(
-                    "Why \"Delta-Neutral\" is a Mathematical Trap.",
-                    size="8",
-                    weight="bold",
-                    text_align="center",
-                    margin_bottom="3rem",
-                    color=COLORS.TEXT_PRIMARY,
-                ),
-                rx.vstack(
-                    rx.box(
-                        rx.vstack(
-                            rx.heading(
-                                "The Problem with 100% Hedging",
-                                size="5",
-                                weight="bold",
-                                margin_bottom="1rem",
-                                color=COLORS.ACCENT_WARNING,
-                            ),
-                            rx.text(
-                                "Most bots chase 'Perfect Zero' delta, but LP positions are dynamic. Maintaining 100% neutrality forces constant rebalancing—locking in IL and bleeding fees with every tick. You end up hedging away your entire profit.",
-                                size="4",
-                                color=COLORS.TEXT_SECONDARY,
-                                line_height="1.7",
-                            ),
-                            align="start",
-                        ),
-                        padding="2rem",
-                        border_radius="8px",
-                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
-                    ),
-                    rx.box(
-                        rx.vstack(
-                            rx.heading(
-                                "The WhisperHedge Approach",
-                                size="5",
-                                weight="bold",
-                                margin_bottom="1rem",
-                                color=COLORS.ACCENT_SUCCESS,
-                            ),
-                            rx.text(
-                                "We utilize Strategic Under-Hedging. Our algorithms understand that a pool is a moving target. We provide enough protection to survive the crashes without the hyper-active rebalancing that bleeds your account dry. We optimize for Net Profit, not theoretical neutrality.",
-                                size="4",
-                                color=COLORS.TEXT_SECONDARY,
-                                line_height="1.7",
-                            ),
-                            align="start",
-                        ),
-                        padding="2.5rem",
-                        border_radius="8px",
-                        border=f"2px solid {COLORS.ACCENT_PRIMARY}",
-                        background="rgba(15, 23, 42, 0.5)",
-                        backdrop_filter="blur(12px)",
-                        width="100%",
-                    ),
-                    spacing="4",
-                    width="100%",
-                    max_width="50rem",
-                ),
-                spacing="5",
-                align="center",
-                padding_top="4rem",
-                padding_bottom="0",
-            ),
-            size="4",
-        ),
-        background="transparent",
-    )
-
-
 def footer() -> rx.Component:
     """Footer section with links and copyright"""
     return rx.box(
@@ -954,9 +882,7 @@ def whisperhedge_landing() -> rx.Component:
         navbar(),
         hero_section(),
         risk_automation_section(),
-        problem_section(),
-        strategic_underhedging_section(),
-        risk_protection_section(),
+        strategic_philosophy_section(),
         features_section(),
         how_it_works_section(),
         pricing_section(),
