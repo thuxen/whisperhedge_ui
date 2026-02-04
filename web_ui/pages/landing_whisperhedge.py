@@ -6,8 +6,11 @@ def navbar() -> rx.Component:
     """Navigation bar for WhisperHedge landing page"""
     return rx.box(
         rx.hstack(
-            # Left: Logo/Name
-            brand_logo(size="navbar"),
+            # Left: Logo/Name (clickable link to top)
+            rx.link(
+                brand_logo(size="navbar"),
+                href="#",
+            ),
             
             # Center: Nav links
             rx.hstack(
@@ -175,6 +178,7 @@ def strategic_philosophy_section() -> rx.Component:
                     text_align="center",
                     margin_bottom="1rem",
                     color=COLORS.TEXT_PRIMARY,
+                    style={"scroll-margin-top": "100px"},
                 ),
                 rx.text(
                     "Why we abandoned standard delta-neutral strategies for something smarter.",
@@ -335,7 +339,7 @@ def strategic_philosophy_section() -> rx.Component:
                 ),
                 spacing="5",
                 align="center",
-                padding_y="6rem",
+                padding_y="4rem",
             ),
             size="4",
         ),
@@ -356,6 +360,7 @@ def features_section() -> rx.Component:
                     margin_bottom="1rem",
                     id="features",
                     color=COLORS.TEXT_PRIMARY,
+                    style={"scroll-margin-top": "100px"},
                 ),
                 rx.text(
                     "Engineered for Performance. Built for Security.",
@@ -695,7 +700,7 @@ def features_section() -> rx.Component:
                 ),
                 spacing="5",
                 align="center",
-                padding_y="6rem",
+                padding_y="4rem",
             ),
             size="4",
         ),
@@ -716,6 +721,7 @@ def how_it_works_section() -> rx.Component:
                     margin_bottom="1rem",
                     id="how-it-works",
                     color=COLORS.TEXT_PRIMARY,
+                    style={"scroll-margin-top": "100px"},
                 ),
                 rx.text(
                     "Three steps to institutional-grade LP protection.",
@@ -851,7 +857,7 @@ def how_it_works_section() -> rx.Component:
                 ),
                 spacing="5",
                 align="center",
-                padding_y="6rem",
+                padding_y="4rem",
             ),
             size="4",
         ),
@@ -930,6 +936,7 @@ def pricing_section() -> rx.Component:
                     margin_bottom="1rem",
                     id="pricing",
                     color=COLORS.TEXT_PRIMARY,
+                    style={"scroll-margin-top": "100px"},
                 ),
                 rx.text(
                     "Professional protection that scales with your liquidity.",
@@ -1230,7 +1237,7 @@ def pricing_section() -> rx.Component:
                 ),
                 spacing="5",
                 align="center",
-                padding_y="6rem",
+                padding_y="4rem",
             ),
             size="4",
         ),
@@ -1389,7 +1396,6 @@ def whisperhedge_landing() -> rx.Component:
         features_section(),
         how_it_works_section(),
         pricing_section(),
-        comparison_table_section(),
         footer(),
         width="100%",
         background=COLORS.BACKGROUND_PRIMARY,
