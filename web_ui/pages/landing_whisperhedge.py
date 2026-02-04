@@ -69,7 +69,8 @@ def navbar() -> rx.Component:
         position="sticky",
         top="0",
         z_index="50",
-        background=COLORS.NAVBAR_BG,
+        background="rgba(15, 23, 42, 0.5)",
+        backdrop_filter="blur(12px)",
         border_bottom=f"1px solid {COLORS.NAVBAR_BORDER}",
         width="100%",
     )
@@ -118,8 +119,15 @@ def hero_section() -> rx.Component:
                 padding_bottom="6rem",
             ),
             size="4",
+            position="relative",
         ),
         background=COLORS.BACKGROUND_PRIMARY,
+        background_image=f"""
+            radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 70%),
+            linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+        """,
+        background_size="100% 100%, 40px 40px, 40px 40px",
     )
 
 
@@ -136,12 +144,22 @@ def risk_automation_section() -> rx.Component:
                     max_width="60rem",
                     line_height="1.8",
                 ),
+                # Dashboard image
+                rx.image(
+                    src="/whisperhedge_dashboard.png",
+                    alt="WhisperHedge Dashboard Interface",
+                    width="100%",
+                    max_width="60rem",
+                    border_radius="12px",
+                    margin_top="3rem",
+                    box_shadow="0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                ),
                 align="center",
                 padding_y="4rem",
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background="transparent",
     )
 
 
@@ -178,8 +196,9 @@ def problem_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     rx.box(
@@ -201,8 +220,9 @@ def problem_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     spacing="4",
@@ -226,7 +246,7 @@ def problem_section() -> rx.Component:
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background="transparent",
     )
 
 
@@ -269,8 +289,9 @@ def risk_protection_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     rx.box(
@@ -292,8 +313,9 @@ def risk_protection_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     spacing="4",
@@ -306,7 +328,7 @@ def risk_protection_section() -> rx.Component:
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background="transparent",
     )
 
 
@@ -345,8 +367,9 @@ def features_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     # Feature 2
@@ -369,8 +392,9 @@ def features_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     # Feature 3
@@ -393,8 +417,9 @@ def features_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     # Feature 4
@@ -418,7 +443,8 @@ def features_section() -> rx.Component:
                         padding="2rem",
                         border_radius="8px",
                         border=f"2px solid {COLORS.ACCENT_SUCCESS}",
-                        background=COLORS.CARD_BG,
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     spacing="4",
@@ -493,8 +519,9 @@ def how_it_works_section() -> rx.Component:
                         ),
                         padding="2.5rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         flex="1",
                     ),
                     # Step 2
@@ -530,8 +557,9 @@ def how_it_works_section() -> rx.Component:
                         ),
                         padding="2.5rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         flex="1",
                     ),
                     spacing="4",
@@ -590,8 +618,9 @@ def comparison_table_section() -> rx.Component:
                     ),
                     padding="2rem",
                     border_radius="8px",
-                    border=f"1px solid {COLORS.CARD_BORDER}",
-                    background=COLORS.CARD_BG,
+                    border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                    background="rgba(15, 23, 42, 0.5)",
+                    backdrop_filter="blur(12px)",
                     width="100%",
                 ),
                 spacing="5",
@@ -599,7 +628,7 @@ def comparison_table_section() -> rx.Component:
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background="transparent",
     )
 
 
@@ -664,8 +693,9 @@ def pricing_section() -> rx.Component:
                     ),
                     padding="2rem",
                     border_radius="8px",
-                    border=f"1px solid {COLORS.CARD_BORDER}",
-                    background=COLORS.CARD_BG,
+                    border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                    background="rgba(15, 23, 42, 0.5)",
+                    backdrop_filter="blur(12px)",
                     width="100%",
                 ),
                 rx.text(
@@ -733,8 +763,9 @@ def strategic_underhedging_section() -> rx.Component:
                         ),
                         padding="2rem",
                         border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     rx.box(
@@ -757,7 +788,8 @@ def strategic_underhedging_section() -> rx.Component:
                         padding="2.5rem",
                         border_radius="8px",
                         border=f"2px solid {COLORS.ACCENT_PRIMARY}",
-                        background=COLORS.CARD_BG,
+                        background="rgba(15, 23, 42, 0.5)",
+                        backdrop_filter="blur(12px)",
                         width="100%",
                     ),
                     spacing="4",
@@ -771,7 +803,7 @@ def strategic_underhedging_section() -> rx.Component:
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background="transparent",
     )
 
 
@@ -905,7 +937,7 @@ def footer() -> rx.Component:
             ),
             size="4",
         ),
-        background=COLORS.BACKGROUND_SURFACE,
+        background="rgba(15, 23, 42, 0.3)",
         border_top=f"1px solid {COLORS.BORDER_DEFAULT}",
         width="100%",
     )
@@ -931,4 +963,5 @@ def whisperhedge_landing() -> rx.Component:
         comparison_table_section(),
         footer(),
         width="100%",
+        background=COLORS.BACKGROUND_PRIMARY,
     )
