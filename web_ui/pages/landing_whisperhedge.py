@@ -123,6 +123,28 @@ def hero_section() -> rx.Component:
     )
 
 
+def risk_automation_section() -> rx.Component:
+    """Risk automation focus section"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                rx.text(
+                    "We focus on risk automation so you can focus on liquidity, yield, and opportunity. As a WhisperHedge user, you can finally close those complex tracking spreadsheets and stop second-guessing your hedge ratios. Our platform provides the real-time precision you need to defend your principal while ensuring your fee earnings aren't being devoured by rebalancing costs. It's time to move beyond manual management and start protecting your capital with institutional-grade logic.",
+                    size="5",
+                    color=COLORS.TEXT_SECONDARY,
+                    text_align="center",
+                    max_width="60rem",
+                    line_height="1.8",
+                ),
+                align="center",
+                padding_y="4rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_SURFACE,
+    )
+
+
 def problem_section() -> rx.Component:
     """The Hidden Cost of Liquidity: Impermanent Loss"""
     return rx.box(
@@ -899,6 +921,7 @@ def whisperhedge_landing() -> rx.Component:
     return rx.box(
         navbar(),
         hero_section(),
+        risk_automation_section(),
         problem_section(),
         strategic_underhedging_section(),
         risk_protection_section(),
