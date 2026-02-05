@@ -12,8 +12,10 @@ def _logo_exists(logo_path: str) -> bool:
             return False
         
         # Convert web path to filesystem path
-        # Remove leading slash and prepend assets directory
-        file_path = Path(__file__).parent / logo_path.lstrip('/')
+        # Assets are served from project_root/assets/
+        # Go up from web_ui/branding/ to project root, then into assets/
+        project_root = Path(__file__).parent.parent.parent
+        file_path = project_root / "assets" / logo_path.lstrip('/')
         return file_path.exists()
     except Exception:
         # On any error, return False to use text fallback
@@ -52,37 +54,27 @@ def brand_logo(
     }
     heading_size = heading_size_map.get(size, "6")
     
-    # Try to get logo path (will check both light/dark based on theme)
-    # For now, we'll use a simple approach - check light logo
-    logo_light = BrandConfig.get_logo_path(prefer_svg=prefer_svg, dark_mode=False)
-    logo_dark = BrandConfig.get_logo_path(prefer_svg=prefer_svg, dark_mode=True)
-    
-    # Check if at least one logo exists
-    has_logo = _logo_exists(logo_light) or _logo_exists(logo_dark)
-    
-    if has_logo:
-        # Return image with theme-aware src
-        return rx.box(
-            rx.image(
-                src=rx.cond(
-                    rx.color_mode_cond(light="light", dark="dark") == "dark",
-                    logo_dark if _logo_exists(logo_dark) else logo_light,
-                    logo_light,
-                ),
-                alt=BrandConfig.APP_NAME,
-                height=logo_height,
-                width="auto",
-                loading="eager",
-                **kwargs
-            )
-        )
-    else:
-        # Fallback to text
-        return rx.heading(
+    # Simplified approach - always try to show logo + text
+    # Return image + text side by side
+    return rx.hstack(
+        rx.image(
+            src="/whisperhedge_logo_transparentbg.png",
+            alt=BrandConfig.APP_NAME,
+            height=logo_height,
+            width="auto",
+            loading="eager",
+            display="block",
+            object_fit="contain",
+        ),
+        rx.heading(
             BrandConfig.APP_NAME,
             size=heading_size,
             **kwargs
-        )
+        ),
+        align="center",
+        spacing="1",
+        display="flex",
+    )
 
 
 def brand_name(as_component: bool = False) -> rx.Component | str:

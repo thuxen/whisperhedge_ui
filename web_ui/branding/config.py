@@ -26,11 +26,11 @@ class BrandConfig:
     TAGLINE = "Liquidity Pool Hedging Simplified" if is_whisperhedge_domain() else "Automated Hedging Platform"
     
     # Logo Paths (optional - will fallback to text if files don't exist)
-    LOGO_LIGHT = os.getenv("BRAND_LOGO_LIGHT", "/branding/assets/logo.png")
-    LOGO_DARK = os.getenv("BRAND_LOGO_DARK", "/branding/assets/logo-dark.png")
-    LOGO_LIGHT_SVG = os.getenv("BRAND_LOGO_LIGHT_SVG", "/branding/assets/logo.svg")
-    LOGO_DARK_SVG = os.getenv("BRAND_LOGO_DARK_SVG", "/branding/assets/logo-dark.svg")
-    FAVICON = os.getenv("BRAND_FAVICON", "/branding/assets/favicon.ico")
+    LOGO_LIGHT = os.getenv("BRAND_LOGO_LIGHT", "/whisperhedge_logo_transparentbg.png")
+    LOGO_DARK = os.getenv("BRAND_LOGO_DARK", "/whisperhedge_logo_transparentbg.png")
+    LOGO_LIGHT_SVG = os.getenv("BRAND_LOGO_LIGHT_SVG", "/whisperhedge_logo_transparentbg.svg")
+    LOGO_DARK_SVG = os.getenv("BRAND_LOGO_DARK_SVG", "/whisperhedge_logo_transparentbg.svg")
+    FAVICON = os.getenv("BRAND_FAVICON", "/favicon.ico")
     
     # Logo Display Settings
     LOGO_HEIGHT_NAVBAR = os.getenv("BRAND_LOGO_HEIGHT_NAVBAR", "32px")
