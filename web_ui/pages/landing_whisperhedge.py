@@ -1444,6 +1444,167 @@ def desktop_pricing_content() -> rx.Component:
     )
 
 
+def faq_section() -> rx.Component:
+    """FAQ section with accordion-style questions"""
+    return rx.box(
+        rx.container(
+            rx.vstack(
+                # Section header
+                rx.heading(
+                    "Frequently Asked Questions",
+                    size="8",
+                    weight="bold",
+                    margin_bottom="3rem",
+                    text_align="center",
+                    color=COLORS.TEXT_PRIMARY,
+                    id="faq",
+                    scroll_margin_top="100px",
+                ),
+                
+                # FAQ Accordion
+                rx.vstack(
+                    # Q1: Do I need to connect my wallet?
+                    rx.accordion.root(
+                        rx.accordion.item(
+                            header=rx.accordion.header(
+                                rx.text(
+                                    "Do I need to connect my wallet?",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                            ),
+                            content=rx.accordion.content(
+                                rx.text(
+                                    "No. WhisperHedge is non-custodial. We only require your public LP Position ID to monitor your data and a restricted API key from Hyperliquid to execute the hedge. We never have access to your private keys or your principal.",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    line_height="1.8",
+                                ),
+                            ),
+                            value="q1",
+                        ),
+                        # Q2: How often does the bot rebalance my hedge?
+                        rx.accordion.item(
+                            header=rx.accordion.header(
+                                rx.text(
+                                    "How often does the bot rebalance my hedge?",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                            ),
+                            content=rx.accordion.content(
+                                rx.text(
+                                    "The bot monitors the market 24/7. Rebalancing checks are made every minute and rebalance trades are executed when the delta has shifted according to your position settings. In Dynamic mode, the engine triggers an adjustment whenever your delta or price-range exposure deviates beyond your set threshold.",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    line_height="1.8",
+                                ),
+                            ),
+                            value="q2",
+                        ),
+                        # Q3: What happens if Hyperliquid goes down?
+                        rx.accordion.item(
+                            header=rx.accordion.header(
+                                rx.text(
+                                    "What happens if Hyperliquid goes down?",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                            ),
+                            content=rx.accordion.content(
+                                rx.text(
+                                    "WhisperHedge is built with fail-safes. If our connection to Hyperliquid is interrupted, the system will alert you immediately via your dashboard and email. However, since your LP position is on-chain (e.g., Uniswap), your principal remains unaffected.",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    line_height="1.8",
+                                ),
+                            ),
+                            value="q3",
+                        ),
+                        # Q4: How are overage charges billed?
+                        rx.accordion.item(
+                            header=rx.accordion.header(
+                                rx.text(
+                                    "How are overage charges billed?",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                            ),
+                            content=rx.accordion.content(
+                                rx.text(
+                                    "We calculate your \"Average Managed TVL\" across the month. If you exceed your plan's included limit, the overage (0.05% or 0.1% depending on the plan) is added to your next billing cycle.",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    line_height="1.8",
+                                ),
+                            ),
+                            value="q4",
+                        ),
+                        # Q5: How do you handle liquidation risk on the Hyperliquid side?
+                        rx.accordion.item(
+                            header=rx.accordion.header(
+                                rx.text(
+                                    "How do you handle liquidation risk on the Hyperliquid side?",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                            ),
+                            content=rx.accordion.content(
+                                rx.text(
+                                    "Safety is our priority. WhisperHedge includes built-in Collateral Monitoring. If your Hyperliquid margin ratio drops below a safe level due to aggressive price moves, the system will alert you immediately or—depending on your settings—automatically trim the hedge to prevent liquidation of your collateral.",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    line_height="1.8",
+                                ),
+                            ),
+                            value="q5",
+                        ),
+                        collapsible=True,
+                        variant="ghost",
+                        width="100%",
+                    ),
+                    spacing="0",
+                    width="100%",
+                    max_width="800px",
+                    margin_x="auto",
+                ),
+                
+                # Final CTA
+                rx.box(
+                    rx.link(
+                        rx.button(
+                            "Ready to protect your liquidity? Start Free Now",
+                            size="4",
+                            background=COLORS.BUTTON_PRIMARY_BG,
+                            color=COLORS.BUTTON_PRIMARY_TEXT,
+                            _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                            padding_x="3rem",
+                            padding_y="1.5rem",
+                            font_size="1.1rem",
+                            font_weight="bold",
+                        ),
+                        href="/signup",
+                    ),
+                    margin_top="4rem",
+                    text_align="center",
+                    width="100%",
+                ),
+                
+                spacing="4",
+                align="center",
+                padding_y="4rem",
+            ),
+            size="4",
+        ),
+        background=COLORS.BACKGROUND_PRIMARY,
+    )
+
+
 def footer() -> rx.Component:
     """Footer section with links and copyright"""
     return rx.box(
@@ -1662,6 +1823,7 @@ def whisperhedge_landing() -> rx.Component:
         features_section(),
         how_it_works_section(),
         pricing_section(),
+        faq_section(),
         footer(),
         width="100%",
         background=COLORS.BACKGROUND_PRIMARY,
