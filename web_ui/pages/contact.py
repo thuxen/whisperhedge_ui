@@ -5,40 +5,13 @@ from .landing_whisperhedge import navbar, footer
 
 class ContactState(rx.State):
     """State for contact form"""
-    name: str = ""
-    email: str = ""
-    subject: str = ""
-    message: str = ""
-    submitted: bool = False
+    show_success: bool = False
     
-    def set_name(self, value: str):
-        """Set name field"""
-        self.name = value
-    
-    def set_email(self, value: str):
-        """Set email field"""
-        self.email = value
-    
-    def set_subject(self, value: str):
-        """Set subject field"""
-        self.subject = value
-    
-    def set_message(self, value: str):
-        """Set message field"""
-        self.message = value
-    
-    def submit_form(self):
-        """Handle form submission"""
-        # In production, this would send an email or save to database
-        self.submitted = True
-        
-    def reset_form(self):
-        """Reset form after submission"""
-        self.name = ""
-        self.email = ""
-        self.subject = ""
-        self.message = ""
-        self.submitted = False
+    @rx.var
+    def check_url_success(self) -> bool:
+        """Check if success parameter is in URL"""
+        # Check query parameters for success=true
+        return "success=true" in self.router.page.raw_path
 
 
 def contact_page() -> rx.Component:
@@ -169,7 +142,7 @@ def contact_page() -> rx.Component:
                     # Right: Contact Form
                     rx.box(
                         rx.cond(
-                            ContactState.submitted,
+                            ContactState.check_url_success,
                             # Success message
                             rx.vstack(
                                 rx.box(
@@ -190,101 +163,58 @@ def contact_page() -> rx.Component:
                                     text_align="center",
                                     margin_bottom="2rem",
                                 ),
-                                rx.button(
-                                    "Send Another Message",
-                                    on_click=ContactState.reset_form,
-                                    variant="outline",
-                                    size="3",
+                                rx.link(
+                                    rx.button(
+                                        "Send Another Message",
+                                        variant="outline",
+                                        size="3",
+                                    ),
+                                    href="/contact",
                                 ),
                                 align="center",
                                 spacing="3",
                                 padding="3rem",
                             ),
-                            # Contact form
-                            rx.vstack(
-                                rx.heading(
-                                    "Send us a Message",
-                                    size="6",
-                                    weight="bold",
-                                    margin_bottom="1rem",
-                                    color=COLORS.TEXT_PRIMARY,
-                                ),
-                                
-                                # Name field
-                                rx.vstack(
-                                    rx.text("Name", size="2", weight="bold", color=COLORS.TEXT_PRIMARY),
-                                    rx.input(
-                                        placeholder="Your name",
-                                        value=ContactState.name,
-                                        on_change=ContactState.set_name,
-                                        size="3",
-                                        width="100%",
-                                    ),
-                                    align="start",
-                                    spacing="1",
-                                    width="100%",
-                                ),
-                                
-                                # Email field
-                                rx.vstack(
-                                    rx.text("Email", size="2", weight="bold", color=COLORS.TEXT_PRIMARY),
-                                    rx.input(
-                                        placeholder="your@email.com",
-                                        type="email",
-                                        value=ContactState.email,
-                                        on_change=ContactState.set_email,
-                                        size="3",
-                                        width="100%",
-                                    ),
-                                    align="start",
-                                    spacing="1",
-                                    width="100%",
-                                ),
-                                
-                                # Subject field
-                                rx.vstack(
-                                    rx.text("Subject", size="2", weight="bold", color=COLORS.TEXT_PRIMARY),
-                                    rx.input(
-                                        placeholder="How can we help?",
-                                        value=ContactState.subject,
-                                        on_change=ContactState.set_subject,
-                                        size="3",
-                                        width="100%",
-                                    ),
-                                    align="start",
-                                    spacing="1",
-                                    width="100%",
-                                ),
-                                
-                                # Message field
-                                rx.vstack(
-                                    rx.text("Message", size="2", weight="bold", color=COLORS.TEXT_PRIMARY),
-                                    rx.text_area(
-                                        placeholder="Tell us more about your inquiry...",
-                                        value=ContactState.message,
-                                        on_change=ContactState.set_message,
-                                        rows="6",
-                                        width="100%",
-                                    ),
-                                    align="start",
-                                    spacing="1",
-                                    width="100%",
-                                ),
-                                
-                                # Submit button
-                                rx.button(
-                                    "Send Message",
-                                    on_click=ContactState.submit_form,
-                                    size="3",
-                                    background=COLORS.BUTTON_PRIMARY_BG,
-                                    color=COLORS.BUTTON_PRIMARY_TEXT,
-                                    _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
-                                    width="100%",
-                                ),
-                                
-                                align="start",
-                                spacing="3",
-                                width="100%",
+                            # Contact form with Formspree
+                            rx.html(
+                                """
+                                <form action="https://formspree.io/f/mjgebrez" method="POST" style="width: 100%;">
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #F1F5F9;">Send us a Message</h3>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Name</label>
+                                        <input type="text" name="name" placeholder="Your name" required 
+                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Email</label>
+                                        <input type="email" name="email" placeholder="your@email.com" required 
+                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Subject</label>
+                                        <input type="text" name="subject" placeholder="How can we help?" required 
+                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Message</label>
+                                        <textarea name="message" placeholder="Tell us more about your inquiry..." required rows="6"
+                                                  style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem; resize: vertical;"></textarea>
+                                    </div>
+                                    
+                                    <input type="hidden" name="_next" value="https://whisperhedge.com/contact?success=true">
+                                    
+                                    <button type="submit" 
+                                            style="width: 100%; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; background: #3B82F6; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                                        Send Message
+                                    </button>
+                                </form>
+                                """
                             ),
                         ),
                         padding="2rem",

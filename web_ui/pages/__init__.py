@@ -8,6 +8,7 @@ from .cookies import cookies_page
 from .about import about_page
 from .contact import contact_page
 from .blog import blog_page
+from .blog_hidden_cost import blog_hidden_cost_page
 
 __all__ = [
     "login_page",
@@ -20,4 +21,5 @@ __all__ = [
     "about_page",
     "contact_page",
     "blog_page",
+    "blog_hidden_cost_page",
 ]

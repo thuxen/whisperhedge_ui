@@ -26,39 +26,42 @@ def blog_page() -> rx.Component:
                 ),
                 
                 # Featured post
-                rx.box(
-                    rx.vstack(
-                        rx.badge("Featured", color_scheme="blue", size="2", margin_bottom="1rem"),
-                        rx.heading(
-                            "The Hidden Cost of Liquidity: Why Most LPs Are Losing Money",
-                            size="7",
-                            weight="bold",
-                            margin_bottom="1rem",
-                            color=COLORS.TEXT_PRIMARY,
-                        ),
-                        rx.text(
-                            "Impermanent loss isn't just a theoretical concept—it's actively draining billions from liquidity providers. In this deep dive, we explore why traditional LP strategies fail and how asymmetric hedging can protect your principal while maintaining fee generation.",
-                            size="3",
-                            color=COLORS.TEXT_SECONDARY,
-                            line_height="1.8",
-                            margin_bottom="1rem",
-                        ),
-                        rx.hstack(
-                            rx.text("February 1, 2026", size="2", color=COLORS.TEXT_MUTED),
-                            rx.text("•", size="2", color=COLORS.TEXT_MUTED),
-                            rx.text("8 min read", size="2", color=COLORS.TEXT_MUTED),
+                rx.link(
+                    rx.box(
+                        rx.vstack(
+                            rx.badge("Featured", color_scheme="blue", size="2", margin_bottom="1rem"),
+                            rx.heading(
+                                "The Hidden Cost of Liquidity: Why Most LPs Are Losing Money",
+                                size="7",
+                                weight="bold",
+                                margin_bottom="1rem",
+                                color=COLORS.TEXT_PRIMARY,
+                            ),
+                            rx.text(
+                                "Impermanent loss isn't just a theoretical concept—it's actively draining billions from liquidity providers. In this deep dive, we explore why traditional LP strategies fail and how asymmetric hedging can protect your principal while maintaining fee generation.",
+                                size="3",
+                                color=COLORS.TEXT_SECONDARY,
+                                line_height="1.8",
+                                margin_bottom="1rem",
+                            ),
+                            rx.hstack(
+                                rx.text("February 5, 2026", size="2", color=COLORS.TEXT_MUTED),
+                                rx.text("•", size="2", color=COLORS.TEXT_MUTED),
+                                rx.text("8 min read", size="2", color=COLORS.TEXT_MUTED),
+                                spacing="2",
+                            ),
+                            align="start",
                             spacing="2",
                         ),
-                        align="start",
-                        spacing="2",
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"2px solid {COLORS.ACCENT_PRIMARY}",
+                        background="rgba(59, 130, 246, 0.05)",
+                        margin_bottom="3rem",
+                        cursor="pointer",
+                        _hover={"border": f"2px solid {COLORS.BUTTON_PRIMARY_HOVER}"},
                     ),
-                    padding="2rem",
-                    border_radius="8px",
-                    border=f"2px solid {COLORS.ACCENT_PRIMARY}",
-                    background="rgba(59, 130, 246, 0.05)",
-                    margin_bottom="3rem",
-                    cursor="pointer",
-                    _hover={"border": f"2px solid {COLORS.BUTTON_PRIMARY_HOVER}"},
+                    href="/blog/hidden-cost-of-liquidity",
                 ),
                 
                 # Blog posts grid

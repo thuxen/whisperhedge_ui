@@ -8,6 +8,15 @@ from .landing_whisperhedge_mobile import (
 )
 
 
+class MobileMenuState(rx.State):
+    """State for mobile menu"""
+    is_open: bool = False
+    
+    def toggle_menu(self):
+        """Toggle mobile menu open/closed"""
+        self.is_open = not self.is_open
+
+
 def navbar() -> rx.Component:
     """Navigation bar for WhisperHedge landing page"""
     return rx.box(
@@ -79,6 +88,7 @@ def navbar() -> rx.Component:
                     rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='3' y1='12' x2='21' y2='12'></line><line x1='3' y1='6' x2='21' y2='6'></line><line x1='3' y1='18' x2='21' y2='18'></line></svg>"),
                     variant="ghost",
                     size="3",
+                    on_click=MobileMenuState.toggle_menu,
                 ),
                 display=["block", "block", "none"],
             ),
@@ -87,6 +97,78 @@ def navbar() -> rx.Component:
             align="center",
             width="100%",
             padding="1rem 2rem",
+        ),
+        # Mobile menu dropdown
+        rx.cond(
+            MobileMenuState.is_open,
+            rx.box(
+                rx.vstack(
+                    rx.link(
+                        "Features",
+                        href="/#features",
+                        size="3",
+                        color=COLORS.TEXT_PRIMARY,
+                        width="100%",
+                        padding="0.75rem 1rem",
+                        _hover={"background": "rgba(59, 130, 246, 0.1)"},
+                        on_click=MobileMenuState.toggle_menu,
+                    ),
+                    rx.link(
+                        "How it works",
+                        href="/#how-it-works",
+                        size="3",
+                        color=COLORS.TEXT_PRIMARY,
+                        width="100%",
+                        padding="0.75rem 1rem",
+                        _hover={"background": "rgba(59, 130, 246, 0.1)"},
+                        on_click=MobileMenuState.toggle_menu,
+                    ),
+                    rx.link(
+                        "Pricing",
+                        href="/#pricing",
+                        size="3",
+                        color=COLORS.TEXT_PRIMARY,
+                        width="100%",
+                        padding="0.75rem 1rem",
+                        _hover={"background": "rgba(59, 130, 246, 0.1)"},
+                        on_click=MobileMenuState.toggle_menu,
+                    ),
+                    rx.divider(margin_y="0.5rem"),
+                    rx.link(
+                        rx.button(
+                            "Login",
+                            variant="ghost",
+                            size="3",
+                            width="100%",
+                        ),
+                        href="/login",
+                        width="100%",
+                        on_click=MobileMenuState.toggle_menu,
+                    ),
+                    rx.link(
+                        rx.button(
+                            "Start Free Trial",
+                            size="3",
+                            background=COLORS.BUTTON_PRIMARY_BG,
+                            color=COLORS.BUTTON_PRIMARY_TEXT,
+                            _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                            width="100%",
+                        ),
+                        href="/signup",
+                        width="100%",
+                        on_click=MobileMenuState.toggle_menu,
+                    ),
+                    spacing="0",
+                    width="100%",
+                    align="start",
+                ),
+                background="rgba(15, 23, 42, 0.95)",
+                backdrop_filter="blur(12px)",
+                border_bottom=f"1px solid {COLORS.NAVBAR_BORDER}",
+                padding="1rem",
+                width="100%",
+                display=["block", "block", "none"],
+            ),
         ),
         position="sticky",
         top="0",
