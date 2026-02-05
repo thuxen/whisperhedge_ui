@@ -11,7 +11,7 @@ class ContactState(rx.State):
     def check_url_success(self) -> bool:
         """Check if success parameter is in URL"""
         # Check query parameters for success=true
-        return "success=true" in self.router.page.raw_path
+        return self.router.page.params.get("success", "") == "true"
 
 
 def contact_page() -> rx.Component:

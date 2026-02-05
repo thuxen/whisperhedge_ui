@@ -29,6 +29,10 @@ class ManagePlanState(rx.State):
     is_loading: bool = False
     error_message: str = ""
     
+    def set_error_message(self, message: str):
+        """Explicitly set error message"""
+        self.error_message = message
+    
     def load_current_plan(self):
         """Load user's current plan from Supabase"""
         # TODO: Implement Supabase query to get user's plan
@@ -36,15 +40,60 @@ class ManagePlanState(rx.State):
     
     def create_checkout_session(self, tier_name: str):
         """Create Stripe checkout session for plan upgrade"""
-        # TODO: Implement Stripe checkout session creation
-        self.is_loading = True
-        # This will redirect to Stripe checkout
-        pass
+        try:
+            import os
+            from ..services.stripe_service import create_checkout_session
+            
+            # Get user info from auth state
+            user_id = self.router.session.client_token
+            user_email = AuthState.user_email
+            
+            # Get base URL for redirects - use env var or default to localhost
+            base_url = os.getenv("APP_URL", "http://localhost:3000")
+            
+            # Create Stripe checkout session
+            checkout_url = create_checkout_session(
+                user_id=user_id,
+                user_email=user_email,
+                tier_name=tier_name,
+                success_url=f"{base_url}/dashboard?upgrade_success=true",
+                cancel_url=f"{base_url}/dashboard?upgrade_cancelled=true",
+            )
+            
+            if checkout_url:
+                # Redirect to Stripe checkout
+                return rx.redirect(checkout_url)
+            else:
+                self.error_message = "Failed to create checkout session. Please check your Stripe configuration."
+                
+        except Exception as e:
+            self.error_message = f"Error: {str(e)}"
+            print(f"[ERROR] Stripe checkout failed: {e}")
     
     def manage_subscription(self):
         """Redirect to Stripe customer portal for subscription management"""
-        # TODO: Implement Stripe customer portal redirect
-        pass
+        try:
+            import os
+            from ..services.stripe_service import create_customer_portal_session
+            
+            # Get base URL for return redirect - use env var or default to localhost
+            base_url = os.getenv("APP_URL", "http://localhost:3000")
+            
+            # Create customer portal session
+            portal_url = create_customer_portal_session(
+                customer_id=self.stripe_customer_id,
+                return_url=f"{base_url}/dashboard",
+            )
+            
+            if portal_url:
+                # Redirect to Stripe customer portal
+                return rx.redirect(portal_url)
+            else:
+                self.error_message = "Failed to open customer portal. Please contact support."
+                
+        except Exception as e:
+            self.error_message = f"Error: {str(e)}"
+            print(f"[ERROR] Customer portal failed: {e}")
 
 
 def plan_card(
@@ -201,7 +250,39 @@ def manage_plan_content() -> rx.Component:
             "Upgrade, downgrade, or manage your subscription.",
             size="4",
             color=COLORS.TEXT_SECONDARY,
-            margin_bottom="3rem",
+            margin_bottom="1rem",
+        ),
+        
+        # Info/Error message
+        rx.cond(
+            ManagePlanState.error_message != "",
+            rx.box(
+                rx.hstack(
+                    rx.icon("info", size=18, color="#3B82F6"),
+                    rx.text(
+                        ManagePlanState.error_message,
+                        size="3",
+                        color=COLORS.TEXT_PRIMARY,
+                    ),
+                    rx.button(
+                        rx.icon("x", size=16),
+                        on_click=ManagePlanState.set_error_message(""),
+                        variant="ghost",
+                        size="1",
+                    ),
+                    spacing="3",
+                    align="center",
+                    width="100%",
+                ),
+                padding="1rem",
+                border_radius="8px",
+                background="rgba(59, 130, 246, 0.1)",
+                border="1px solid rgba(59, 130, 246, 0.3)",
+                margin_bottom="2rem",
+                max_width="1400px",
+                margin_x="auto",
+                width="100%",
+            ),
         ),
                     
                     # Current usage stats

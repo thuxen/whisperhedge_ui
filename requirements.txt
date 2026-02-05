@@ -1,4 +1,4 @@
-
+stripe==14.3.0
 reflex==0.8.25
 supabase==2.10.0
 python-dotenv==1.0.0
