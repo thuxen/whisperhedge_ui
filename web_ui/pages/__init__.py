@@ -9,6 +9,7 @@ from .about import about_page
 from .contact import contact_page
 from .blog import blog_page
 from .blog_hidden_cost import blog_hidden_cost_page
+from .manage_plan import manage_plan_page
 
 __all__ = [
     "login_page",
@@ -22,4 +23,5 @@ __all__ = [
     "contact_page",
     "blog_page",
     "blog_hidden_cost_page",
+    "manage_plan_page",
 ]

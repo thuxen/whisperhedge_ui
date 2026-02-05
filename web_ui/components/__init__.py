@@ -8,6 +8,7 @@ from .sections import (
     bot_status_section,
     faq_section,
     settings_section,
+    manage_plan_section,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "bot_status_section",
     "faq_section",
     "settings_section",
+    "manage_plan_section",
 ]

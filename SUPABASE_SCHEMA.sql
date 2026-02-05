@@ -165,3 +165,107 @@ CREATE TRIGGER update_user_api_keys_updated_at
     BEFORE UPDATE ON user_api_keys
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- TABLE: plan_tiers (Master Plan Definitions)
+-- =====================================================
+-- Tiers: free ($0, 1 pos, $2.5k TVL), hobby ($19.99, 3 pos, $10k TVL),
+--        pro ($49.99, 10 pos, $50k TVL), elite ($149.99, unlimited pos, $250k TVL)
+CREATE TABLE IF NOT EXISTS plan_tiers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tier_name TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL,
+    price_monthly DECIMAL(10,2) NOT NULL,
+    max_tvl DECIMAL(15,2),
+    max_positions INTEGER,
+    rebalance_frequency TEXT NOT NULL,
+    support_level TEXT NOT NULL,
+    features JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_tiers_tier_name ON plan_tiers(tier_name);
+CREATE INDEX IF NOT EXISTS idx_plan_tiers_active ON plan_tiers(is_active);
+
+-- =====================================================
+-- TABLE: user_subscriptions (User's Current Plan + Overrides)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS user_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    plan_tier_id UUID REFERENCES plan_tiers(id),
+    subscribed_tvl_limit DECIMAL(15,2),
+    subscribed_position_limit INTEGER,
+    subscribed_rebalance_frequency TEXT,
+    override_tvl_limit DECIMAL(15,2),
+    override_position_limit INTEGER,
+    override_rebalance_frequency TEXT,
+    override_support_level TEXT,
+    stripe_subscription_id TEXT,
+    stripe_customer_id TEXT,
+    billing_cycle_start TIMESTAMPTZ,
+    billing_cycle_end TIMESTAMPTZ,
+    status TEXT DEFAULT 'active',
+    is_beta_tester BOOLEAN DEFAULT false,
+    beta_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user_id ON user_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_plan_tier_id ON user_subscriptions(plan_tier_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON user_subscriptions(status);
+
+-- =====================================================
+-- VIEW: user_effective_limits
+-- =====================================================
+CREATE OR REPLACE VIEW user_effective_limits AS
+SELECT 
+    us.user_id,
+    us.plan_tier_id,
+    pt.tier_name,
+    pt.display_name,
+    pt.price_monthly,
+    COALESCE(us.override_tvl_limit, us.subscribed_tvl_limit, pt.max_tvl) as effective_tvl_limit,
+    COALESCE(us.override_position_limit, us.subscribed_position_limit, pt.max_positions) as effective_position_limit,
+    COALESCE(us.override_rebalance_frequency, us.subscribed_rebalance_frequency, pt.rebalance_frequency) as effective_rebalance_frequency,
+    COALESCE(us.override_support_level, pt.support_level) as effective_support_level,
+    us.is_beta_tester,
+    us.status as subscription_status,
+    us.billing_cycle_end,
+    CASE WHEN us.override_tvl_limit IS NOT NULL THEN true ELSE false END as has_tvl_override,
+    CASE WHEN us.override_position_limit IS NOT NULL THEN true ELSE false END as has_position_override,
+    pt.features
+FROM user_subscriptions us
+JOIN plan_tiers pt ON us.plan_tier_id = pt.id;
+
+-- =====================================================
+-- RLS for plan_tiers and user_subscriptions
+-- =====================================================
+ALTER TABLE plan_tiers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Plan tiers are publicly readable"
+ON plan_tiers FOR SELECT
+USING (true);
+
+CREATE POLICY "Users can only access their own subscription"
+ON user_subscriptions FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- =====================================================
+-- TRIGGERS for plan_tiers and user_subscriptions
+-- =====================================================
+CREATE TRIGGER update_plan_tiers_updated_at
+    BEFORE UPDATE ON plan_tiers
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_user_subscriptions_updated_at
+    BEFORE UPDATE ON user_subscriptions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();

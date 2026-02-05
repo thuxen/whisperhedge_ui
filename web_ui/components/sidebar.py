@@ -2,6 +2,7 @@ import reflex as rx
 from ..state import AuthState
 from ..config import AppConfig
 from ..branding import brand_logo, COLORS
+from .plan_status import plan_status_widget
 
 
 class DashboardState(rx.State):
@@ -60,6 +61,9 @@ def sidebar() -> rx.Component:
             ),
             
             rx.spacer(),
+            
+            # Plan status widget
+            plan_status_widget(),
             
             rx.vstack(
                 rx.divider(),

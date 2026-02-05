@@ -1,6 +1,7 @@
 import reflex as rx
 from .api_keys import api_keys_component
 from ..overview_state import OverviewState
+from ..pages.manage_plan import manage_plan_content
 
 
 def overview_section() -> rx.Component:
@@ -203,3 +204,8 @@ def faq_section() -> rx.Component:
         spacing="4",
         width="100%",
     )
+
+
+def manage_plan_section() -> rx.Component:
+    """Manage Plan section for dashboard"""
+    return manage_plan_content()
