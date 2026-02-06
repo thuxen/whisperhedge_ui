@@ -38,18 +38,25 @@ class ManagePlanState(rx.State):
         # TODO: Implement Supabase query to get user's plan
         pass
     
-    def create_checkout_session(self, tier_name: str):
+    async def create_checkout_session(self, tier_name: str):
         """Create Stripe checkout session for plan upgrade"""
         try:
             import os
             from ..services.stripe_service import create_checkout_session
             
-            # Get user info from auth state
-            user_id = self.router.session.client_token
-            user_email = AuthState.user_email
+            # Get user info from auth state - need to get the parent state instance
+            auth_state = await self.get_state(AuthState)
+            user_id = auth_state.user_id
+            user_email = auth_state.user_email
+            
+            print(f"[DEBUG] Creating checkout session:")
+            print(f"  - user_id: {user_id}")
+            print(f"  - user_email: {user_email}")
+            print(f"  - tier_name: {tier_name}")
             
             # Get base URL for redirects - use env var or default to localhost
             base_url = os.getenv("APP_URL", "http://localhost:3000")
+            print(f"  - base_url: {base_url}")
             
             # Create Stripe checkout session
             checkout_url = create_checkout_session(
@@ -60,15 +67,19 @@ class ManagePlanState(rx.State):
                 cancel_url=f"{base_url}/dashboard?upgrade_cancelled=true",
             )
             
+            print(f"[DEBUG] Checkout URL: {checkout_url}")
+            
             if checkout_url:
                 # Redirect to Stripe checkout
                 return rx.redirect(checkout_url)
             else:
-                self.error_message = "Failed to create checkout session. Please check your Stripe configuration."
+                self.error_message = "Failed to create checkout session. Check console for details."
                 
         except Exception as e:
             self.error_message = f"Error: {str(e)}"
             print(f"[ERROR] Stripe checkout failed: {e}")
+            import traceback
+            traceback.print_exc()
     
     def manage_subscription(self):
         """Redirect to Stripe customer portal for subscription management"""
