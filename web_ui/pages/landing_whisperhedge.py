@@ -20,6 +20,79 @@ class MobileMenuState(rx.State):
 def navbar() -> rx.Component:
     """Navigation bar for WhisperHedge landing page"""
     return rx.box(
+        # Desktop: 3-column grid layout for perfect centering
+        rx.box(
+            rx.grid(
+                # Left: Logo/Name (clickable to home, no link styling)
+                rx.box(
+                    brand_logo(size="navbar"),
+                    on_click=rx.redirect("/"),
+                    cursor="pointer",
+                ),
+                
+                # Center: Nav links (hidden on mobile)
+                rx.hstack(
+                    rx.link(
+                        "Features",
+                        href="/#features",
+                        size="3",
+                        color=COLORS.NAVBAR_LINK,
+                        _hover={"color": COLORS.NAVBAR_LINK_HOVER},
+                    ),
+                    rx.link(
+                        "How it works",
+                        href="/#how-it-works",
+                        size="3",
+                        color=COLORS.NAVBAR_LINK,
+                        _hover={"color": COLORS.NAVBAR_LINK_HOVER},
+                    ),
+                    rx.link(
+                        "Pricing",
+                        href="/#pricing",
+                        size="3",
+                        color=COLORS.NAVBAR_LINK,
+                        _hover={"color": COLORS.NAVBAR_LINK_HOVER},
+                    ),
+                    spacing="6",
+                    align="center",
+                    justify="center",
+                ),
+                
+                # Right: Login and Free Trial buttons (hidden on mobile)
+                rx.hstack(
+                    rx.link(
+                        rx.button(
+                            "Login",
+                            variant="ghost",
+                            size="3",
+                            color=COLORS.TEXT_PRIMARY,
+                        ),
+                        href="/login",
+                    ),
+                    rx.link(
+                        rx.button(
+                            "Free Trial",
+                            size="3",
+                            background=COLORS.BUTTON_PRIMARY_BG,
+                            color=COLORS.BUTTON_PRIMARY_TEXT,
+                            _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                        ),
+                        href="/signup",
+                    ),
+                    spacing="4",
+                    align="center",
+                    justify="end",
+                ),
+                
+                columns="3",
+                width="100%",
+                align="center",
+            ),
+            display=["none", "none", "grid"],
+            padding="1rem 2rem",
+        ),
+        
+        # Mobile: Simple hstack with hamburger
         rx.hstack(
             # Left: Logo/Name (clickable to home, no link styling)
             rx.box(
@@ -28,75 +101,19 @@ def navbar() -> rx.Component:
                 cursor="pointer",
             ),
             
-            # Center: Nav links (hidden on mobile)
-            rx.hstack(
-                rx.link(
-                    "Features",
-                    href="/#features",
-                    size="3",
-                    color=COLORS.NAVBAR_LINK,
-                    _hover={"color": COLORS.NAVBAR_LINK_HOVER},
-                ),
-                rx.link(
-                    "How it works",
-                    href="/#how-it-works",
-                    size="3",
-                    color=COLORS.NAVBAR_LINK,
-                    _hover={"color": COLORS.NAVBAR_LINK_HOVER},
-                ),
-                rx.link(
-                    "Pricing",
-                    href="/#pricing",
-                    size="3",
-                    color=COLORS.NAVBAR_LINK,
-                    _hover={"color": COLORS.NAVBAR_LINK_HOVER},
-                ),
-                spacing="6",
-                align="center",
-                display=["none", "none", "flex"],
-            ),
-            
-            # Right: Login and Free Trial buttons (hidden on mobile)
-            rx.hstack(
-                rx.link(
-                    rx.button(
-                        "Login",
-                        variant="ghost",
-                        size="3",
-                        color=COLORS.TEXT_PRIMARY,
-                    ),
-                    href="/login",
-                ),
-                rx.link(
-                    rx.button(
-                        "Free Trial",
-                        size="3",
-                        background=COLORS.BUTTON_PRIMARY_BG,
-                        color=COLORS.BUTTON_PRIMARY_TEXT,
-                        _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
-                    ),
-                    href="/signup",
-                ),
-                spacing="4",
-                align="center",
-                display=["none", "none", "flex"],
-            ),
-            
             # Mobile: Hamburger menu button (shown only on mobile)
-            rx.box(
-                rx.button(
-                    rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='3' y1='12' x2='21' y2='12'></line><line x1='3' y1='6' x2='21' y2='6'></line><line x1='3' y1='18' x2='21' y2='18'></line></svg>"),
-                    variant="ghost",
-                    size="3",
-                    on_click=MobileMenuState.toggle_menu,
-                ),
-                display=["block", "block", "none"],
+            rx.button(
+                rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='3' y1='12' x2='21' y2='12'></line><line x1='3' y1='6' x2='21' y2='6'></line><line x1='3' y1='18' x2='21' y2='18'></line></svg>"),
+                variant="ghost",
+                size="3",
+                on_click=MobileMenuState.toggle_menu,
             ),
             
             justify="between",
             align="center",
             width="100%",
             padding="1rem 2rem",
+            display=["flex", "flex", "none"],
         ),
         # Mobile menu dropdown
         rx.cond(

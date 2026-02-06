@@ -651,6 +651,32 @@ def mobile_pricing_section() -> rx.Component:
             background="rgba(15, 23, 42, 0.4)",
             width="100%",
         ),
+        # Disclaimer - moved directly after pricing cards
+        rx.box(
+            rx.vstack(
+                rx.text(
+                    "Overage charges are calculated based on your average monthly managed TVL and billed at the end of each cycle. Priority Calculation ensures your positions are analyzed and rebalanced first during high-volatility events.",
+                    size="1",
+                    color=COLORS.TEXT_MUTED,
+                    text_align="center",
+                    line_height="1.5",
+                ),
+                rx.text(
+                    "TVL (Total Value Locked) = LP Position Value + Hyperliquid Hedge Account Value",
+                    size="1",
+                    color=COLORS.TEXT_MUTED,
+                    text_align="center",
+                    line_height="1.5",
+                ),
+                spacing="2",
+            ),
+            padding="1rem",
+            border_radius="8px",
+            background="rgba(15, 23, 42, 0.3)",
+            border=f"1px solid #1E293B",
+            margin_top="1rem",
+            width="100%",
+        ),
         # Whale custom solution link
         rx.box(
             rx.text(
@@ -707,22 +733,6 @@ def mobile_pricing_section() -> rx.Component:
             spacing="2",
             align="center",
             margin_top="2rem",
-            width="100%",
-        ),
-        # Disclaimer
-        rx.box(
-            rx.text(
-                "Overage charges are calculated based on your average monthly managed TVL. Priority Calculation ensures your positions are rebalanced first during high-volatility events.",
-                size="1",
-                color=COLORS.TEXT_MUTED,
-                text_align="center",
-                line_height="1.5",
-            ),
-            padding="1rem",
-            border_radius="8px",
-            background="rgba(15, 23, 42, 0.3)",
-            border=f"1px solid #1E293B",
-            margin_top="1rem",
             width="100%",
         ),
         spacing="3",
