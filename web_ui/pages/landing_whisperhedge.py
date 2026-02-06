@@ -1444,6 +1444,31 @@ def desktop_pricing_content() -> rx.Component:
                         "1024px": {"columns": "4", "spacing": "4"},
                     },
                 ),
+                # Disclaimer footer - moved directly under pricing boxes
+                rx.box(
+                    rx.vstack(
+                        rx.text(
+                            "Overage charges are calculated based on your average monthly managed TVL and billed at the end of each cycle. Priority Calculation ensures your positions are analyzed and rebalanced first during high-volatility events.",
+                            size="2",
+                            color=COLORS.TEXT_MUTED,
+                            text_align="center",
+                            line_height="1.6",
+                        ),
+                        rx.text(
+                            "TVL (Total Value Locked) = LP Position Value + Hyperliquid Hedge Account Value",
+                            size="2",
+                            color=COLORS.TEXT_MUTED,
+                            text_align="center",
+                            line_height="1.6",
+                        ),
+                        spacing="2",
+                    ),
+                    padding="2rem",
+                    border_radius="8px",
+                    background="rgba(15, 23, 42, 0.3)",
+                    border=f"1px solid #1E293B",
+                    margin_top="2rem",
+                ),
                 # Whale custom solution link
                 rx.box(
                     rx.text(
@@ -1499,21 +1524,6 @@ def desktop_pricing_content() -> rx.Component:
                     wrap="wrap",
                     margin_top="3rem",
                     width="100%",
-                ),
-                # Disclaimer footer
-                rx.box(
-                    rx.text(
-                        "Overage charges are calculated based on your average monthly managed TVL and billed at the end of each cycle. Priority Calculation ensures your positions are analyzed and rebalanced first during high-volatility events.",
-                        size="2",
-                        color=COLORS.TEXT_MUTED,
-                        text_align="center",
-                        line_height="1.6",
-                    ),
-                    padding="2rem",
-                    border_radius="8px",
-                    background="rgba(15, 23, 42, 0.3)",
-                    border=f"1px solid #1E293B",
-                    margin_top="3rem",
                 ),
                 spacing="5",
                 align="center",

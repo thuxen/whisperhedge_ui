@@ -426,6 +426,15 @@ def overview_tab() -> rx.Component:
                     width="100%",
                 ),
                 
+                # TVL footnote
+                rx.text(
+                    "* TVL (Total Value Locked) = LP Position Value + Hyperliquid Hedge Account Value",
+                    size="1",
+                    color=COLORS.TEXT_MUTED,
+                    font_style="italic",
+                    margin_top="0.5rem",
+                ),
+                
                 # Beta tester badge
                 rx.cond(
                     ManagePlanState.is_beta_tester,
