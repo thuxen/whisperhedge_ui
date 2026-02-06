@@ -25,9 +25,14 @@ class ManagePlanState(rx.State):
     stripe_customer_id: str = ""
     stripe_subscription_id: str = ""
     
-    # Loading states
+    # UI state
+    active_tab: str = "overview"
     is_loading: bool = False
     error_message: str = ""
+    
+    def set_active_tab(self, tab: str):
+        """Switch between tabs"""
+        self.active_tab = tab
     
     def set_error_message(self, message: str):
         """Explicitly set error message"""
@@ -246,30 +251,480 @@ def plan_card(
     )
 
 
+def tab_button(label: str, tab_id: str) -> rx.Component:
+    """Tab button component"""
+    is_active = ManagePlanState.active_tab == tab_id
+    
+    return rx.box(
+        rx.text(
+            label,
+            size="3",
+            weight="medium",
+        ),
+        padding="0.75rem 1.5rem",
+        border_bottom=rx.cond(
+            is_active,
+            f"2px solid {COLORS.ACCENT_PRIMARY}",
+            "2px solid transparent",
+        ),
+        color=rx.cond(
+            is_active,
+            COLORS.TEXT_PRIMARY,
+            COLORS.TEXT_SECONDARY,
+        ),
+        cursor="pointer",
+        on_click=lambda: ManagePlanState.set_active_tab(tab_id),
+        _hover={
+            "color": COLORS.TEXT_PRIMARY,
+        },
+    )
+
+
+def overview_tab() -> rx.Component:
+    """Overview tab - shows current plan and usage"""
+    return rx.vstack(
+        # Current Plan Summary
+        rx.box(
+            rx.vstack(
+                rx.heading(
+                    "Current Plan",
+                    size="5",
+                    weight="bold",
+                    color=COLORS.TEXT_PRIMARY,
+                    margin_bottom="1rem",
+                ),
+                rx.hstack(
+                    rx.vstack(
+                        rx.text(
+                            ManagePlanState.current_display_name,
+                            size="7",
+                            weight="bold",
+                            color=COLORS.ACCENT_PRIMARY,
+                        ),
+                        rx.text(
+                            rx.cond(
+                                ManagePlanState.current_price > 0,
+                                f"${ManagePlanState.current_price:.2f}/month",
+                                "Free Forever",
+                            ),
+                            size="3",
+                            color=COLORS.TEXT_SECONDARY,
+                        ),
+                        align="start",
+                        spacing="1",
+                    ),
+                    rx.spacer(),
+                    rx.button(
+                        "Change Plan",
+                        size="3",
+                        variant="outline",
+                        on_click=lambda: ManagePlanState.set_active_tab("change_plan"),
+                    ),
+                    width="100%",
+                    align="center",
+                ),
+                align="start",
+                spacing="3",
+                width="100%",
+            ),
+            padding="2rem",
+            border_radius="8px",
+            border=f"1px solid {COLORS.CARD_BORDER}",
+            background=COLORS.CARD_BG,
+            margin_bottom="2rem",
+        ),
+        
+        # Usage Stats
+        rx.box(
+            rx.vstack(
+                rx.heading(
+                    "Current Usage",
+                    size="5",
+                    weight="bold",
+                    color=COLORS.TEXT_PRIMARY,
+                    margin_bottom="1rem",
+                ),
+                rx.grid(
+                    # TVL Usage
+                    rx.box(
+                        rx.vstack(
+                            rx.text(
+                                "Total Value Locked",
+                                size="2",
+                                color=COLORS.TEXT_SECONDARY,
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.hstack(
+                                rx.text(
+                                    f"${ManagePlanState.current_tvl:,.0f}",
+                                    size="6",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    f" / ${ManagePlanState.current_tvl_limit:,.0f}",
+                                    size="3",
+                                    color=COLORS.TEXT_MUTED,
+                                ),
+                                spacing="1",
+                            ),
+                            rx.progress(
+                                value=((ManagePlanState.current_tvl / ManagePlanState.current_tvl_limit) * 100).to(int),
+                                max=100,
+                                width="100%",
+                                margin_top="0.5rem",
+                            ),
+                            align="start",
+                            spacing="1",
+                        ),
+                        padding="1.5rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                    ),
+                    
+                    # Position Usage
+                    rx.box(
+                        rx.vstack(
+                            rx.text(
+                                "Active Positions",
+                                size="2",
+                                color=COLORS.TEXT_SECONDARY,
+                                margin_bottom="0.5rem",
+                            ),
+                            rx.hstack(
+                                rx.text(
+                                    ManagePlanState.current_positions,
+                                    size="6",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    f" / {ManagePlanState.current_position_limit}",
+                                    size="3",
+                                    color=COLORS.TEXT_MUTED,
+                                ),
+                                spacing="1",
+                            ),
+                            rx.progress(
+                                value=((ManagePlanState.current_positions / ManagePlanState.current_position_limit) * 100).to(int),
+                                max=100,
+                                width="100%",
+                                margin_top="0.5rem",
+                            ),
+                            align="start",
+                            spacing="1",
+                        ),
+                        padding="1.5rem",
+                        border_radius="8px",
+                        border=f"1px solid {COLORS.CARD_BORDER}",
+                        background=COLORS.CARD_BG,
+                    ),
+                    
+                    columns="2",
+                    spacing="4",
+                    width="100%",
+                ),
+                
+                # Beta tester badge
+                rx.cond(
+                    ManagePlanState.is_beta_tester,
+                    rx.box(
+                        rx.hstack(
+                            rx.icon("info", size=16, color="#10B981"),
+                            rx.text(
+                                "You're a beta tester with custom limits. Contact support to modify your plan.",
+                                size="2",
+                                color=COLORS.TEXT_SECONDARY,
+                            ),
+                            spacing="2",
+                        ),
+                        padding="1rem",
+                        border_radius="8px",
+                        background="rgba(16, 185, 129, 0.1)",
+                        border="1px solid rgba(16, 185, 129, 0.3)",
+                        margin_top="1rem",
+                    ),
+                ),
+                
+                align="start",
+                spacing="3",
+                width="100%",
+            ),
+            padding="2rem",
+            border_radius="8px",
+            border=f"1px solid {COLORS.CARD_BORDER}",
+            background=COLORS.CARD_BG,
+        ),
+        
+        align="start",
+        spacing="4",
+        width="100%",
+    )
+
+
+def change_plan_tab() -> rx.Component:
+    """Change Plan tab - shows all plan options for upgrade/downgrade"""
+    return rx.vstack(
+        rx.heading(
+            "Choose Your Plan",
+            size="5",
+            weight="bold",
+            color=COLORS.TEXT_PRIMARY,
+            margin_bottom="1rem",
+        ),
+        rx.text(
+            "Upgrade or downgrade your subscription at any time.",
+            size="3",
+            color=COLORS.TEXT_SECONDARY,
+            margin_bottom="2rem",
+        ),
+        
+        # Plan options grid
+        rx.grid(
+            # FREE
+            plan_card(
+                tier_name="free",
+                display_name="Free",
+                price=0.0,
+                positions="1 LP Position",
+                tvl="$2,500 TVL Hard Cap",
+                features=[
+                    "Standard Execution",
+                    "Hyperliquid Integration",
+                    "All Strategies",
+                ],
+                is_current=ManagePlanState.current_tier_name == "free",
+            ),
+            
+            # HOBBY
+            plan_card(
+                tier_name="hobby",
+                display_name="Hobby",
+                price=19.99,
+                positions="3 LP Positions",
+                tvl="$10,000 Included TVL",
+                features=[
+                    "Standard Execution",
+                    "Email Alerts",
+                    "0.1% (10 bps) on excess TVL",
+                ],
+                is_current=ManagePlanState.current_tier_name == "hobby",
+            ),
+            
+            # PRO
+            plan_card(
+                tier_name="pro",
+                display_name="Pro",
+                price=49.99,
+                positions="10 LP Positions",
+                tvl="$50,000 Included TVL",
+                features=[
+                    "Priority Execution",
+                    "Multi-DEX Roadmap Access",
+                    "0.05% (5 bps) on excess TVL",
+                ],
+                is_current=ManagePlanState.current_tier_name == "pro",
+                is_popular=True,
+                badge_color=COLORS.ACCENT_PRIMARY,
+            ),
+            
+            # ELITE
+            plan_card(
+                tier_name="elite",
+                display_name="Elite",
+                price=149.99,
+                positions="Unlimited LP Positions",
+                tvl="$250,000 Included TVL",
+                features=[
+                    "Elite Priority Calculation Engine",
+                    "Top-of-queue Rebalancing",
+                    "Direct Dev Support",
+                    "0.05% (5 bps) on excess TVL",
+                ],
+                is_current=ManagePlanState.current_tier_name == "elite",
+                badge_color="#D4AF37",
+            ),
+            
+            columns="4",
+            spacing="4",
+            width="100%",
+        ),
+        
+        align="start",
+        spacing="4",
+        width="100%",
+    )
+
+
+def billing_tab() -> rx.Component:
+    """Billing tab - manage payment method, view invoices, cancel subscription"""
+    return rx.vstack(
+        rx.heading(
+            "Billing Management",
+            size="5",
+            weight="bold",
+            color=COLORS.TEXT_PRIMARY,
+            margin_bottom="1rem",
+        ),
+        
+        # For paid users
+        rx.cond(
+            ManagePlanState.stripe_subscription_id != "",
+            rx.vstack(
+                # Stripe Portal Card
+                rx.box(
+                    rx.vstack(
+                        rx.hstack(
+                            rx.icon("credit-card", size=24, color=COLORS.ACCENT_PRIMARY),
+                            rx.vstack(
+                                rx.text(
+                                    "Payment Method & Invoices",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "Manage your payment method, view invoices, and download receipts.",
+                                    size="2",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="start",
+                                spacing="1",
+                            ),
+                            spacing="3",
+                            align="start",
+                            width="100%",
+                        ),
+                        rx.button(
+                            rx.hstack(
+                                rx.icon("external-link", size=16),
+                                rx.text("Open Stripe Billing Portal"),
+                                spacing="2",
+                            ),
+                            size="3",
+                            on_click=ManagePlanState.manage_subscription,
+                            width="fit-content",
+                        ),
+                        align="start",
+                        spacing="3",
+                        width="100%",
+                    ),
+                    padding="2rem",
+                    border_radius="8px",
+                    border=f"1px solid {COLORS.CARD_BORDER}",
+                    background=COLORS.CARD_BG,
+                    margin_bottom="1.5rem",
+                ),
+                
+                # Cancel Subscription Card
+                rx.box(
+                    rx.vstack(
+                        rx.hstack(
+                            rx.icon("alert-triangle", size=24, color="#EF4444"),
+                            rx.vstack(
+                                rx.text(
+                                    "Cancel Subscription",
+                                    size="4",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "You can cancel your subscription at any time. You'll retain access until the end of your billing period.",
+                                    size="2",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="start",
+                                spacing="1",
+                            ),
+                            spacing="3",
+                            align="start",
+                            width="100%",
+                        ),
+                        rx.button(
+                            "Cancel Subscription",
+                            size="3",
+                            color_scheme="red",
+                            variant="outline",
+                            on_click=ManagePlanState.manage_subscription,
+                            width="fit-content",
+                        ),
+                        align="start",
+                        spacing="3",
+                        width="100%",
+                    ),
+                    padding="2rem",
+                    border_radius="8px",
+                    border="1px solid rgba(239, 68, 68, 0.3)",
+                    background="rgba(239, 68, 68, 0.05)",
+                ),
+                
+                align="start",
+                spacing="4",
+                width="100%",
+            ),
+            # Free tier message
+            rx.box(
+                rx.vstack(
+                    rx.icon("info", size=24, color=COLORS.TEXT_SECONDARY),
+                    rx.text(
+                        "You're on the Free plan",
+                        size="4",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                    ),
+                    rx.text(
+                        "Upgrade to a paid plan to access billing management features.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                    ),
+                    rx.button(
+                        "View Plans",
+                        size="3",
+                        on_click=lambda: ManagePlanState.set_active_tab("change_plan"),
+                        margin_top="1rem",
+                    ),
+                    align="center",
+                    spacing="3",
+                ),
+                padding="3rem",
+                border_radius="8px",
+                border=f"1px solid {COLORS.CARD_BORDER}",
+                background=COLORS.CARD_BG,
+                text_align="center",
+            ),
+        ),
+        
+        align="start",
+        spacing="4",
+        width="100%",
+    )
+
+
 def manage_plan_content() -> rx.Component:
     """Manage Plan content - for use within dashboard"""
     return rx.vstack(
         # Header
         rx.heading(
-            "Manage Your Plan",
+            "Billing & Subscription",
             size="8",
             weight="bold",
             margin_bottom="0.5rem",
             color=COLORS.TEXT_PRIMARY,
         ),
         rx.text(
-            "Upgrade, downgrade, or manage your subscription.",
+            "Manage your plan, view usage, and update billing details.",
             size="4",
             color=COLORS.TEXT_SECONDARY,
-            margin_bottom="1rem",
+            margin_bottom="2rem",
         ),
         
-        # Info/Error message
+        # Error message
         rx.cond(
             ManagePlanState.error_message != "",
             rx.box(
                 rx.hstack(
-                    rx.icon("info", size=18, color="#3B82F6"),
+                    rx.icon("alert-triangle", size=18, color="#EF4444"),
                     rx.text(
                         ManagePlanState.error_message,
                         size="3",
@@ -287,232 +742,45 @@ def manage_plan_content() -> rx.Component:
                 ),
                 padding="1rem",
                 border_radius="8px",
-                background="rgba(59, 130, 246, 0.1)",
-                border="1px solid rgba(59, 130, 246, 0.3)",
+                background="rgba(239, 68, 68, 0.1)",
+                border="1px solid rgba(239, 68, 68, 0.3)",
                 margin_bottom="2rem",
                 max_width="1400px",
                 margin_x="auto",
                 width="100%",
             ),
         ),
-                    
-                    # Current usage stats
-                    rx.box(
-                        rx.box(
-                            rx.vstack(
-                                rx.heading(
-                                    "Current Usage",
-                                    size="5",
-                                    weight="bold",
-                                    color=COLORS.TEXT_PRIMARY,
-                                    margin_bottom="1rem",
-                                ),
-                                rx.grid(
-                                    # TVL Usage
-                                    rx.box(
-                                        rx.vstack(
-                                            rx.text(
-                                                "Total Value Locked",
-                                                size="2",
-                                                color=COLORS.TEXT_SECONDARY,
-                                                margin_bottom="0.5rem",
-                                            ),
-                                            rx.hstack(
-                                                rx.text(
-                                                    f"${ManagePlanState.current_tvl:,.0f}",
-                                                    size="6",
-                                                    weight="bold",
-                                                    color=COLORS.TEXT_PRIMARY,
-                                                ),
-                                                rx.text(
-                                                    f" / ${ManagePlanState.current_tvl_limit:,.0f}",
-                                                    size="3",
-                                                    color=COLORS.TEXT_MUTED,
-                                                ),
-                                                spacing="1",
-                                            ),
-                                            align="start",
-                                            spacing="1",
-                                        ),
-                                        padding="1.5rem",
-                                        border_radius="8px",
-                                        border=f"1px solid {COLORS.CARD_BORDER}",
-                                        background=COLORS.CARD_BG,
-                                    ),
-                                    
-                                    # Position Usage
-                                    rx.box(
-                                        rx.vstack(
-                                            rx.text(
-                                                "Active Positions",
-                                                size="2",
-                                                color=COLORS.TEXT_SECONDARY,
-                                                margin_bottom="0.5rem",
-                                            ),
-                                            rx.hstack(
-                                                rx.text(
-                                                    ManagePlanState.current_positions,
-                                                    size="6",
-                                                    weight="bold",
-                                                    color=COLORS.TEXT_PRIMARY,
-                                                ),
-                                                rx.text(
-                                                    f" / {ManagePlanState.current_position_limit}",
-                                                    size="3",
-                                                    color=COLORS.TEXT_MUTED,
-                                                ),
-                                                spacing="1",
-                                            ),
-                                            align="start",
-                                            spacing="1",
-                                        ),
-                                        padding="1.5rem",
-                                        border_radius="8px",
-                                        border=f"1px solid {COLORS.CARD_BORDER}",
-                                        background=COLORS.CARD_BG,
-                                    ),
-                                    
-                                    columns="2",
-                                    spacing="4",
-                                    width="100%",
-                                ),
-                                
-                                # Beta tester badge
-                                rx.cond(
-                                    ManagePlanState.is_beta_tester,
-                                    rx.box(
-                                        rx.hstack(
-                                            rx.icon("info", size=16, color="#10B981"),
-                                            rx.text(
-                                                "You're a beta tester with custom limits. Contact support to modify your plan.",
-                                                size="2",
-                                                color=COLORS.TEXT_SECONDARY,
-                                            ),
-                                            spacing="2",
-                                        ),
-                                        padding="1rem",
-                                        border_radius="8px",
-                                        background="rgba(16, 185, 129, 0.1)",
-                                        border="1px solid rgba(16, 185, 129, 0.3)",
-                                        margin_top="1rem",
-                                    ),
-                                ),
-                                
-                                align="start",
-                                spacing="3",
-                                width="100%",
-                            ),
-                            padding="2rem",
-                            border_radius="8px",
-                            border=f"1px solid {COLORS.CARD_BORDER}",
-                            background=COLORS.CARD_BG,
-                        ),
-                        max_width="1400px",
-                        margin_x="auto",
-                        margin_bottom="3rem",
-                        width="100%",
-                    ),
-                    
-                    # Plan options grid
-                    rx.box(
-                        rx.grid(
-                            # FREE
-                            plan_card(
-                                tier_name="free",
-                                display_name="Free",
-                                price=0.0,
-                                positions="1 LP Position",
-                                tvl="$2,500 TVL Hard Cap",
-                                features=[
-                                    "Standard Execution",
-                                    "Hyperliquid Integration",
-                                    "All Strategies",
-                                ],
-                                is_current=ManagePlanState.current_tier_name == "free",
-                            ),
-                            
-                            # HOBBY
-                            plan_card(
-                                tier_name="hobby",
-                                display_name="Hobby",
-                                price=19.99,
-                                positions="3 LP Positions",
-                                tvl="$10,000 Included TVL",
-                                features=[
-                                    "Standard Execution",
-                                    "Email Alerts",
-                                    "0.1% (10 bps) on excess TVL",
-                                ],
-                                is_current=ManagePlanState.current_tier_name == "hobby",
-                            ),
-                            
-                            # PRO
-                            plan_card(
-                                tier_name="pro",
-                                display_name="Pro",
-                                price=49.99,
-                                positions="10 LP Positions",
-                                tvl="$50,000 Included TVL",
-                                features=[
-                                    "Priority Execution",
-                                    "Multi-DEX Roadmap Access",
-                                    "0.05% (5 bps) on excess TVL",
-                                ],
-                                is_current=ManagePlanState.current_tier_name == "pro",
-                                is_popular=True,
-                                badge_color=COLORS.ACCENT_PRIMARY,
-                            ),
-                            
-                            # ELITE
-                            plan_card(
-                                tier_name="elite",
-                                display_name="Elite",
-                                price=149.99,
-                                positions="Unlimited LP Positions",
-                                tvl="$250,000 Included TVL",
-                                features=[
-                                    "Elite Priority Calculation Engine",
-                                    "Top-of-queue Rebalancing",
-                                    "Direct Dev Support",
-                                    "0.05% (5 bps) on excess TVL",
-                                ],
-                                is_current=ManagePlanState.current_tier_name == "elite",
-                                badge_color="#D4AF37",
-                            ),
-                            
-                            columns="4",
-                            spacing="4",
-                            width="100%",
-                        ),
-                        max_width="1400px",
-                        margin_x="auto",
-                        width="100%",
-                    ),
-                    
-                    # Manage subscription button (for existing paid subscribers)
-                    rx.cond(
-                        ManagePlanState.stripe_subscription_id != "",
-                        rx.box(
-                            rx.vstack(
-                                rx.divider(margin_y="2rem"),
-                                rx.text(
-                                    "Need to update payment method or cancel?",
-                                    size="3",
-                                    color=COLORS.TEXT_SECONDARY,
-                                    text_align="center",
-                                ),
-                                rx.button(
-                                    "Manage Subscription in Stripe",
-                                    size="3",
-                                    variant="outline",
-                                    on_click=ManagePlanState.manage_subscription,
-                                ),
-                                align="center",
-                                spacing="3",
-                            ),
-                            width="100%",
-                        ),
-                    ),
+        
+        # Tab Navigation
+        rx.box(
+            rx.hstack(
+                tab_button("Overview", "overview"),
+                tab_button("Change Plan", "change_plan"),
+                tab_button("Billing", "billing"),
+                spacing="0",
+                border_bottom=f"1px solid {COLORS.BORDER_DEFAULT}",
+            ),
+            margin_bottom="2rem",
+            max_width="1400px",
+            margin_x="auto",
+            width="100%",
+        ),
+        
+        # Tab Content
+        rx.box(
+            rx.cond(
+                ManagePlanState.active_tab == "overview",
+                overview_tab(),
+                rx.cond(
+                    ManagePlanState.active_tab == "change_plan",
+                    change_plan_tab(),
+                    billing_tab(),
+                ),
+            ),
+            max_width="1400px",
+            margin_x="auto",
+            width="100%",
+        ),
                     
         align="start",
         spacing="4",

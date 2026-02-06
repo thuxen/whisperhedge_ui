@@ -5,7 +5,7 @@ This file should be imported and registered with your Reflex app
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from ..services.stripe_service import verify_webhook_signature
-from .stripe_webhook_simple import process_stripe_webhook
+from .stripe_webhook import process_stripe_webhook
 
 # Create router for webhook endpoints
 webhook_router = APIRouter(prefix="/api", tags=["webhooks"])

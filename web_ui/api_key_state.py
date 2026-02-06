@@ -46,6 +46,7 @@ class APIKeyState(rx.State):
     show_api_secret: bool = False
     show_private_key: bool = False
     is_editing: bool = False
+    _api_keys_loaded: bool = False  # Guard flag to prevent duplicate loading
     
     def clear_messages(self):
         self.error_message = ""
@@ -118,6 +119,15 @@ class APIKeyState(rx.State):
         self.loading_key_id = ""
     
     async def load_api_keys(self):
+        # Guard against duplicate loading
+        if self._api_keys_loaded:
+            # Still need to mark as loaded for dashboard loading state
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            if not dashboard_loading.api_keys_loaded:
+                dashboard_loading.mark_api_keys_loaded()
+            return
+        
         self.is_loading = True
         self.clear_messages()
         
@@ -170,6 +180,7 @@ class APIKeyState(rx.State):
             await self._update_overview_stats()
             
             # Mark API keys as loaded for dashboard loading state
+            self._api_keys_loaded = True
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             dashboard_loading.mark_api_keys_loaded()
@@ -177,6 +188,7 @@ class APIKeyState(rx.State):
         except Exception as e:
             self.error_message = "Failed to load API keys. Please try again."
             # Mark as loaded even on error to prevent infinite loading
+            self._api_keys_loaded = True
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             dashboard_loading.mark_api_keys_loaded()
@@ -386,6 +398,7 @@ class APIKeyState(rx.State):
                 self.success_message = f"API keys for '{account_name}' saved successfully!"
                 yield rx.toast.success(f"'{account_name}' API key saved successfully!", duration=3000)
             
+            self._api_keys_loaded = False  # Reset flag to allow reload
             await self.load_api_keys()
             self.clear_form()
             
@@ -429,6 +442,7 @@ class APIKeyState(rx.State):
             supabase.table("user_api_keys").delete().eq("id", self.loading_key_id).eq("user_id", auth_state.user_id).execute()
             
             self.success_message = f"API keys for '{account_name}' deleted successfully!"
+            self._api_keys_loaded = False  # Reset flag to allow reload
             await self.load_api_keys()
             
             if self.selected_key_id == self.loading_key_id:
@@ -456,6 +470,7 @@ class APIKeyState(rx.State):
             if key_data:
                 new_status = not key_data.is_active
                 supabase.table("user_api_keys").update({"is_active": new_status}).eq("id", key_id).eq("user_id", auth_state.user_id).execute()
+                self._api_keys_loaded = False  # Reset flag to allow reload
                 await self.load_api_keys()
         except Exception as e:
             self.error_message = "Failed to update status. Please try again."

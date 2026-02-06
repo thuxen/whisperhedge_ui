@@ -86,6 +86,7 @@ class LPPositionState(rx.State):
     hedge_ratio: int = 80
     selected_hedge_wallet: str = ""
     _cached_wallets: list[str] = []  # Cache for available wallets
+    _wallets_loaded: bool = False  # Guard flag to prevent duplicate wallet loading
     
     # Balance tracking for selected API key
     selected_wallet_balance: float = 0.0
@@ -247,6 +248,15 @@ class LPPositionState(rx.State):
     
     async def load_wallets(self):
         """Load available API keys for wallet selector - called on mount"""
+        # Guard against duplicate loading
+        if self._wallets_loaded:
+            # Still need to mark as loaded for dashboard loading state
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            if not dashboard_loading.wallets_loaded:
+                dashboard_loading.mark_wallets_loaded()
+            return
+        
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
@@ -287,11 +297,13 @@ class LPPositionState(rx.State):
                     await self.fetch_wallet_balance()
             
             # Mark wallets as loaded for dashboard loading state
+            self._wallets_loaded = True
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             dashboard_loading.mark_wallets_loaded()
         except Exception as e:
             # Mark as loaded even on error to prevent infinite loading
+            self._wallets_loaded = True
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             dashboard_loading.mark_wallets_loaded()
@@ -540,8 +552,7 @@ class LPPositionState(rx.State):
         # Guard against duplicate loading
         if self._positions_loaded:
             print("Positions already loaded, skipping duplicate load")
-            # Check if dashboard loading state already has positions marked as loaded
-            # to avoid unnecessary state updates that cause UI flashes
+            # Still need to mark as loaded for dashboard loading state
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             if not dashboard_loading.positions_loaded:
