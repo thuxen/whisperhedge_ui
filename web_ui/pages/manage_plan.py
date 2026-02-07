@@ -63,7 +63,7 @@ class ManagePlanState(rx.State):
             # Initialize Supabase client
             supabase = create_client(
                 os.getenv("SUPABASE_URL"),
-                os.getenv("SUPABASE_ANON_KEY")
+                os.getenv("SUPABASE_KEY")
             )
             
             # Query user subscription
@@ -127,7 +127,7 @@ class ManagePlanState(rx.State):
                 user_id=user_id,
                 user_email=user_email,
                 tier_name=tier_name,
-                success_url=f"{base_url}/dashboard?upgrade_success=true",
+                success_url=f"{base_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
                 cancel_url=f"{base_url}/dashboard?upgrade_cancelled=true",
             )
             
