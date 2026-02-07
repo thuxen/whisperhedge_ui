@@ -1,4 +1,5 @@
 import reflex as rx
+import sys
 from ..branding import COLORS
 from ..state import AuthState
 
@@ -44,17 +45,20 @@ class ManagePlanState(rx.State):
             import os
             from supabase import create_client
             
-            print("[PLAN] Loading current plan from Supabase")
+            print("[PLAN] Loading current plan from Supabase", flush=True)
+            sys.stdout.flush()
             
             # Get user ID from auth state
             auth_state = self.get_state(AuthState)
             user_id = auth_state.user_id
             
             if not user_id:
-                print("[PLAN] No user_id found, skipping plan load")
+                print("[PLAN] No user_id found, skipping plan load", flush=True)
+                sys.stdout.flush()
                 return
             
-            print(f"[PLAN]   - User ID: {user_id}")
+            print(f"[PLAN]   - User ID: {user_id}", flush=True)
+            sys.stdout.flush()
             
             # Initialize Supabase client
             supabase = create_client(
@@ -67,24 +71,32 @@ class ManagePlanState(rx.State):
             
             if result.data and len(result.data) > 0:
                 plan = result.data[0]
-                print(f"[PLAN] ✓ Plan loaded from database")
-                print(f"[PLAN]   - Tier: {plan.get('tier_name', 'free')}")
-                print(f"[PLAN]   - Status: {plan.get('status', 'N/A')}")
-                print(f"[PLAN]   - Stripe Customer: {plan.get('stripe_customer_id', 'N/A')}")
-                print(f"[PLAN]   - Stripe Subscription: {plan.get('stripe_subscription_id', 'N/A')}")
+                print(f"[PLAN] ✓ Plan loaded from database", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Tier: {plan.get('tier_name', 'free')}", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Status: {plan.get('status', 'N/A')}", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Stripe Customer: {plan.get('stripe_customer_id', 'N/A')}", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Stripe Subscription: {plan.get('stripe_subscription_id', 'N/A')}", flush=True)
+                sys.stdout.flush()
                 
                 # Update state with plan data
                 self.current_tier_name = plan.get("tier_name", "free")
                 self.stripe_customer_id = plan.get("stripe_customer_id", "")
                 self.stripe_subscription_id = plan.get("stripe_subscription_id", "")
             else:
-                print("[PLAN] No subscription found in database, using free tier")
+                print("[PLAN] No subscription found in database, using free tier", flush=True)
+                sys.stdout.flush()
                 self.current_tier_name = "free"
                 
         except Exception as e:
-            print(f"[PLAN ERROR] Failed to load plan: {e}")
+            print(f"[PLAN ERROR] Failed to load plan: {e}", flush=True)
+            sys.stdout.flush()
             import traceback
             traceback.print_exc()
+            sys.stdout.flush()
     
     async def create_checkout_session(self, tier_name: str):
         """Create Stripe checkout session for plan upgrade"""
@@ -92,19 +104,23 @@ class ManagePlanState(rx.State):
             import os
             from ..services.stripe_service import create_checkout_session
             
-            print(f"[CHECKOUT] Initiating checkout for tier: {tier_name}")
+            print(f"[CHECKOUT] Initiating checkout for tier: {tier_name}", flush=True)
+            sys.stdout.flush()
             
             # Get user info from auth state - need to get the parent state instance
             auth_state = await self.get_state(AuthState)
             user_id = auth_state.user_id
             user_email = auth_state.user_email
             
-            print(f"[CHECKOUT]   - User ID: {user_id}")
-            print(f"[CHECKOUT]   - User Email: {user_email}")
+            print(f"[CHECKOUT]   - User ID: {user_id}", flush=True)
+            sys.stdout.flush()
+            print(f"[CHECKOUT]   - User Email: {user_email}", flush=True)
+            sys.stdout.flush()
             
             # Get base URL for redirects - use env var or default to localhost
             base_url = os.getenv("APP_URL", "http://localhost:3000")
-            print(f"[CHECKOUT]   - Base URL: {base_url}")
+            print(f"[CHECKOUT]   - Base URL: {base_url}", flush=True)
+            sys.stdout.flush()
             
             # Create Stripe checkout session
             checkout_url = create_checkout_session(
@@ -116,18 +132,22 @@ class ManagePlanState(rx.State):
             )
             
             if checkout_url:
-                print(f"[CHECKOUT] ✓ Redirecting to Stripe: {checkout_url}")
+                print(f"[CHECKOUT] ✓ Redirecting to Stripe: {checkout_url}", flush=True)
+                sys.stdout.flush()
                 # Redirect to Stripe checkout
                 return rx.redirect(checkout_url)
             else:
-                print(f"[CHECKOUT ERROR] No checkout URL returned")
+                print(f"[CHECKOUT ERROR] No checkout URL returned", flush=True)
+                sys.stdout.flush()
                 self.error_message = "Failed to create checkout session. Check console for details."
                 
         except Exception as e:
             self.error_message = f"Error: {str(e)}"
-            print(f"[CHECKOUT ERROR] Stripe checkout failed: {e}")
+            print(f"[CHECKOUT ERROR] Stripe checkout failed: {e}", flush=True)
+            sys.stdout.flush()
             import traceback
             traceback.print_exc()
+            sys.stdout.flush()
     
     def manage_subscription(self):
         """Redirect to Stripe customer portal for subscription management"""
@@ -135,11 +155,13 @@ class ManagePlanState(rx.State):
             import os
             from ..services.stripe_service import create_customer_portal_session
             
-            print(f"[PORTAL] Opening customer portal for customer: {self.stripe_customer_id}")
+            print(f"[PORTAL] Opening customer portal for customer: {self.stripe_customer_id}", flush=True)
+            sys.stdout.flush()
             
             # Get base URL for return redirect - use env var or default to localhost
             base_url = os.getenv("APP_URL", "http://localhost:3000")
-            print(f"[PORTAL]   - Return URL: {base_url}/dashboard")
+            print(f"[PORTAL]   - Return URL: {base_url}/dashboard", flush=True)
+            sys.stdout.flush()
             
             # Create customer portal session
             portal_url = create_customer_portal_session(
@@ -148,40 +170,52 @@ class ManagePlanState(rx.State):
             )
             
             if portal_url:
-                print(f"[PORTAL] ✓ Redirecting to portal: {portal_url}")
+                print(f"[PORTAL] ✓ Redirecting to portal: {portal_url}", flush=True)
+                sys.stdout.flush()
                 # Redirect to Stripe customer portal
                 return rx.redirect(portal_url)
             else:
-                print(f"[PORTAL ERROR] No portal URL returned")
+                print(f"[PORTAL ERROR] No portal URL returned", flush=True)
+                sys.stdout.flush()
                 self.error_message = "Failed to open customer portal. Please contact support."
                 
         except Exception as e:
             self.error_message = f"Error: {str(e)}"
-            print(f"[PORTAL ERROR] Customer portal failed: {e}")
+            print(f"[PORTAL ERROR] Customer portal failed: {e}", flush=True)
+            sys.stdout.flush()
             import traceback
             traceback.print_exc()
+            sys.stdout.flush()
     
     def on_load(self):
         """Called when the manage plan page loads"""
-        print("[PAGE] Manage Plan page loading")
-        print(f"[PAGE]   - Current URL: {self.router.page.path}")
-        print(f"[PAGE]   - Query params: {self.router.page.params}")
+        print("[PAGE] Manage Plan page loading", flush=True)
+        sys.stdout.flush()
+        print(f"[PAGE]   - Current URL: {self.router.page.path}", flush=True)
+        sys.stdout.flush()
+        print(f"[PAGE]   - Query params: {self.router.page.params}", flush=True)
+        sys.stdout.flush()
         
         # Check for success/cancel query params from Stripe redirect
         upgrade_success = self.router.page.params.get("upgrade_success")
         upgrade_cancelled = self.router.page.params.get("upgrade_cancelled")
         
         if upgrade_success:
-            print("[PAGE] ✓ Stripe checkout completed successfully")
-            print("[PAGE]   - Loading updated plan from database...")
+            print("[PAGE] ✓ Stripe checkout completed successfully", flush=True)
+            sys.stdout.flush()
+            print("[PAGE]   - Loading updated plan from database...", flush=True)
+            sys.stdout.flush()
             self.load_current_plan()
         elif upgrade_cancelled:
-            print("[PAGE] ⚠ Stripe checkout was cancelled")
+            print("[PAGE] ⚠ Stripe checkout was cancelled", flush=True)
+            sys.stdout.flush()
         else:
-            print("[PAGE]   - Normal page load, loading current plan...")
+            print("[PAGE]   - Normal page load, loading current plan...", flush=True)
+            sys.stdout.flush()
             self.load_current_plan()
         
-        print("[PAGE] Page load complete")
+        print("[PAGE] Page load complete", flush=True)
+        sys.stdout.flush()
 
 
 def plan_card(

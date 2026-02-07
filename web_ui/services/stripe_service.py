@@ -2,6 +2,7 @@
 Stripe integration service for subscription management
 """
 import os
+import sys
 import stripe
 from typing import Optional, Dict, Any
 
@@ -38,18 +39,25 @@ def create_checkout_session(
         Checkout session URL or None if error
     """
     try:
-        print(f"[STRIPE] Creating checkout session for user {user_id}")
-        print(f"[STRIPE]   - Email: {user_email}")
-        print(f"[STRIPE]   - Tier: {tier_name}")
-        print(f"[STRIPE]   - Success URL: {success_url}")
-        print(f"[STRIPE]   - Cancel URL: {cancel_url}")
+        print(f"[STRIPE] Creating checkout session for user {user_id}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Email: {user_email}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Tier: {tier_name}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Success URL: {success_url}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Cancel URL: {cancel_url}", flush=True)
+        sys.stdout.flush()
         
         price_id = STRIPE_PRICE_IDS.get(tier_name)
         if not price_id:
-            print(f"[STRIPE ERROR] Invalid tier name: {tier_name}")
+            print(f"[STRIPE ERROR] Invalid tier name: {tier_name}", flush=True)
+            sys.stdout.flush()
             raise ValueError(f"Invalid tier name: {tier_name}")
         
-        print(f"[STRIPE]   - Price ID: {price_id}")
+        print(f"[STRIPE]   - Price ID: {price_id}", flush=True)
+        sys.stdout.flush()
         
         session = stripe.checkout.Session.create(
             customer_email=user_email,
@@ -71,15 +79,20 @@ def create_checkout_session(
             billing_address_collection="auto",
         )
         
-        print(f"[STRIPE] ✓ Checkout session created: {session.id}")
-        print(f"[STRIPE]   - Session URL: {session.url}")
-        print(f"[STRIPE]   - Customer: {session.customer}")
+        print(f"[STRIPE] ✓ Checkout session created: {session.id}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Session URL: {session.url}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Customer: {session.customer}", flush=True)
+        sys.stdout.flush()
         
         return session.url
     except Exception as e:
-        print(f"[STRIPE ERROR] Failed to create checkout session: {e}")
+        print(f"[STRIPE ERROR] Failed to create checkout session: {e}", flush=True)
+        sys.stdout.flush()
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return None
 
 
@@ -98,23 +111,30 @@ def create_customer_portal_session(
         Portal session URL or None if error
     """
     try:
-        print(f"[STRIPE] Creating customer portal session")
-        print(f"[STRIPE]   - Customer ID: {customer_id}")
-        print(f"[STRIPE]   - Return URL: {return_url}")
+        print(f"[STRIPE] Creating customer portal session", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Customer ID: {customer_id}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Return URL: {return_url}", flush=True)
+        sys.stdout.flush()
         
         session = stripe.billing_portal.Session.create(
             customer=customer_id,
             return_url=return_url,
         )
         
-        print(f"[STRIPE] ✓ Portal session created: {session.id}")
-        print(f"[STRIPE]   - Portal URL: {session.url}")
+        print(f"[STRIPE] ✓ Portal session created: {session.id}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Portal URL: {session.url}", flush=True)
+        sys.stdout.flush()
         
         return session.url
     except Exception as e:
-        print(f"[STRIPE ERROR] Failed to create portal session: {e}")
+        print(f"[STRIPE ERROR] Failed to create portal session: {e}", flush=True)
+        sys.stdout.flush()
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return None
 
 
@@ -129,7 +149,8 @@ def get_subscription_details(subscription_id: str) -> Optional[Dict[str, Any]]:
         Subscription details dict or None if error
     """
     try:
-        print(f"[STRIPE] Retrieving subscription details: {subscription_id}")
+        print(f"[STRIPE] Retrieving subscription details: {subscription_id}", flush=True)
+        sys.stdout.flush()
         
         subscription = stripe.Subscription.retrieve(subscription_id)
         
@@ -142,15 +163,20 @@ def get_subscription_details(subscription_id: str) -> Optional[Dict[str, Any]]:
             "cancel_at_period_end": subscription.cancel_at_period_end,
         }
         
-        print(f"[STRIPE] ✓ Subscription retrieved")
-        print(f"[STRIPE]   - Status: {details['status']}")
-        print(f"[STRIPE]   - Customer: {details['customer']}")
+        print(f"[STRIPE] ✓ Subscription retrieved", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Status: {details['status']}", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Customer: {details['customer']}", flush=True)
+        sys.stdout.flush()
         
         return details
     except Exception as e:
-        print(f"[STRIPE ERROR] Failed to retrieve subscription: {e}")
+        print(f"[STRIPE ERROR] Failed to retrieve subscription: {e}", flush=True)
+        sys.stdout.flush()
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return None
 
 
