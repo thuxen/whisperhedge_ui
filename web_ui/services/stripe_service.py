@@ -12,9 +12,10 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 # Stripe Price IDs - Set these in your environment variables after creating products in Stripe
 STRIPE_PRICE_IDS = {
-    "hobby": os.getenv("STRIPE_PRICE_HOBBY", ""),  # $19.99/mo
-    "pro": os.getenv("STRIPE_PRICE_PRO", ""),      # $49.99/mo
-    "elite": os.getenv("STRIPE_PRICE_ELITE", ""),  # $149.99/mo
+    "hobby": os.getenv("STRIPE_PRICE_HOBBY", ""),    # Legacy tier (if still used)
+    "pro": os.getenv("STRIPE_PRICE_PRO", ""),        # $49.99/mo - $50k TVL
+    "expert": os.getenv("STRIPE_PRICE_EXPERT", ""),  # $89.99/mo - $150k TVL
+    "elite": os.getenv("STRIPE_PRICE_ELITE", ""),    # $199.99/mo - $500k TVL
 }
 
 
@@ -31,7 +32,7 @@ def create_checkout_session(
     Args:
         user_id: User's UUID from Supabase
         user_email: User's email
-        tier_name: Plan tier name (hobby, pro, elite)
+        tier_name: Plan tier name (pro, expert, elite)
         success_url: URL to redirect after successful payment
         cancel_url: URL to redirect if user cancels
         
