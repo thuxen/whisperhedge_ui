@@ -7,57 +7,9 @@ from .plan_status import plan_status_widget
 
 class DashboardState(rx.State):
     active_section: str = "api_keys"
-    payment_processing: bool = False
-    payment_success_message: str = ""
     
     def set_section(self, section: str):
         self.active_section = section
-    
-    async def on_load(self):
-        """Check for Stripe redirect and process payment if needed"""
-        import sys
-        import os
-        
-        # Check for stripe_session_id in URL params
-        stripe_session_id = self.router.page.params.get("stripe_session_id", "")
-        
-        if stripe_session_id:
-            print("=" * 80, flush=True)
-            sys.stdout.flush()
-            print(f"[DASHBOARD] Stripe redirect detected with session_id: {stripe_session_id}", flush=True)
-            sys.stdout.flush()
-            
-            self.payment_processing = True
-            
-            try:
-                # Import payment processing function
-                from ..pages.payment_success import PaymentSuccessState
-                
-                # Get payment success state and trigger processing
-                payment_state = await self.get_state(PaymentSuccessState)
-                await payment_state.trigger_payment_processing(stripe_session_id)
-                
-                print(f"[DASHBOARD] Payment processing completed successfully", flush=True)
-                sys.stdout.flush()
-                
-                self.payment_success_message = "Payment successful! Your plan has been upgraded."
-                
-                # Redirect to clean URL without session_id after 2 seconds
-                yield rx.call_script(
-                    "setTimeout(() => { window.location.href = '/dashboard?payment_success=true'; }, 2000);"
-                )
-                
-            except Exception as e:
-                print(f"[DASHBOARD ERROR] Payment processing failed: {e}", flush=True)
-                sys.stdout.flush()
-                import traceback
-                traceback.print_exc()
-                sys.stdout.flush()
-                
-                self.payment_success_message = f"Payment processing error: {str(e)}"
-            
-            finally:
-                self.payment_processing = False
 
 
 def sidebar_item(label: str, section: str, icon: str = "circle") -> rx.Component:
