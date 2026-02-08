@@ -155,7 +155,21 @@ class ManagePlanState(rx.State):
             
             # Get base URL for redirects - use env var or default to localhost
             base_url = os.getenv("APP_URL", "http://localhost:3000")
-            print(f"[CHECKOUT]   - Base URL: {base_url}", flush=True)
+            reflex_domain = os.getenv("REFLEX_DOMAIN", "")
+            print(f"[CHECKOUT]   - APP_URL env var: {os.getenv('APP_URL', 'NOT SET')}", flush=True)
+            sys.stdout.flush()
+            print(f"[CHECKOUT]   - REFLEX_DOMAIN env var: {reflex_domain if reflex_domain else 'NOT SET'}", flush=True)
+            sys.stdout.flush()
+            print(f"[CHECKOUT]   - Using Base URL: {base_url}", flush=True)
+            sys.stdout.flush()
+            
+            # Construct success and cancel URLs
+            success_url = f"{base_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+            cancel_url = f"{base_url}/dashboard?upgrade_cancelled=true"
+            
+            print(f"[CHECKOUT]   - Success URL: {success_url}", flush=True)
+            sys.stdout.flush()
+            print(f"[CHECKOUT]   - Cancel URL: {cancel_url}", flush=True)
             sys.stdout.flush()
             
             # Create Stripe checkout session
@@ -163,8 +177,8 @@ class ManagePlanState(rx.State):
                 user_id=user_id,
                 user_email=user_email,
                 tier_name=tier_name,
-                success_url=f"{base_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url=f"{base_url}/dashboard?upgrade_cancelled=true",
+                success_url=success_url,
+                cancel_url=cancel_url,
             )
             
             if checkout_url:
