@@ -15,13 +15,14 @@ from .pages import (
 from .pages.manage_plan import manage_plan_page, ManagePlanState
 from .pages.payment_success import payment_success_page, PaymentSuccessState
 from .pages.settings import settings
+from .components import DashboardState
 
 
 app = rx.App()
 app.add_page(landing_page, route="/", image="/favicon.ico")
 app.add_page(login_page, route="/login", image="/favicon.ico")
 app.add_page(signup_page, route="/signup", image="/favicon.ico")
-app.add_page(dashboard_page, route="/dashboard", image="/favicon.ico")
+app.add_page(dashboard_page, route="/dashboard", on_load=DashboardState.on_load, image="/favicon.ico")
 app.add_page(manage_plan_page, route="/manage-plan", on_load=ManagePlanState.on_load, image="/favicon.ico")
 app.add_page(payment_success_page, route="/payment-success", on_load=PaymentSuccessState.on_load, image="/favicon.ico")
 app.add_page(settings, route="/settings", image="/favicon.ico")
