@@ -13,9 +13,10 @@ class ManagePlanState(rx.State):
     current_tvl_limit: float = 2500.0
     current_position_limit: int = 1
     
-    # Usage stats
-    current_tvl: float = 0.0
-    current_positions: int = 0
+    # Billing cycle dates
+    current_period_start: str = ""
+    current_period_end: str = ""
+    subscription_status: str = ""
     
     # Override flags
     has_tvl_override: bool = False
@@ -25,6 +26,10 @@ class ManagePlanState(rx.State):
     # Stripe
     stripe_customer_id: str = ""
     stripe_subscription_id: str = ""
+    
+    # Current usage - will be synced from LPPositionState
+    current_tvl: float = 0.0
+    current_positions: int = 0
     
     # UI state
     active_tab: str = "overview"
@@ -66,8 +71,8 @@ class ManagePlanState(rx.State):
                 os.getenv("SUPABASE_KEY")
             )
             
-            # Query user subscription
-            result = supabase.table("user_subscriptions").select("*").eq("user_id", user_id).execute()
+            # Query user_effective_limits view for complete plan data
+            result = supabase.table("user_effective_limits").select("*").eq("user_id", user_id).execute()
             
             if result.data and len(result.data) > 0:
                 plan = result.data[0]
@@ -75,7 +80,11 @@ class ManagePlanState(rx.State):
                 sys.stdout.flush()
                 print(f"[PLAN]   - Tier: {plan.get('tier_name', 'free')}", flush=True)
                 sys.stdout.flush()
-                print(f"[PLAN]   - Status: {plan.get('status', 'N/A')}", flush=True)
+                print(f"[PLAN]   - Display Name: {plan.get('display_name', 'Free')}", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Price: ${plan.get('price_monthly', 0.0)}/mo", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Status: {plan.get('subscription_status', 'N/A')}", flush=True)
                 sys.stdout.flush()
                 print(f"[PLAN]   - Stripe Customer: {plan.get('stripe_customer_id', 'N/A')}", flush=True)
                 sys.stdout.flush()
@@ -84,12 +93,39 @@ class ManagePlanState(rx.State):
                 
                 # Update state with plan data
                 self.current_tier_name = plan.get("tier_name", "free")
+                self.current_display_name = plan.get("display_name", "Free")
+                self.current_price = plan.get("price_monthly", 0.0)
                 self.stripe_customer_id = plan.get("stripe_customer_id", "")
                 self.stripe_subscription_id = plan.get("stripe_subscription_id", "")
+                self.subscription_status = plan.get("subscription_status", "")
+                self.current_period_start = plan.get("current_period_start", "")
+                self.current_period_end = plan.get("current_period_end", "")
+                self.current_tvl_limit = plan.get("effective_tvl_limit", 2500.0)
+                self.current_position_limit = plan.get("effective_position_limit", 1)
+                
+                print(f"[PLAN]   - TVL Limit: ${self.current_tvl_limit:,.0f}", flush=True)
+                sys.stdout.flush()
+                print(f"[PLAN]   - Position Limit: {self.current_position_limit}", flush=True)
+                sys.stdout.flush()
             else:
                 print("[PLAN] No subscription found in database, using free tier", flush=True)
                 sys.stdout.flush()
                 self.current_tier_name = "free"
+                self.current_display_name = "Free"
+                self.current_price = 0.0
+                self.current_tvl_limit = 2500.0
+                self.current_position_limit = 1
+            
+            # Sync usage data from OverviewState
+            from web_ui.overview_state import OverviewState
+            overview_state = self.get_state(OverviewState)
+            self.current_tvl = overview_state.total_value
+            self.current_positions = overview_state.total_positions
+            
+            print(f"[PLAN]   - Current TVL: ${self.current_tvl:,.2f}", flush=True)
+            sys.stdout.flush()
+            print(f"[PLAN]   - Current Positions: {self.current_positions}", flush=True)
+            sys.stdout.flush()
                 
         except Exception as e:
             print(f"[PLAN ERROR] Failed to load plan: {e}", flush=True)
@@ -199,9 +235,10 @@ class ManagePlanState(rx.State):
         # Check for success/cancel query params from Stripe redirect
         upgrade_success = self.router.page.params.get("upgrade_success")
         upgrade_cancelled = self.router.page.params.get("upgrade_cancelled")
+        payment_success = self.router.page.params.get("payment_success")
         
-        if upgrade_success:
-            print("[PAGE] ✓ Stripe checkout completed successfully", flush=True)
+        if upgrade_success or payment_success:
+            print("[PAGE] ✓ Payment completed successfully - reloading plan data", flush=True)
             sys.stdout.flush()
             print("[PAGE]   - Loading updated plan from database...", flush=True)
             sys.stdout.flush()
@@ -209,6 +246,7 @@ class ManagePlanState(rx.State):
         elif upgrade_cancelled:
             print("[PAGE] ⚠ Stripe checkout was cancelled", flush=True)
             sys.stdout.flush()
+            self.load_current_plan()
         else:
             print("[PAGE]   - Normal page load, loading current plan...", flush=True)
             sys.stdout.flush()
@@ -415,6 +453,25 @@ def overview_tab() -> rx.Component:
                             ),
                             size="3",
                             color=COLORS.TEXT_SECONDARY,
+                        ),
+                        # Billing dates for paid plans
+                        rx.cond(
+                            ManagePlanState.current_period_start != "",
+                            rx.vstack(
+                                rx.text(
+                                    f"Billing cycle started: {ManagePlanState.current_period_start[:10]}",
+                                    size="2",
+                                    color=COLORS.TEXT_MUTED,
+                                ),
+                                rx.text(
+                                    f"Next billing date: {ManagePlanState.current_period_end[:10]}",
+                                    size="2",
+                                    color=COLORS.TEXT_MUTED,
+                                ),
+                                spacing="0",
+                                align="start",
+                                margin_top="0.5rem",
+                            ),
                         ),
                         align="start",
                         spacing="1",

@@ -8,7 +8,7 @@ class PlanStatusState(rx.State):
     display_name: str = "Free"
     price_monthly: float = 0.0
     
-    # Current usage
+    # Current usage - will be synced from LPPositionState
     current_tvl: float = 0.0
     current_positions: int = 0
     
@@ -22,11 +22,60 @@ class PlanStatusState(rx.State):
     has_position_override: bool = False
     is_beta_tester: bool = False
     
-    def load_plan_data(self):
+    async def load_plan_data(self):
         """Load user's plan and usage data from Supabase"""
-        # TODO: Implement Supabase query
-        # This will be implemented when we add the backend integration
-        pass
+        try:
+            import os
+            from supabase import create_client
+            from ..state import AuthState
+            
+            # Get user ID from auth state
+            auth_state = await self.get_state(AuthState)
+            user_id = auth_state.user_id
+            
+            if not user_id:
+                from ..dashboard_loading_state import DashboardLoadingState
+                dashboard_loading = await self.get_state(DashboardLoadingState)
+                dashboard_loading.mark_plan_data_loaded()
+                return
+            
+            supabase_url = os.getenv("SUPABASE_URL")
+            supabase_key = os.getenv("SUPABASE_KEY")
+            supabase = create_client(supabase_url, supabase_key)
+            
+            # Query user_effective_limits view for current plan
+            result = supabase.table("user_effective_limits").select("*").eq("user_id", user_id).execute()
+            
+            if result.data and len(result.data) > 0:
+                plan = result.data[0]
+                self.tier_name = plan.get("tier_name", "free")
+                self.display_name = plan.get("display_name", "Free")
+                self.price_monthly = plan.get("price_monthly", 0.0)
+                self.tvl_limit = plan.get("effective_tvl_limit")
+                self.position_limit = plan.get("effective_position_limit")
+                self.rebalance_frequency = plan.get("effective_rebalance_frequency", "standard")
+                self.has_tvl_override = plan.get("override_tvl_limit") is not None
+                self.has_position_override = plan.get("override_position_limit") is not None
+                self.is_beta_tester = plan.get("is_beta_tester", False)
+            
+            # Sync usage data from OverviewState
+            from ..overview_state import OverviewState
+            overview_state = await self.get_state(OverviewState)
+            self.current_tvl = overview_state.total_value
+            self.current_positions = overview_state.total_positions
+            
+            # Mark as loaded for dashboard loading state
+            from ..dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_plan_data_loaded()
+        except Exception as e:
+            print(f"[PLAN STATUS ERROR] Failed to load plan data: {e}")
+            import traceback
+            traceback.print_exc()
+            # Mark as loaded even on error to prevent infinite loading
+            from ..dashboard_loading_state import DashboardLoadingState
+            dashboard_loading = await self.get_state(DashboardLoadingState)
+            dashboard_loading.mark_plan_data_loaded()
     
     def navigate_to_manage_plan(self):
         """Navigate to manage plan section in dashboard"""
@@ -98,29 +147,12 @@ def plan_status_widget() -> rx.Component:
                 margin_bottom="0.5rem",
             ),
             
-            # Plan name and price
-            rx.vstack(
-                rx.hstack(
-                    rx.text(
-                        PlanStatusState.display_name,
-                        size="5",
-                        weight="bold",
-                        color=COLORS.ACCENT_PRIMARY,
-                    ),
-                    rx.cond(
-                        PlanStatusState.price_monthly > 0,
-                        rx.text(
-                            rx.text.span("$", PlanStatusState.price_monthly, "/mo"),
-                            size="3",
-                            color=COLORS.TEXT_SECONDARY,
-                        ),
-                    ),
-                    justify="between",
-                    width="100%",
-                ),
-                align="start",
-                spacing="1",
-                width="100%",
+            # Plan name (no price)
+            rx.text(
+                PlanStatusState.display_name,
+                size="5",
+                weight="bold",
+                color=COLORS.ACCENT_PRIMARY,
                 margin_bottom="1rem",
             ),
             

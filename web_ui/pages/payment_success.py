@@ -2,8 +2,12 @@
 Payment Success Page - Handles Stripe checkout redirect and subscription sync
 """
 import reflex as rx
+import stripe
+import os
 import sys
-from ..state import AuthState
+from web_ui.branding.colors import COLORS
+from web_ui.branding.config import BrandConfig
+from web_ui.state import AuthState
 
 
 class PaymentSuccessState(rx.State):
@@ -13,6 +17,10 @@ class PaymentSuccessState(rx.State):
     error_message: str = ""
     status_message: str = "Processing your payment..."
     session_id: str = ""
+    payment_intent_id: str = ""
+    invoice_number: str = ""
+    order_reference: str = ""
+    should_redirect: bool = False
     
     async def on_load(self):
         """Called when payment success page loads"""
@@ -100,6 +108,20 @@ class PaymentSuccessState(rx.State):
             customer_id = session.customer
             tier_name = session.metadata.get("tier_name", "unknown")
             
+            # Get payment intent and invoice for order reference
+            self.payment_intent_id = session.payment_intent if hasattr(session, 'payment_intent') else ""
+            print(f"[PAYMENT SUCCESS]   - Payment Intent: {self.payment_intent_id}", flush=True)
+            sys.stdout.flush()
+            
+            # Create order reference from payment intent (last 8 chars for readability)
+            if self.payment_intent_id:
+                self.order_reference = self.payment_intent_id.split('_')[-1].upper()[:8]
+            else:
+                self.order_reference = subscription_id.split('_')[-1].upper()[:8]
+            
+            print(f"[PAYMENT SUCCESS]   - Order Reference: {self.order_reference}", flush=True)
+            sys.stdout.flush()
+            
             print(f"[PAYMENT SUCCESS] Retrieving subscription: {subscription_id}", flush=True)
             sys.stdout.flush()
             
@@ -173,6 +195,30 @@ class PaymentSuccessState(rx.State):
             print(f"[PAYMENT SUCCESS] Supabase client created", flush=True)
             sys.stdout.flush()
             
+            # Query plan_tiers table to get the plan_tier_id based on tier_name
+            plan_tier_id = None
+            print(f"[PAYMENT SUCCESS] Looking up plan_tier_id for tier_name: {tier_name}", flush=True)
+            sys.stdout.flush()
+            
+            try:
+                tier_result = supabase.table("plan_tiers").select("id").eq("tier_name", tier_name).execute()
+                print(f"[PAYMENT SUCCESS] Plan tier query result: {tier_result.data}", flush=True)
+                sys.stdout.flush()
+                
+                if tier_result.data and len(tier_result.data) > 0:
+                    plan_tier_id = tier_result.data[0]['id']
+                    print(f"[PAYMENT SUCCESS] ✓ Found plan_tier_id: {plan_tier_id}", flush=True)
+                    sys.stdout.flush()
+                else:
+                    print(f"[PAYMENT SUCCESS WARNING] No plan tier found for tier_name: {tier_name}", flush=True)
+                    sys.stdout.flush()
+            except Exception as tier_error:
+                print(f"[PAYMENT SUCCESS ERROR] Failed to query plan_tiers: {tier_error}", flush=True)
+                sys.stdout.flush()
+                import traceback
+                traceback.print_exc()
+                sys.stdout.flush()
+            
             # Convert Unix timestamps to ISO datetime for Postgres
             from datetime import datetime, timezone
             
@@ -198,7 +244,15 @@ class PaymentSuccessState(rx.State):
                 "current_period_start": period_start_dt,
                 "current_period_end": period_end_dt,
             }
-            # Note: tier_name removed - not in user_subscriptions table
+            
+            # Add plan_tier_id if found
+            if plan_tier_id:
+                subscription_data["plan_tier_id"] = plan_tier_id
+                print(f"[PAYMENT SUCCESS] Including plan_tier_id in upsert: {plan_tier_id}", flush=True)
+                sys.stdout.flush()
+            else:
+                print(f"[PAYMENT SUCCESS WARNING] plan_tier_id not found, will not update tier", flush=True)
+                sys.stdout.flush()
             
             print(f"[PAYMENT SUCCESS] FULL SUBSCRIPTION DATA DICT:", flush=True)
             sys.stdout.flush()
@@ -256,6 +310,11 @@ class PaymentSuccessState(rx.State):
             print("=" * 80, flush=True)
             sys.stdout.flush()
             
+            # Set flag to trigger redirect in component
+            self.should_redirect = True
+            print("[PAYMENT SUCCESS] Redirect flag set to True", flush=True)
+            sys.stdout.flush()
+            
         except Exception as e:
             print(f"[PAYMENT SUCCESS ERROR] Exception occurred: {e}", flush=True)
             sys.stdout.flush()
@@ -269,46 +328,166 @@ class PaymentSuccessState(rx.State):
 
 
 def payment_success_page() -> rx.Component:
-    """Payment success page - minimal UI with maximum logging"""
-    return rx.vstack(
-        rx.heading("Payment Processing"),
-        
-        rx.cond(
-            PaymentSuccessState.is_processing,
+    """Payment success page with branding and styling"""
+    return rx.box(
+        rx.center(
             rx.vstack(
-                rx.spinner(),
-                rx.text(PaymentSuccessState.status_message),
-            ),
-        ),
-        
-        rx.cond(
-            PaymentSuccessState.success,
-            rx.vstack(
-                rx.text("✓ SUCCESS"),
-                rx.text(PaymentSuccessState.status_message),
-                rx.text("Redirecting to dashboard..."),
-                rx.script(
-                    """
-                    setTimeout(function() {
-                        window.location.href = '/dashboard';
-                    }, 5000);
-                    """
+                # Logo
+                rx.image(
+                    src=BrandConfig.LOGO_LIGHT,
+                    alt=BrandConfig.APP_NAME,
+                    width="200px",
+                    margin_bottom="2rem",
                 ),
-            ),
-        ),
-        
-        rx.cond(
-            PaymentSuccessState.error_message != "",
-            rx.vstack(
-                rx.text("⚠ ERROR"),
-                rx.text("Payment Processing Error"),
-                rx.text(PaymentSuccessState.error_message),
-                rx.button(
-                    "Go to Dashboard",
-                    on_click=rx.redirect("/dashboard"),
+                
+                # Processing state
+                rx.cond(
+                    PaymentSuccessState.is_processing,
+                    rx.vstack(
+                        rx.heading(
+                            "Processing Payment",
+                            size="8",
+                            color=COLORS.TEXT_PRIMARY,
+                            margin_bottom="1rem",
+                        ),
+                        rx.spinner(
+                            size="3",
+                            color=COLORS.ACCENT_PRIMARY,
+                        ),
+                        rx.text(
+                            PaymentSuccessState.status_message,
+                            color=COLORS.TEXT_SECONDARY,
+                            margin_top="1rem",
+                        ),
+                        spacing="4",
+                        align="center",
+                    ),
                 ),
+                
+                # Success state
+                rx.cond(
+                    PaymentSuccessState.success,
+                    rx.vstack(
+                        rx.icon(
+                            "circle-check",
+                            size=64,
+                            color=COLORS.ACCENT_SUCCESS,
+                        ),
+                        rx.heading(
+                            "Payment Successful!",
+                            size="8",
+                            color=COLORS.TEXT_PRIMARY,
+                            margin_top="1rem",
+                        ),
+                        rx.text(
+                            PaymentSuccessState.status_message,
+                            size="4",
+                            color=COLORS.TEXT_SECONDARY,
+                            margin_top="0.5rem",
+                        ),
+                        rx.text(
+                            "Thank you for upgrading! You now have access to all premium features.",
+                            color=COLORS.TEXT_SECONDARY,
+                            text_align="center",
+                            max_width="500px",
+                            margin_top="1rem",
+                        ),
+                        rx.text(
+                            f"Order Reference: {PaymentSuccessState.order_reference}",
+                            color=COLORS.TEXT_MUTED,
+                            font_family="monospace",
+                            font_size="0.9rem",
+                            margin_top="1rem",
+                        ),
+                        rx.text(
+                            "Redirecting to dashboard...",
+                            color=COLORS.TEXT_MUTED,
+                            margin_top="2rem",
+                        ),
+                        rx.text(
+                            "If you aren't automatically redirected in a few seconds, ",
+                            rx.link(
+                                "click here",
+                                href="/dashboard",
+                                color=COLORS.ACCENT_PRIMARY,
+                                text_decoration="underline",
+                            ),
+                            ".",
+                            color=COLORS.TEXT_MUTED,
+                            margin_top="0.5rem",
+                        ),
+                        # Auto-redirect when should_redirect is True
+                        rx.cond(
+                            PaymentSuccessState.should_redirect,
+                            rx.fragment(
+                                rx.script(
+                                    """
+                                    setTimeout(function() {
+                                        window.location.href = '/dashboard?payment_success=true';
+                                    }, 2000);
+                                    """
+                                ),
+                            ),
+                        ),
+                        spacing="4",
+                        align="center",
+                    ),
+                ),
+                
+                # Error state
+                rx.cond(
+                    PaymentSuccessState.error_message != "",
+                    rx.vstack(
+                        rx.icon(
+                            "circle-x",
+                            size=64,
+                            color=COLORS.ACCENT_WARNING,
+                        ),
+                        rx.heading(
+                            "Payment Processing Error",
+                            size="8",
+                            color=COLORS.TEXT_PRIMARY,
+                            margin_top="1rem",
+                        ),
+                        rx.text(
+                            PaymentSuccessState.error_message,
+                            color=COLORS.TEXT_SECONDARY,
+                            text_align="center",
+                            max_width="500px",
+                            margin_top="1rem",
+                        ),
+                        rx.button(
+                            "Go to Dashboard",
+                            on_click=rx.redirect("/dashboard"),
+                            background_color=COLORS.BUTTON_PRIMARY_BG,
+                            color=COLORS.BUTTON_PRIMARY_TEXT,
+                            _hover={"background_color": COLORS.BUTTON_PRIMARY_HOVER},
+                            margin_top="2rem",
+                        ),
+                        spacing="4",
+                        align="center",
+                    ),
+                ),
+                
+                # Session ID (small, at bottom)
+                rx.text(
+                    f"Session ID: {PaymentSuccessState.session_id}",
+                    color=COLORS.TEXT_MUTED,
+                    font_size="0.75rem",
+                    margin_top="3rem",
+                ),
+                
+                spacing="6",
+                align="center",
+                padding="2rem",
+                background_color=COLORS.BACKGROUND_SURFACE,
+                border_radius="12px",
+                border=f"1px solid {COLORS.BORDER_DEFAULT}",
+                max_width="600px",
             ),
+            height="100vh",
         ),
-        
-        rx.text(f"Session ID: {PaymentSuccessState.session_id}"),
+        background_color=COLORS.BACKGROUND_PRIMARY,
+        width="100%",
+        min_height="100vh",
     )

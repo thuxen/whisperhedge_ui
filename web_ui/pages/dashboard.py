@@ -15,6 +15,7 @@ from ..components import (
     settings_section,
     manage_plan_section,
 )
+from ..components.plan_status import PlanStatusState
 
 
 def dashboard_page() -> rx.Component:
@@ -88,6 +89,7 @@ def dashboard_page() -> rx.Component:
             
             on_mount=[
                 DashboardLoadingState.reset_loading,
+                PlanStatusState.load_plan_data,
                 APIKeyState.load_api_keys,
                 LPPositionState.load_positions,
                 LPPositionState.load_wallets,
