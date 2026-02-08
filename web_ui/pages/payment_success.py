@@ -22,11 +22,30 @@ class PaymentSuccessState(rx.State):
     order_reference: str = ""
     should_redirect: bool = False
     
-    async def on_load(self):
-        """Called when payment success page loads"""
+    async def trigger_payment_processing(self, session_id: str):
+        """Manual trigger for payment processing - bypasses on_load"""
         print("=" * 80, flush=True)
         sys.stdout.flush()
-        print("[PAYMENT SUCCESS] Page loaded - on_load handler executing", flush=True)
+        print("[PAYMENT SUCCESS] MANUAL TRIGGER - Processing payment", flush=True)
+        sys.stdout.flush()
+        print(f"[PAYMENT SUCCESS] Session ID: {session_id}", flush=True)
+        sys.stdout.flush()
+        
+        if not session_id:
+            print("[PAYMENT SUCCESS ERROR] No session_id provided to trigger!", flush=True)
+            sys.stdout.flush()
+            self.error_message = "No session ID provided"
+            self.is_processing = False
+            return
+        
+        self.session_id = session_id
+        await self.process_payment()
+    
+    async def on_load(self):
+        """Called when payment success page loads - FALLBACK ONLY"""
+        print("=" * 80, flush=True)
+        sys.stdout.flush()
+        print("[PAYMENT SUCCESS] on_load handler executing (FALLBACK)", flush=True)
         sys.stdout.flush()
         print(f"[PAYMENT SUCCESS] Environment check:", flush=True)
         sys.stdout.flush()
@@ -49,17 +68,16 @@ class PaymentSuccessState(rx.State):
         session_id = self.router.page.params.get("session_id", "")
         
         if not session_id:
-            print("[PAYMENT SUCCESS ERROR] No session_id in query params!", flush=True)
+            print("[PAYMENT SUCCESS] on_load: No session_id - client-side script should handle this", flush=True)
             sys.stdout.flush()
-            self.error_message = "No session ID provided"
-            self.is_processing = False
             return
         
-        print(f"[PAYMENT SUCCESS] Session ID: {session_id}", flush=True)
+        print(f"[PAYMENT SUCCESS] on_load: Session ID found: {session_id}", flush=True)
         sys.stdout.flush()
-        self.session_id = session_id
+        print(f"[PAYMENT SUCCESS] on_load: Triggering payment processing", flush=True)
+        sys.stdout.flush()
         
-        # Process the payment
+        self.session_id = session_id
         await self.process_payment()
     
     async def process_payment(self):
@@ -340,166 +358,57 @@ class PaymentSuccessState(rx.State):
 
 
 def payment_success_page() -> rx.Component:
-    """Payment success page with branding and styling"""
+    """Payment success page - MINIMAL PLAIN TEXT VERSION to guarantee loading"""
     return rx.box(
-        rx.center(
-            rx.vstack(
-                # Logo
-                rx.image(
-                    src=BrandConfig.LOGO_LIGHT,
-                    alt=BrandConfig.APP_NAME,
-                    width="200px",
-                    margin_bottom="2rem",
-                ),
+        # CRITICAL: Client-side script to trigger payment processing immediately
+        # This bypasses the broken on_load handler in production (Reflex issue #2817)
+        rx.script("""
+            (function() {
+                console.log('[PAYMENT SUCCESS] Page loaded - client-side script executing');
+                console.log('[PAYMENT SUCCESS] Current URL:', window.location.href);
                 
-                # Processing state
-                rx.cond(
-                    PaymentSuccessState.is_processing,
-                    rx.vstack(
-                        rx.heading(
-                            "Processing Payment",
-                            size="8",
-                            color=COLORS.TEXT_PRIMARY,
-                            margin_bottom="1rem",
-                        ),
-                        rx.spinner(
-                            size="3",
-                            color=COLORS.ACCENT_PRIMARY,
-                        ),
-                        rx.text(
-                            PaymentSuccessState.status_message,
-                            color=COLORS.TEXT_SECONDARY,
-                            margin_top="1rem",
-                        ),
-                        spacing="4",
-                        align="center",
-                    ),
-                ),
+                // Get session_id from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id');
                 
-                # Success state
-                rx.cond(
-                    PaymentSuccessState.success,
-                    rx.vstack(
-                        rx.icon(
-                            "circle-check",
-                            size=64,
-                            color=COLORS.ACCENT_SUCCESS,
-                        ),
-                        rx.heading(
-                            "Payment Successful!",
-                            size="8",
-                            color=COLORS.TEXT_PRIMARY,
-                            margin_top="1rem",
-                        ),
-                        rx.text(
-                            PaymentSuccessState.status_message,
-                            size="4",
-                            color=COLORS.TEXT_SECONDARY,
-                            margin_top="0.5rem",
-                        ),
-                        rx.text(
-                            "Thank you for upgrading! You now have access to all premium features.",
-                            color=COLORS.TEXT_SECONDARY,
-                            text_align="center",
-                            max_width="500px",
-                            margin_top="1rem",
-                        ),
-                        rx.text(
-                            f"Order Reference: {PaymentSuccessState.order_reference}",
-                            color=COLORS.TEXT_MUTED,
-                            font_family="monospace",
-                            font_size="0.9rem",
-                            margin_top="1rem",
-                        ),
-                        rx.text(
-                            "Redirecting to dashboard...",
-                            color=COLORS.TEXT_MUTED,
-                            margin_top="2rem",
-                        ),
-                        rx.text(
-                            "If you aren't automatically redirected in a few seconds, ",
-                            rx.link(
-                                "click here",
-                                href="/dashboard",
-                                color=COLORS.ACCENT_PRIMARY,
-                                text_decoration="underline",
-                            ),
-                            ".",
-                            color=COLORS.TEXT_MUTED,
-                            margin_top="0.5rem",
-                        ),
-                        # Auto-redirect when should_redirect is True
-                        rx.cond(
-                            PaymentSuccessState.should_redirect,
-                            rx.fragment(
-                                rx.script(
-                                    """
-                                    setTimeout(function() {
-                                        window.location.href = '/dashboard?payment_success=true';
-                                    }, 2000);
-                                    """
-                                ),
-                            ),
-                        ),
-                        spacing="4",
-                        align="center",
-                    ),
-                ),
+                console.log('[PAYMENT SUCCESS] Session ID from URL:', sessionId);
                 
-                # Error state
-                rx.cond(
-                    PaymentSuccessState.error_message != "",
-                    rx.vstack(
-                        rx.icon(
-                            "circle-x",
-                            size=64,
-                            color=COLORS.ACCENT_WARNING,
-                        ),
-                        rx.heading(
-                            "Payment Processing Error",
-                            size="8",
-                            color=COLORS.TEXT_PRIMARY,
-                            margin_top="1rem",
-                        ),
-                        rx.text(
-                            PaymentSuccessState.error_message,
-                            color=COLORS.TEXT_SECONDARY,
-                            text_align="center",
-                            max_width="500px",
-                            margin_top="1rem",
-                        ),
-                        rx.button(
-                            "Go to Dashboard",
-                            on_click=rx.redirect("/dashboard"),
-                            background_color=COLORS.BUTTON_PRIMARY_BG,
-                            color=COLORS.BUTTON_PRIMARY_TEXT,
-                            _hover={"background_color": COLORS.BUTTON_PRIMARY_HOVER},
-                            margin_top="2rem",
-                        ),
-                        spacing="4",
-                        align="center",
-                    ),
-                ),
-                
-                # Session ID (small, at bottom)
-                rx.text(
-                    f"Session ID: {PaymentSuccessState.session_id}",
-                    color=COLORS.TEXT_MUTED,
-                    font_size="0.75rem",
-                    margin_top="3rem",
-                ),
-                
-                spacing="6",
-                align="center",
-                padding="2rem",
-                background_color=COLORS.BACKGROUND_SURFACE,
-                border_radius="12px",
-                border=f"1px solid {COLORS.BORDER_DEFAULT}",
-                max_width="600px",
-            ),
-            height="100vh",
+                if (sessionId) {
+                    console.log('[PAYMENT SUCCESS] Calling trigger_payment_processing with session_id');
+                    
+                    // Wait for Reflex to be ready, then trigger the event
+                    setTimeout(() => {
+                        try {
+                            // Call the Reflex event handler directly
+                            if (window.__reflex && window.__reflex.Event) {
+                                console.log('[PAYMENT SUCCESS] Reflex available, triggering event');
+                                window.__reflex.Event('payment_success_state.trigger_payment_processing', {session_id: sessionId});
+                            } else {
+                                console.error('[PAYMENT SUCCESS] Reflex not available yet, retrying...');
+                                // Retry after another delay
+                                setTimeout(() => {
+                                    if (window.__reflex && window.__reflex.Event) {
+                                        window.__reflex.Event('payment_success_state.trigger_payment_processing', {session_id: sessionId});
+                                    } else {
+                                        console.error('[PAYMENT SUCCESS] Reflex still not available!');
+                                    }
+                                }, 1000);
+                            }
+                        } catch (e) {
+                            console.error('[PAYMENT SUCCESS] Error triggering event:', e);
+                        }
+                    }, 500);
+                } else {
+                    console.error('[PAYMENT SUCCESS] No session_id found in URL!');
+                }
+            })();
+        """),
+        rx.vstack(
+            rx.heading("Payment Success"),
+            rx.text("Processing your payment..."),
+            rx.text("You will be redirected to the dashboard shortly."),
+            rx.link("Click here if not redirected", href="/dashboard?payment_success=true"),
+            spacing="4",
+            padding="2rem",
         ),
-        background_color=COLORS.BACKGROUND_PRIMARY,
-        width="100%",
-        min_height="100vh",
     )
