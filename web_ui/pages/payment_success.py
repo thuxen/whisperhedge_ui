@@ -358,9 +358,10 @@ class PaymentSuccessState(rx.State):
 
 
 def payment_success_page() -> rx.Component:
-    """Payment success page with clean redirect flow"""
+    """Payment success page - MINIMAL PLAIN TEXT VERSION to guarantee loading"""
     return rx.box(
-        # Client-side script to trigger payment processing immediately
+        # CRITICAL: Client-side script to trigger payment processing immediately
+        # This bypasses the broken on_load handler in production (Reflex issue #2817)
         rx.script("""
             (function() {
                 console.log('[PAYMENT SUCCESS] Page loaded - client-side script executing');
@@ -402,79 +403,12 @@ def payment_success_page() -> rx.Component:
                 }
             })();
         """),
-        # Auto-redirect script when success flag is set
-        rx.cond(
-            PaymentSuccessState.success,
-            rx.script("""
-                setTimeout(() => {
-                    console.log('[PAYMENT SUCCESS] Redirecting to dashboard...');
-                    window.location.href = '/dashboard?payment_success=true';
-                }, 2000);
-            """),
+        rx.vstack(
+            rx.heading("Payment Success"),
+            rx.text("Processing your payment..."),
+            rx.text("You will be redirected to the dashboard shortly."),
+            rx.link("Click here if not redirected", href="/dashboard?payment_success=true"),
+            spacing="4",
+            padding="2rem",
         ),
-        rx.center(
-            rx.vstack(
-                # Processing state
-                rx.cond(
-                    PaymentSuccessState.is_processing,
-                    rx.vstack(
-                        rx.heading("Processing Payment", size="7", color=COLORS.TEXT_PRIMARY),
-                        rx.spinner(size="3", color=COLORS.ACCENT_PRIMARY, margin_top="1rem"),
-                        rx.text(PaymentSuccessState.status_message, color=COLORS.TEXT_SECONDARY, margin_top="1rem"),
-                        spacing="4",
-                        align="center",
-                    ),
-                ),
-                # Success state
-                rx.cond(
-                    PaymentSuccessState.success,
-                    rx.vstack(
-                        rx.heading("✓ Payment Successful!", size="7", color=COLORS.ACCENT_SUCCESS),
-                        rx.text(
-                            PaymentSuccessState.status_message,
-                            size="4",
-                            color=COLORS.TEXT_PRIMARY,
-                            margin_top="1rem",
-                        ),
-                        rx.text(
-                            "Redirecting to dashboard in 2 seconds...",
-                            color=COLORS.TEXT_SECONDARY,
-                            margin_top="1rem",
-                        ),
-                        rx.link(
-                            "Click here if not redirected",
-                            href="/dashboard?payment_success=true",
-                            color=COLORS.ACCENT_PRIMARY,
-                            margin_top="0.5rem",
-                        ),
-                        spacing="4",
-                        align="center",
-                    ),
-                ),
-                # Error state
-                rx.cond(
-                    PaymentSuccessState.error_message != "",
-                    rx.vstack(
-                        rx.heading("Payment Error", size="7", color=COLORS.ACCENT_WARNING),
-                        rx.text(
-                            PaymentSuccessState.error_message,
-                            color=COLORS.ACCENT_WARNING,
-                            margin_top="1rem",
-                        ),
-                        rx.link(
-                            rx.button("Return to Dashboard", size="3", margin_top="2rem"),
-                            href="/dashboard",
-                        ),
-                        spacing="4",
-                        align="center",
-                    ),
-                ),
-                spacing="6",
-                align="center",
-                padding="2rem",
-            ),
-            min_height="100vh",
-        ),
-        width="100%",
-        background=COLORS.BACKGROUND_PRIMARY,
     )

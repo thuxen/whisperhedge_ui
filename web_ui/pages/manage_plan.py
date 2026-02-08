@@ -164,7 +164,9 @@ class ManagePlanState(rx.State):
             sys.stdout.flush()
             
             # Construct success and cancel URLs
-            success_url = f"{base_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+            # CRITICAL: Redirect to /dashboard instead of /payment-success because /payment-success
+            # route fails to load in production after external Stripe redirect (infrastructure issue)
+            success_url = f"{base_url}/dashboard?stripe_session_id={{CHECKOUT_SESSION_ID}}"
             cancel_url = f"{base_url}/dashboard?upgrade_cancelled=true"
             
             print(f"[CHECKOUT]   - Success URL: {success_url}", flush=True)
