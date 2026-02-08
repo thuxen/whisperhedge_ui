@@ -455,10 +455,10 @@ def payment_success_page() -> rx.Component:
                 rx.cond(
                     PaymentSuccessState.error_message != "",
                     rx.vstack(
-                        rx.heading("Payment Error", size="7", color=COLORS.ACCENT_ERROR),
+                        rx.heading("Payment Error", size="7", color=COLORS.ACCENT_WARNING),
                         rx.text(
                             PaymentSuccessState.error_message,
-                            color=COLORS.ACCENT_ERROR,
+                            color=COLORS.ACCENT_WARNING,
                             margin_top="1rem",
                         ),
                         rx.link(
@@ -476,5 +476,5 @@ def payment_success_page() -> rx.Component:
             min_height="100vh",
         ),
         width="100%",
-        background=COLORS.BG_PRIMARY,
+        background=COLORS.BACKGROUND_PRIMARY,
     )
