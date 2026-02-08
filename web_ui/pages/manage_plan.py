@@ -323,16 +323,20 @@ def plan_card(
             
             # Limits
             rx.vstack(
-                rx.text(
-                    positions,
-                    size="3",
-                    weight="bold",
-                    color=COLORS.TEXT_PRIMARY,
+                rx.cond(
+                    positions != "",
+                    rx.text(
+                        positions,
+                        size="3",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                    ),
                 ),
                 rx.text(
                     tvl,
-                    size="2",
-                    color=COLORS.TEXT_SECONDARY,
+                    size="3",
+                    weight="bold",
+                    color=COLORS.TEXT_PRIMARY,
                     margin_bottom="1rem",
                 ),
                 
@@ -659,7 +663,7 @@ def change_plan_tab() -> rx.Component:
                 tier_name="free",
                 display_name="Free",
                 price=0.0,
-                positions="1 LP Position",
+                positions="",
                 tvl="$2,500 TVL Hard Cap",
                 features=[
                     "Standard Execution",
@@ -674,7 +678,7 @@ def change_plan_tab() -> rx.Component:
                 tier_name="hobby",
                 display_name="Hobby",
                 price=19.99,
-                positions="3 LP Positions",
+                positions="",
                 tvl="$10,000 Included TVL",
                 features=[
                     "Standard Execution",
@@ -689,7 +693,7 @@ def change_plan_tab() -> rx.Component:
                 tier_name="pro",
                 display_name="Pro",
                 price=49.99,
-                positions="10 LP Positions",
+                positions="",
                 tvl="$50,000 Included TVL",
                 features=[
                     "Priority Execution",
@@ -701,13 +705,28 @@ def change_plan_tab() -> rx.Component:
                 badge_color=COLORS.ACCENT_PRIMARY,
             ),
             
+            # EXPERT
+            plan_card(
+                tier_name="expert",
+                display_name="Expert",
+                price=89.99,
+                positions="",
+                tvl="$150,000 Included TVL",
+                features=[
+                    "Priority Execution",
+                    "Multi-DEX Roadmap Access",
+                    "0.05% (5 bps) on excess TVL",
+                ],
+                is_current=ManagePlanState.current_tier_name == "expert",
+            ),
+            
             # ELITE
             plan_card(
                 tier_name="elite",
                 display_name="Elite",
-                price=149.99,
-                positions="Unlimited LP Positions",
-                tvl="$250,000 Included TVL",
+                price=199.99,
+                positions="",
+                tvl="$500,000 Included TVL",
                 features=[
                     "Elite Priority Calculation Engine",
                     "Top-of-queue Rebalancing",
@@ -718,7 +737,7 @@ def change_plan_tab() -> rx.Component:
                 badge_color="#D4AF37",
             ),
             
-            columns="4",
+            columns="5",
             spacing="4",
             width="100%",
         ),

@@ -1170,15 +1170,10 @@ def desktop_pricing_content() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "1 LP Position",
+                                    "$2,500 TVL Hard Cap",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    "$2,500 TVL Hard Cap",
-                                    size="2",
-                                    color=COLORS.TEXT_SECONDARY,
                                     margin_bottom="1rem",
                                 ),
                                 rx.vstack(
@@ -1241,15 +1236,10 @@ def desktop_pricing_content() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "3 LP Positions",
+                                    "$10,000 Included TVL",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    "$10,000 Included TVL",
-                                    size="2",
-                                    color=COLORS.TEXT_SECONDARY,
                                 ),
                                 rx.text(
                                     "0.1% (10 bps) on excess TVL",
@@ -1325,15 +1315,10 @@ def desktop_pricing_content() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "10 LP Positions",
+                                    "$50,000 Included TVL",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    "$50,000 Included TVL",
-                                    size="2",
-                                    color=COLORS.TEXT_SECONDARY,
                                 ),
                                 rx.text(
                                     "0.05% (5 bps) on excess TVL",
@@ -1373,21 +1358,21 @@ def desktop_pricing_content() -> rx.Component:
                         background="rgba(15, 23, 42, 0.4)",
                         box_shadow="0 0 20px rgba(59, 130, 246, 0.3)",
                     ),
-                    # Tier 4: ELITE
+                    # Tier 4: EXPERT
                     rx.box(
                         rx.vstack(
                             rx.text(
-                                "ELITE",
+                                "EXPERT",
                                 size="2",
                                 weight="bold",
-                                color="#D4AF37",
+                                color=COLORS.TEXT_SECONDARY,
                                 text_transform="uppercase",
                                 letter_spacing="0.1em",
                                 margin_bottom="1rem",
                             ),
                             rx.hstack(
                                 rx.heading(
-                                    "$149.99",
+                                    "$89.99",
                                     size="8",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
@@ -1404,15 +1389,83 @@ def desktop_pricing_content() -> rx.Component:
                             rx.divider(margin_y="1rem"),
                             rx.vstack(
                                 rx.text(
-                                    "Unlimited LP Positions",
+                                    "$150,000 Included TVL",
                                     size="3",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
                                 rx.text(
-                                    "$250,000 Included TVL",
+                                    "0.05% (5 bps) on excess TVL",
                                     size="2",
+                                    color=COLORS.TEXT_MUTED,
+                                    font_style="italic",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.vstack(
+                                    rx.text("✓ Priority Execution", size="2", color=COLORS.TEXT_SECONDARY, weight="bold"),
+                                    rx.text("✓ Multi-DEX Roadmap Access", size="2", color=COLORS.TEXT_SECONDARY),
+                                    align="start",
+                                    spacing="2",
+                                ),
+                                align="start",
+                                spacing="2",
+                            ),
+                            rx.link(
+                                rx.button(
+                                    "Get Started",
+                                    size="3",
+                                    background=COLORS.BUTTON_PRIMARY_BG,
+                                    color=COLORS.BUTTON_PRIMARY_TEXT,
+                                    _hover={"background": COLORS.BUTTON_PRIMARY_HOVER},
+                                    width="100%",
+                                    margin_top="1rem",
+                                ),
+                                href="/signup",
+                                width="100%",
+                            ),
+                            align="start",
+                            spacing="3",
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                    ),
+                    # Tier 5: ELITE
+                    rx.box(
+                        rx.vstack(
+                            rx.text(
+                                "ELITE",
+                                size="2",
+                                weight="bold",
+                                color="#D4AF37",
+                                text_transform="uppercase",
+                                letter_spacing="0.1em",
+                                margin_bottom="1rem",
+                            ),
+                            rx.hstack(
+                                rx.heading(
+                                    "$199.99",
+                                    size="8",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "/mo",
+                                    size="3",
                                     color=COLORS.TEXT_SECONDARY,
+                                ),
+                                align="end",
+                                spacing="1",
+                                margin_bottom="1rem",
+                            ),
+                            rx.divider(margin_y="1rem"),
+                            rx.vstack(
+                                rx.text(
+                                    "$500,000 Included TVL",
+                                    size="3",
+                                    weight="bold",
+                                    color=COLORS.TEXT_PRIMARY,
                                 ),
                                 rx.text(
                                     "0.05% (5 bps) on excess TVL",
@@ -1452,13 +1505,14 @@ def desktop_pricing_content() -> rx.Component:
                         border=f"1px solid #D4AF37",
                         background="rgba(15, 23, 42, 0.4)",
                     ),
-                    columns="4",
+                    columns="5",
                     spacing="4",
                     width="100%",
                     responsive={
                         "0px": {"columns": "1", "spacing": "3"},
                         "768px": {"columns": "2", "spacing": "4"},
-                        "1024px": {"columns": "4", "spacing": "4"},
+                        "1024px": {"columns": "3", "spacing": "4"},
+                        "1280px": {"columns": "5", "spacing": "4"},
                     },
                 ),
                 # Disclaimer footer - moved directly under pricing boxes
