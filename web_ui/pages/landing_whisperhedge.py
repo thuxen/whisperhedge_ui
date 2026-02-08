@@ -1154,7 +1154,7 @@ def desktop_pricing_content() -> rx.Component:
                             rx.hstack(
                                 rx.heading(
                                     "$0",
-                                    size="8",
+                                    size="7",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
@@ -1220,7 +1220,7 @@ def desktop_pricing_content() -> rx.Component:
                             rx.hstack(
                                 rx.heading(
                                     "$19.99",
-                                    size="8",
+                                    size="7",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
@@ -1299,7 +1299,7 @@ def desktop_pricing_content() -> rx.Component:
                             rx.hstack(
                                 rx.heading(
                                     "$49.99",
-                                    size="8",
+                                    size="7",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
@@ -1373,7 +1373,7 @@ def desktop_pricing_content() -> rx.Component:
                             rx.hstack(
                                 rx.heading(
                                     "$89.99",
-                                    size="8",
+                                    size="7",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
@@ -1446,7 +1446,7 @@ def desktop_pricing_content() -> rx.Component:
                             rx.hstack(
                                 rx.heading(
                                     "$199.99",
-                                    size="8",
+                                    size="7",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
@@ -1533,6 +1533,8 @@ def desktop_pricing_content() -> rx.Component:
                             line_height="1.6",
                         ),
                         spacing="2",
+                        align="center",
+                        width="100%",
                     ),
                     padding="2rem",
                     border_radius="8px",
