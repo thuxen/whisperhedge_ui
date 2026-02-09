@@ -80,22 +80,40 @@ class ManagePlanState(rx.State):
             supabase_key = os.getenv("SUPABASE_KEY")
             supabase = create_client(supabase_url, supabase_key)
             
-            # Query user_subscriptions table directly to get ALL fields
-            result = supabase.table("user_subscriptions").select("*").eq("user_id", user_id).execute()
+            # Query user_effective_limits VIEW (same as PlanStatusState - this works!)
+            result = supabase.table("user_effective_limits").select("*").eq("user_id", user_id).execute()
             
             if result.data and len(result.data) > 0:
-                sub = result.data[0]
+                plan = result.data[0]
                 
-                # Get plan tier info
-                if sub.get("plan_tier_id"):
-                    tier_result = supabase.table("plan_tiers").select("*").eq("id", sub["plan_tier_id"]).execute()
-                    if tier_result.data and len(tier_result.data) > 0:
-                        tier = tier_result.data[0]
-                        self.current_tier_name = tier.get("tier_name", "free")
-                        self.current_display_name = tier.get("display_name", "Free")
-                        self.current_price = tier.get("price_monthly", 0.0)
-                        self.current_tvl_limit = tier.get("max_tvl", 2500.0)
-                        self.current_position_limit = tier.get("max_positions", 1)
+                # Get tier info from view (already joined)
+                self.current_tier_name = plan.get("tier_name", "free")
+                self.current_display_name = plan.get("display_name", "Free")
+                self.current_price = plan.get("price_monthly", 0.0)
+                self.current_tvl_limit = plan.get("effective_tvl_limit", 2500.0)
+                self.current_position_limit = plan.get("effective_position_limit", 1)
+                
+                # Overrides from view
+                self.has_tvl_override = plan.get("has_tvl_override", False)
+                self.has_position_override = plan.get("has_position_override", False)
+                self.is_beta_tester = plan.get("is_beta_tester", False)
+                
+                print(f"[MANAGE PLAN] ✓ Loaded tier from view: {self.current_display_name}", flush=True)
+                sys.stdout.flush()
+            else:
+                print("[MANAGE PLAN] No data in user_effective_limits, using free tier", flush=True)
+                sys.stdout.flush()
+                self.current_tier_name = "free"
+                self.current_display_name = "Free"
+                self.current_price = 0.0
+                self.current_tvl_limit = 2500.0
+                self.current_position_limit = 1
+            
+            # Query user_subscriptions table for date fields and Stripe info
+            sub_result = supabase.table("user_subscriptions").select("*").eq("user_id", user_id).execute()
+            
+            if sub_result.data and len(sub_result.data) > 0:
+                sub = sub_result.data[0]
                 
                 # Stripe info
                 self.stripe_customer_id = sub.get("stripe_customer_id", "")
@@ -118,21 +136,8 @@ class ManagePlanState(rx.State):
                 self.subscription_created_at = sub.get("created_at", "")
                 self.subscription_updated_at = sub.get("updated_at", "")
                 
-                # Overrides
-                self.has_tvl_override = sub.get("override_tvl_limit") is not None
-                self.has_position_override = sub.get("override_position_limit") is not None
-                self.is_beta_tester = sub.get("is_beta_tester", False)
-                
-                print(f"[MANAGE PLAN] Loaded: {self.current_display_name} tier", flush=True)
+                print(f"[MANAGE PLAN] ✓ Loaded dates from user_subscriptions", flush=True)
                 sys.stdout.flush()
-            else:
-                print("[MANAGE PLAN] No subscription found, using free tier", flush=True)
-                sys.stdout.flush()
-                self.current_tier_name = "free"
-                self.current_display_name = "Free"
-                self.current_price = 0.0
-                self.current_tvl_limit = 2500.0
-                self.current_position_limit = 1
             
             # Get account creation date from auth.users
             try:
@@ -140,7 +145,7 @@ class ManagePlanState(rx.State):
                 if user_result and hasattr(user_result, 'user'):
                     created_at = user_result.user.created_at
                     self.account_created_at = created_at if created_at else ""
-                    print(f"[MANAGE PLAN] Account created: {self.account_created_at}", flush=True)
+                    print(f"[MANAGE PLAN] ✓ Account created: {self.account_created_at}", flush=True)
                     sys.stdout.flush()
             except Exception as e:
                 print(f"[MANAGE PLAN] Could not fetch account creation date: {e}", flush=True)
@@ -151,6 +156,9 @@ class ManagePlanState(rx.State):
             overview_state = await self.get_state(OverviewState)
             self.current_tvl = overview_state.total_value
             self.current_positions = overview_state.total_positions
+            
+            print(f"[MANAGE PLAN] ✓✓✓ Complete - Tier: {self.current_display_name}, TVL: ${self.current_tvl:,.2f}", flush=True)
+            sys.stdout.flush()
             
         except Exception as e:
             print(f"[MANAGE PLAN ERROR] Failed to load plan data: {e}", flush=True)
