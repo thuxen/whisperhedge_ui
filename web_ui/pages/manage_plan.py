@@ -60,25 +60,25 @@ class ManagePlanState(rx.State):
     async def load_plan_data(self):
         """Load complete plan data including all billing dates"""
         try:
-            import os
-            from supabase import create_client
-            from datetime import datetime
+            from ..auth import get_supabase_client
             
             print("[MANAGE PLAN] Loading complete plan data", flush=True)
             sys.stdout.flush()
             
-            # Get user ID from auth state
+            # Get user ID and access token from auth state
             auth_state = await self.get_state(AuthState)
             user_id = auth_state.user_id
+            access_token = auth_state.access_token
             
             if not user_id:
                 print("[MANAGE PLAN] No user_id found", flush=True)
                 sys.stdout.flush()
                 return
             
-            supabase_url = os.getenv("SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_KEY")
-            supabase = create_client(supabase_url, supabase_key)
+            # Use get_supabase_client with access token for proper RLS
+            supabase = get_supabase_client(access_token)
+            print("[MANAGE PLAN] Using authenticated Supabase client with RLS", flush=True)
+            sys.stdout.flush()
             
             # Query user_effective_limits VIEW (same as PlanStatusState - this works!)
             result = supabase.table("user_effective_limits").select("*").eq("user_id", user_id).execute()
@@ -166,16 +166,11 @@ class ManagePlanState(rx.State):
                 print(f"[MANAGE PLAN] ⚠ No user_subscriptions row found for user", flush=True)
                 sys.stdout.flush()
             
-            # Get account creation date from auth.users
-            try:
-                user_result = supabase.auth.admin.get_user_by_id(user_id)
-                if user_result and hasattr(user_result, 'user'):
-                    created_at = user_result.user.created_at
-                    self.account_created_at = created_at if created_at else ""
-                    print(f"[MANAGE PLAN] ✓ Account created: {self.account_created_at}", flush=True)
-                    sys.stdout.flush()
-            except Exception as e:
-                print(f"[MANAGE PLAN] Could not fetch account creation date: {e}", flush=True)
+            # Use subscription created_at as account signup proxy
+            # (Can't use auth.admin.get_user_by_id with user token - requires service role)
+            if self.subscription_created_at:
+                self.account_created_at = self.subscription_created_at
+                print(f"[MANAGE PLAN] ✓ Using subscription created_at as account date: {self.account_created_at[:19]}", flush=True)
                 sys.stdout.flush()
             
             # Sync usage data from OverviewState

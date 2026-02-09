@@ -25,13 +25,13 @@ class PlanStatusState(rx.State):
     async def load_plan_data(self):
         """Load user's plan and usage data from Supabase"""
         try:
-            import os
-            from supabase import create_client
+            from ..auth import get_supabase_client
             from ..state import AuthState
             
-            # Get user ID from auth state
+            # Get user ID and access token from auth state
             auth_state = await self.get_state(AuthState)
             user_id = auth_state.user_id
+            access_token = auth_state.access_token
             
             if not user_id:
                 from ..dashboard_loading_state import DashboardLoadingState
@@ -39,9 +39,8 @@ class PlanStatusState(rx.State):
                 dashboard_loading.mark_plan_data_loaded()
                 return
             
-            supabase_url = os.getenv("SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_KEY")
-            supabase = create_client(supabase_url, supabase_key)
+            # Use get_supabase_client with access token for proper RLS
+            supabase = get_supabase_client(access_token)
             
             # Query user_effective_limits view for current plan
             result = supabase.table("user_effective_limits").select("*").eq("user_id", user_id).execute()
