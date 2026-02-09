@@ -227,4 +227,8 @@ def faq_section() -> rx.Component:
 
 def manage_plan_section() -> rx.Component:
     """Manage Plan section for dashboard"""
-    return manage_plan_content()
+    from ..pages.manage_plan import ManagePlanState
+    return rx.fragment(
+        manage_plan_content(),
+        on_mount=ManagePlanState.sync_from_plan_status,
+    )

@@ -18,6 +18,9 @@ class ManagePlanState(rx.State):
     current_period_end: str = ""
     subscription_status: str = ""
     
+    # Account info
+    account_created_at: str = ""
+    
     # Override flags
     has_tvl_override: bool = False
     has_position_override: bool = False
@@ -44,17 +47,18 @@ class ManagePlanState(rx.State):
         """Explicitly set error message"""
         self.error_message = message
     
-    def load_current_plan(self):
+    async def load_current_plan(self):
         """Load user's current plan from Supabase"""
         try:
             import os
             from supabase import create_client
+            from datetime import datetime
             
             print("[PLAN] Loading current plan from Supabase", flush=True)
             sys.stdout.flush()
             
             # Get user ID from auth state
-            auth_state = self.get_state(AuthState)
+            auth_state = await self.get_state(AuthState)
             user_id = auth_state.user_id
             
             if not user_id:
@@ -102,6 +106,9 @@ class ManagePlanState(rx.State):
                 self.current_period_end = plan.get("current_period_end", "")
                 self.current_tvl_limit = plan.get("effective_tvl_limit", 2500.0)
                 self.current_position_limit = plan.get("effective_position_limit", 1)
+                self.has_tvl_override = plan.get("override_tvl_limit") is not None
+                self.has_position_override = plan.get("override_position_limit") is not None
+                self.is_beta_tester = plan.get("is_beta_tester", False)
                 
                 print(f"[PLAN]   - TVL Limit: ${self.current_tvl_limit:,.0f}", flush=True)
                 sys.stdout.flush()
@@ -116,9 +123,21 @@ class ManagePlanState(rx.State):
                 self.current_tvl_limit = 2500.0
                 self.current_position_limit = 1
             
+            # Get account creation date from auth.users
+            try:
+                user_result = supabase.auth.admin.get_user_by_id(user_id)
+                if user_result and hasattr(user_result, 'user'):
+                    created_at = user_result.user.created_at
+                    self.account_created_at = created_at if created_at else ""
+                    print(f"[PLAN]   - Account Created: {self.account_created_at}", flush=True)
+                    sys.stdout.flush()
+            except Exception as e:
+                print(f"[PLAN] Could not fetch account creation date: {e}", flush=True)
+                sys.stdout.flush()
+            
             # Sync usage data from OverviewState
-            from web_ui.overview_state import OverviewState
-            overview_state = self.get_state(OverviewState)
+            from ..overview_state import OverviewState
+            overview_state = await self.get_state(OverviewState)
             self.current_tvl = overview_state.total_value
             self.current_positions = overview_state.total_positions
             
@@ -239,37 +258,37 @@ class ManagePlanState(rx.State):
             traceback.print_exc()
             sys.stdout.flush()
     
-    def on_load(self):
-        """Called when the manage plan page loads"""
-        print("[PAGE] Manage Plan page loading", flush=True)
-        sys.stdout.flush()
-        print(f"[PAGE]   - Current URL: {self.router.page.path}", flush=True)
-        sys.stdout.flush()
-        print(f"[PAGE]   - Query params: {self.router.page.params}", flush=True)
-        sys.stdout.flush()
-        
-        # Check for success/cancel query params from Stripe redirect
-        upgrade_success = self.router.page.params.get("upgrade_success")
-        upgrade_cancelled = self.router.page.params.get("upgrade_cancelled")
-        payment_success = self.router.page.params.get("payment_success")
-        
-        if upgrade_success or payment_success:
-            print("[PAGE] ✓ Payment completed successfully - reloading plan data", flush=True)
+    async def sync_from_plan_status(self):
+        """Sync plan data from PlanStatusState (which loads on dashboard mount)"""
+        try:
+            from ..components.plan_status import PlanStatusState
+            plan_status = await self.get_state(PlanStatusState)
+            
+            # Sync plan info
+            self.current_tier_name = plan_status.tier_name
+            self.current_display_name = plan_status.display_name
+            self.current_price = plan_status.price_monthly
+            self.current_tvl_limit = plan_status.tvl_limit or 2500.0
+            self.current_position_limit = plan_status.position_limit or 1
+            self.has_tvl_override = plan_status.has_tvl_override
+            self.has_position_override = plan_status.has_position_override
+            self.is_beta_tester = plan_status.is_beta_tester
+            
+            # Sync usage data
+            self.current_tvl = plan_status.current_tvl
+            self.current_positions = plan_status.current_positions
+            
+            print(f"[MANAGE PLAN] Synced from PlanStatusState: {self.current_display_name} tier", flush=True)
             sys.stdout.flush()
-            print("[PAGE]   - Loading updated plan from database...", flush=True)
+            
+            # Load additional details from database (billing dates, account creation)
+            await self.load_current_plan()
+        except Exception as e:
+            print(f"[MANAGE PLAN ERROR] Failed to sync from PlanStatusState: {e}", flush=True)
             sys.stdout.flush()
-            self.load_current_plan()
-        elif upgrade_cancelled:
-            print("[PAGE] ⚠ Stripe checkout was cancelled", flush=True)
+            import traceback
+            traceback.print_exc()
             sys.stdout.flush()
-            self.load_current_plan()
-        else:
-            print("[PAGE]   - Normal page load, loading current plan...", flush=True)
-            sys.stdout.flush()
-            self.load_current_plan()
-        
-        print("[PAGE] Page load complete", flush=True)
-        sys.stdout.flush()
 
 
 def plan_card(
@@ -474,12 +493,27 @@ def overview_tab() -> rx.Component:
                             size="3",
                             color=COLORS.TEXT_SECONDARY,
                         ),
-                        # Billing dates for paid plans
+                        rx.cond(
+                            ManagePlanState.account_created_at != "",
+                            rx.text(
+                                f"Member since: {ManagePlanState.account_created_at[:10]}",
+                                size="2",
+                                color=COLORS.TEXT_MUTED,
+                                margin_top="0.5rem",
+                            ),
+                        ),
                         rx.cond(
                             ManagePlanState.current_period_start != "",
                             rx.vstack(
+                                rx.divider(margin_y="0.5rem"),
                                 rx.text(
-                                    f"Billing cycle started: {ManagePlanState.current_period_start[:10]}",
+                                    "Billing Information",
+                                    size="2",
+                                    weight="bold",
+                                    color=COLORS.TEXT_SECONDARY,
+                                ),
+                                rx.text(
+                                    f"Current billing period: {ManagePlanState.current_period_start[:10]} - {ManagePlanState.current_period_end[:10]}",
                                     size="2",
                                     color=COLORS.TEXT_MUTED,
                                 ),
@@ -488,7 +522,7 @@ def overview_tab() -> rx.Component:
                                     size="2",
                                     color=COLORS.TEXT_MUTED,
                                 ),
-                                spacing="0",
+                                spacing="1",
                                 align="start",
                                 margin_top="0.5rem",
                             ),
