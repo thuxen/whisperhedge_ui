@@ -289,6 +289,35 @@ class ManagePlanState(rx.State):
             import traceback
             traceback.print_exc()
             sys.stdout.flush()
+    
+    def on_load(self):
+        """Called when the manage plan page loads"""
+        print("[PAGE] Manage Plan page loading", flush=True)
+        sys.stdout.flush()
+        print(f"[PAGE]   - Current URL: {self.router.page.path}", flush=True)
+        sys.stdout.flush()
+        print(f"[PAGE]   - Query params: {self.router.page.params}", flush=True)
+        sys.stdout.flush()
+        
+        # Check for success/cancel query params from Stripe redirect
+        upgrade_success = self.router.page.params.get("upgrade_success")
+        upgrade_cancelled = self.router.page.params.get("upgrade_cancelled")
+        payment_success = self.router.page.params.get("payment_success")
+        
+        if upgrade_success or payment_success:
+            print("[PAGE] ✓ Payment completed successfully - reloading plan data", flush=True)
+            sys.stdout.flush()
+            print("[PAGE]   - Loading updated plan from database...", flush=True)
+            sys.stdout.flush()
+        elif upgrade_cancelled:
+            print("[PAGE] ⚠ Stripe checkout was cancelled", flush=True)
+            sys.stdout.flush()
+        else:
+            print("[PAGE]   - Normal page load", flush=True)
+            sys.stdout.flush()
+        
+        print("[PAGE] Page load complete", flush=True)
+        sys.stdout.flush()
 
 
 def plan_card(
