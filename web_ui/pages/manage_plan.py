@@ -13,13 +13,23 @@ class ManagePlanState(rx.State):
     current_tvl_limit: float = 2500.0
     current_position_limit: int = 1
     
-    # Billing cycle dates
+    # Billing cycle dates (Stripe current)
     current_period_start: str = ""
     current_period_end: str = ""
     subscription_status: str = ""
+    cancel_at_period_end: bool = False
+    cancelled_at: str = ""
+    trial_end: str = ""
+    
+    # Legacy billing dates
+    billing_cycle_start: str = ""
+    billing_cycle_end: str = ""
+    legacy_status: str = ""
     
     # Account info
     account_created_at: str = ""
+    subscription_created_at: str = ""
+    subscription_updated_at: str = ""
     
     # Override flags
     has_tvl_override: bool = False
@@ -46,6 +56,108 @@ class ManagePlanState(rx.State):
     def set_error_message(self, message: str):
         """Explicitly set error message"""
         self.error_message = message
+    
+    async def load_plan_data(self):
+        """Load complete plan data including all billing dates"""
+        try:
+            import os
+            from supabase import create_client
+            from datetime import datetime
+            
+            print("[MANAGE PLAN] Loading complete plan data", flush=True)
+            sys.stdout.flush()
+            
+            # Get user ID from auth state
+            auth_state = await self.get_state(AuthState)
+            user_id = auth_state.user_id
+            
+            if not user_id:
+                print("[MANAGE PLAN] No user_id found", flush=True)
+                sys.stdout.flush()
+                return
+            
+            supabase_url = os.getenv("SUPABASE_URL")
+            supabase_key = os.getenv("SUPABASE_KEY")
+            supabase = create_client(supabase_url, supabase_key)
+            
+            # Query user_subscriptions table directly to get ALL fields
+            result = supabase.table("user_subscriptions").select("*").eq("user_id", user_id).execute()
+            
+            if result.data and len(result.data) > 0:
+                sub = result.data[0]
+                
+                # Get plan tier info
+                if sub.get("plan_tier_id"):
+                    tier_result = supabase.table("plan_tiers").select("*").eq("id", sub["plan_tier_id"]).execute()
+                    if tier_result.data and len(tier_result.data) > 0:
+                        tier = tier_result.data[0]
+                        self.current_tier_name = tier.get("tier_name", "free")
+                        self.current_display_name = tier.get("display_name", "Free")
+                        self.current_price = tier.get("price_monthly", 0.0)
+                        self.current_tvl_limit = tier.get("max_tvl", 2500.0)
+                        self.current_position_limit = tier.get("max_positions", 1)
+                
+                # Stripe info
+                self.stripe_customer_id = sub.get("stripe_customer_id", "")
+                self.stripe_subscription_id = sub.get("stripe_subscription_id", "")
+                
+                # Current billing dates (Stripe)
+                self.current_period_start = sub.get("current_period_start", "")
+                self.current_period_end = sub.get("current_period_end", "")
+                self.subscription_status = sub.get("subscription_status", "")
+                self.cancel_at_period_end = sub.get("cancel_at_period_end", False)
+                self.cancelled_at = sub.get("cancelled_at", "")
+                self.trial_end = sub.get("trial_end", "")
+                
+                # Legacy billing dates
+                self.billing_cycle_start = sub.get("billing_cycle_start", "")
+                self.billing_cycle_end = sub.get("billing_cycle_end", "")
+                self.legacy_status = sub.get("status", "")
+                
+                # Subscription record dates
+                self.subscription_created_at = sub.get("created_at", "")
+                self.subscription_updated_at = sub.get("updated_at", "")
+                
+                # Overrides
+                self.has_tvl_override = sub.get("override_tvl_limit") is not None
+                self.has_position_override = sub.get("override_position_limit") is not None
+                self.is_beta_tester = sub.get("is_beta_tester", False)
+                
+                print(f"[MANAGE PLAN] Loaded: {self.current_display_name} tier", flush=True)
+                sys.stdout.flush()
+            else:
+                print("[MANAGE PLAN] No subscription found, using free tier", flush=True)
+                sys.stdout.flush()
+                self.current_tier_name = "free"
+                self.current_display_name = "Free"
+                self.current_price = 0.0
+                self.current_tvl_limit = 2500.0
+                self.current_position_limit = 1
+            
+            # Get account creation date from auth.users
+            try:
+                user_result = supabase.auth.admin.get_user_by_id(user_id)
+                if user_result and hasattr(user_result, 'user'):
+                    created_at = user_result.user.created_at
+                    self.account_created_at = created_at if created_at else ""
+                    print(f"[MANAGE PLAN] Account created: {self.account_created_at}", flush=True)
+                    sys.stdout.flush()
+            except Exception as e:
+                print(f"[MANAGE PLAN] Could not fetch account creation date: {e}", flush=True)
+                sys.stdout.flush()
+            
+            # Sync usage data from OverviewState
+            from ..overview_state import OverviewState
+            overview_state = await self.get_state(OverviewState)
+            self.current_tvl = overview_state.total_value
+            self.current_positions = overview_state.total_positions
+            
+        except Exception as e:
+            print(f"[MANAGE PLAN ERROR] Failed to load plan data: {e}", flush=True)
+            sys.stdout.flush()
+            import traceback
+            traceback.print_exc()
+            sys.stdout.flush()
     
     async def load_current_plan(self):
         """Load user's current plan from Supabase"""
@@ -522,39 +634,61 @@ def overview_tab() -> rx.Component:
                             size="3",
                             color=COLORS.TEXT_SECONDARY,
                         ),
+                        # ALL DATE FIELDS - TO BE CLEANED UP LATER
+                        rx.divider(margin_y="0.75rem"),
+                        rx.text("ALL DATE FIELDS (for review):", size="2", weight="bold", color=COLORS.TEXT_SECONDARY),
+                        
+                        # Account dates
                         rx.cond(
                             ManagePlanState.account_created_at != "",
-                            rx.text(
-                                f"Member since: {ManagePlanState.account_created_at[:10]}",
-                                size="2",
-                                color=COLORS.TEXT_MUTED,
-                                margin_top="0.5rem",
-                            ),
+                            rx.text(f"Account created (auth.users): {ManagePlanState.account_created_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
                         ),
                         rx.cond(
+                            ManagePlanState.subscription_created_at != "",
+                            rx.text(f"Subscription record created: {ManagePlanState.subscription_created_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.subscription_updated_at != "",
+                            rx.text(f"Subscription record updated: {ManagePlanState.subscription_updated_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        
+                        # Current Stripe billing dates
+                        rx.text("Stripe Billing (current_period_*):", size="2", weight="bold", color=COLORS.TEXT_SECONDARY, margin_top="0.5rem"),
+                        rx.cond(
                             ManagePlanState.current_period_start != "",
-                            rx.vstack(
-                                rx.divider(margin_y="0.5rem"),
-                                rx.text(
-                                    "Billing Information",
-                                    size="2",
-                                    weight="bold",
-                                    color=COLORS.TEXT_SECONDARY,
-                                ),
-                                rx.text(
-                                    f"Current billing period: {ManagePlanState.current_period_start[:10]} - {ManagePlanState.current_period_end[:10]}",
-                                    size="2",
-                                    color=COLORS.TEXT_MUTED,
-                                ),
-                                rx.text(
-                                    f"Next billing date: {ManagePlanState.current_period_end[:10]}",
-                                    size="2",
-                                    color=COLORS.TEXT_MUTED,
-                                ),
-                                spacing="1",
-                                align="start",
-                                margin_top="0.5rem",
-                            ),
+                            rx.text(f"current_period_start: {ManagePlanState.current_period_start[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.current_period_end != "",
+                            rx.text(f"current_period_end: {ManagePlanState.current_period_end[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.subscription_status != "",
+                            rx.text(f"subscription_status: {ManagePlanState.subscription_status}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.text(f"cancel_at_period_end: {ManagePlanState.cancel_at_period_end}", size="1", color=COLORS.TEXT_MUTED),
+                        rx.cond(
+                            ManagePlanState.cancelled_at != "",
+                            rx.text(f"cancelled_at: {ManagePlanState.cancelled_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.trial_end != "",
+                            rx.text(f"trial_end: {ManagePlanState.trial_end[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        
+                        # Legacy billing dates
+                        rx.text("Legacy Billing (billing_cycle_*):", size="2", weight="bold", color=COLORS.TEXT_SECONDARY, margin_top="0.5rem"),
+                        rx.cond(
+                            ManagePlanState.billing_cycle_start != "",
+                            rx.text(f"billing_cycle_start: {ManagePlanState.billing_cycle_start[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.billing_cycle_end != "",
+                            rx.text(f"billing_cycle_end: {ManagePlanState.billing_cycle_end[:19]}", size="1", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.legacy_status != "",
+                            rx.text(f"status (legacy): {ManagePlanState.legacy_status}", size="1", color=COLORS.TEXT_MUTED),
                         ),
                         align="start",
                         spacing="1",
