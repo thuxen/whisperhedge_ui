@@ -112,31 +112,58 @@ class ManagePlanState(rx.State):
             # Query user_subscriptions table for date fields and Stripe info
             sub_result = supabase.table("user_subscriptions").select("*").eq("user_id", user_id).execute()
             
+            print(f"[MANAGE PLAN] user_subscriptions query result:", flush=True)
+            sys.stdout.flush()
+            print(f"[MANAGE PLAN]   - Found {len(sub_result.data) if sub_result.data else 0} rows", flush=True)
+            sys.stdout.flush()
+            
             if sub_result.data and len(sub_result.data) > 0:
                 sub = sub_result.data[0]
+                
+                print(f"[MANAGE PLAN] Raw subscription data:", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - stripe_customer_id: {sub.get('stripe_customer_id')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - stripe_subscription_id: {sub.get('stripe_subscription_id')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - current_period_start: {sub.get('current_period_start')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - current_period_end: {sub.get('current_period_end')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - subscription_status: {sub.get('subscription_status')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - billing_cycle_start: {sub.get('billing_cycle_start')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - billing_cycle_end: {sub.get('billing_cycle_end')}", flush=True)
+                sys.stdout.flush()
+                print(f"[MANAGE PLAN]   - created_at: {sub.get('created_at')}", flush=True)
+                sys.stdout.flush()
                 
                 # Stripe info
                 self.stripe_customer_id = sub.get("stripe_customer_id", "")
                 self.stripe_subscription_id = sub.get("stripe_subscription_id", "")
                 
                 # Current billing dates (Stripe)
-                self.current_period_start = sub.get("current_period_start", "")
-                self.current_period_end = sub.get("current_period_end", "")
-                self.subscription_status = sub.get("subscription_status", "")
+                self.current_period_start = sub.get("current_period_start") or ""
+                self.current_period_end = sub.get("current_period_end") or ""
+                self.subscription_status = sub.get("subscription_status") or ""
                 self.cancel_at_period_end = sub.get("cancel_at_period_end", False)
-                self.cancelled_at = sub.get("cancelled_at", "")
-                self.trial_end = sub.get("trial_end", "")
+                self.cancelled_at = sub.get("cancelled_at") or ""
+                self.trial_end = sub.get("trial_end") or ""
                 
                 # Legacy billing dates
-                self.billing_cycle_start = sub.get("billing_cycle_start", "")
-                self.billing_cycle_end = sub.get("billing_cycle_end", "")
-                self.legacy_status = sub.get("status", "")
+                self.billing_cycle_start = sub.get("billing_cycle_start") or ""
+                self.billing_cycle_end = sub.get("billing_cycle_end") or ""
+                self.legacy_status = sub.get("status") or ""
                 
                 # Subscription record dates
-                self.subscription_created_at = sub.get("created_at", "")
-                self.subscription_updated_at = sub.get("updated_at", "")
+                self.subscription_created_at = sub.get("created_at") or ""
+                self.subscription_updated_at = sub.get("updated_at") or ""
                 
                 print(f"[MANAGE PLAN] ✓ Loaded dates from user_subscriptions", flush=True)
+                sys.stdout.flush()
+            else:
+                print(f"[MANAGE PLAN] ⚠ No user_subscriptions row found for user", flush=True)
                 sys.stdout.flush()
             
             # Get account creation date from auth.users
