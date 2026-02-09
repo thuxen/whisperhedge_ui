@@ -1,7 +1,13 @@
--- ACTUAL DATABASE SCHEMA
--- This file reflects the TRUE schema as it exists in the Supabase database
--- Updated: 2026-01-18
--- This is a COMPLETE schema file that can be run to set up the entire database
+-- =====================================================
+-- WHISPERHEDGE COMPLETE DATABASE SCHEMA
+-- =====================================================
+-- This is the COMPLETE production schema for WhisperHedge
+-- Updated: 2026-02-09
+-- Includes: Core tables, Plan tiers, Subscriptions, RLS policies
+-- 
+-- This file can be run on a fresh Supabase instance to set up the entire database
+-- No additional migrations needed - this is the consolidated schema
+-- =====================================================
 
 -- =====================================================
 -- TABLE: user_api_keys
@@ -196,28 +202,55 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     plan_tier_id UUID REFERENCES plan_tiers(id),
+    
+    -- Snapshot of limits at subscription time (allows grandfathering)
     subscribed_tvl_limit DECIMAL(15,2),
     subscribed_position_limit INTEGER,
     subscribed_rebalance_frequency TEXT,
+    
+    -- Manual overrides (NULL means use subscribed value)
     override_tvl_limit DECIMAL(15,2),
     override_position_limit INTEGER,
     override_rebalance_frequency TEXT,
     override_support_level TEXT,
-    stripe_subscription_id TEXT,
+    
+    -- Stripe billing info
     stripe_customer_id TEXT,
+    stripe_subscription_id TEXT,
+    subscription_status TEXT DEFAULT 'active',
+    current_period_start TIMESTAMPTZ,
+    current_period_end TIMESTAMPTZ,
+    cancel_at_period_end BOOLEAN DEFAULT false,
+    cancelled_at TIMESTAMPTZ,
+    trial_end TIMESTAMPTZ,
+    
+    -- Legacy fields (kept for compatibility)
     billing_cycle_start TIMESTAMPTZ,
     billing_cycle_end TIMESTAMPTZ,
     status TEXT DEFAULT 'active',
+    
+    -- Beta tester flags
     is_beta_tester BOOLEAN DEFAULT false,
     beta_notes TEXT,
+    
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id)
+    UNIQUE(user_id),
+    
+    -- Constraint for subscription status
+    CONSTRAINT user_subscriptions_status_check 
+        CHECK (subscription_status IN (
+            'active', 'trialing', 'past_due', 'canceled', 
+            'unpaid', 'incomplete', 'incomplete_expired', 'paused'
+        ))
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user_id ON user_subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_plan_tier_id ON user_subscriptions(plan_tier_id);
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON user_subscriptions(status);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_stripe_customer ON user_subscriptions(stripe_customer_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_stripe_subscription ON user_subscriptions(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_subscription_status ON user_subscriptions(subscription_status);
 
 -- =====================================================
 -- VIEW: user_effective_limits
@@ -269,3 +302,89 @@ CREATE TRIGGER update_user_subscriptions_updated_at
     BEFORE UPDATE ON user_subscriptions
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- SEED DATA: Plan Tiers
+-- =====================================================
+-- Insert default plan tiers (free, pro, expert, elite)
+-- Uses ON CONFLICT to allow re-running this script
+
+INSERT INTO plan_tiers (tier_name, display_name, price_monthly, max_tvl, max_positions, rebalance_frequency, support_level, features)
+VALUES 
+    -- Free tier: $0/mo, $2.5k TVL, unlimited positions
+    ('free', 'Free', 0.00, 2500.00, NULL, 'hourly', 'community', 
+     '{"standard_execution": true, "hyperliquid_integration": true, "all_strategies": true, "hard_cap": true}'::jsonb),
+    
+    -- Pro tier: $49.99/mo, $50k TVL, unlimited positions
+    ('pro', 'Pro', 49.99, 50000.00, NULL, 'priority', 'email', 
+     '{"priority_execution": true, "multi_dex_roadmap": true, "excess_tvl_fee": "0.05% (5 bps)"}'::jsonb),
+    
+    -- Expert tier: $89.99/mo, $150k TVL, unlimited positions
+    ('expert', 'Expert', 89.99, 150000.00, NULL, 'priority', 'priority', 
+     '{"priority_execution": true, "multi_dex_roadmap": true, "excess_tvl_fee": "0.05% (5 bps)"}'::jsonb),
+    
+    -- Elite tier: $199.99/mo, $500k TVL, unlimited positions
+    ('elite', 'Elite', 199.99, 500000.00, NULL, 'realtime', 'dedicated', 
+     '{"elite_priority_engine": true, "top_queue_rebalancing": true, "direct_dev_support": true, "unlimited_positions": true, "excess_tvl_fee": "0.05% (5 bps)"}'::jsonb)
+ON CONFLICT (tier_name) DO UPDATE SET
+    display_name = EXCLUDED.display_name,
+    price_monthly = EXCLUDED.price_monthly,
+    max_tvl = EXCLUDED.max_tvl,
+    max_positions = EXCLUDED.max_positions,
+    rebalance_frequency = EXCLUDED.rebalance_frequency,
+    support_level = EXCLUDED.support_level,
+    features = EXCLUDED.features,
+    updated_at = NOW();
+
+-- =====================================================
+-- ADDITIONAL VIEWS
+-- =====================================================
+-- Quick subscription status check view
+CREATE OR REPLACE VIEW user_subscription_status AS
+SELECT 
+    us.user_id,
+    us.plan_tier_id,
+    pt.tier_name,
+    pt.display_name,
+    pt.price_monthly,
+    us.subscription_status,
+    us.stripe_customer_id,
+    us.stripe_subscription_id,
+    us.current_period_start,
+    us.current_period_end,
+    us.cancel_at_period_end,
+    
+    -- Effective limits (with overrides)
+    COALESCE(us.override_tvl_limit, us.subscribed_tvl_limit, pt.max_tvl) as effective_tvl_limit,
+    COALESCE(us.override_position_limit, us.subscribed_position_limit, pt.max_positions) as effective_position_limit,
+    
+    -- Access status (graceful - allow access even if past_due)
+    CASE 
+        WHEN us.subscription_status IN ('active', 'trialing', 'past_due') THEN true
+        WHEN us.subscription_status = 'canceled' AND us.current_period_end > NOW() THEN true
+        ELSE false
+    END as has_access,
+    
+    -- Warning flags
+    CASE 
+        WHEN us.subscription_status = 'past_due' THEN 'Payment failed - please update payment method'
+        WHEN us.cancel_at_period_end THEN 'Subscription will cancel at period end'
+        WHEN us.subscription_status = 'canceled' THEN 'Subscription cancelled'
+        ELSE NULL
+    END as warning_message
+    
+FROM user_subscriptions us
+LEFT JOIN plan_tiers pt ON us.plan_tier_id = pt.id;
+
+-- =====================================================
+-- PERMISSIONS
+-- =====================================================
+GRANT SELECT ON user_subscription_status TO authenticated;
+GRANT ALL ON user_subscriptions TO service_role;
+
+-- =====================================================
+-- COMMENTS
+-- =====================================================
+COMMENT ON TABLE user_subscriptions IS 'User subscriptions - free tier assigned lazily by application when no record exists';
+COMMENT ON VIEW user_subscription_status IS 'Quick subscription status check with graceful access control';
+COMMENT ON COLUMN user_subscriptions.subscription_status IS 'Stripe subscription status - past_due users still have access';
