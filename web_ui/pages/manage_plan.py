@@ -527,85 +527,41 @@ def overview_tab() -> rx.Component:
                     color=COLORS.TEXT_PRIMARY,
                     margin_bottom="1rem",
                 ),
-                rx.grid(
-                    # TVL Usage
-                    rx.box(
-                        rx.vstack(
+                rx.box(
+                    rx.vstack(
+                        rx.text(
+                            "Total Value Locked",
+                            size="2",
+                            color=COLORS.TEXT_SECONDARY,
+                            margin_bottom="0.5rem",
+                        ),
+                        rx.hstack(
                             rx.text(
-                                "Total Value Locked",
-                                size="2",
-                                color=COLORS.TEXT_SECONDARY,
-                                margin_bottom="0.5rem",
+                                f"${ManagePlanState.current_tvl:,.0f}",
+                                size="6",
+                                weight="bold",
+                                color=COLORS.TEXT_PRIMARY,
                             ),
-                            rx.hstack(
-                                rx.text(
-                                    f"${ManagePlanState.current_tvl:,.0f}",
-                                    size="6",
-                                    weight="bold",
-                                    color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    f" / ${ManagePlanState.current_tvl_limit:,.0f}",
-                                    size="3",
-                                    color=COLORS.TEXT_MUTED,
-                                ),
-                                spacing="1",
+                            rx.text(
+                                f" / ${ManagePlanState.current_tvl_limit:,.0f}",
+                                size="3",
+                                color=COLORS.TEXT_MUTED,
                             ),
-                            rx.progress(
-                                value=((ManagePlanState.current_tvl / ManagePlanState.current_tvl_limit) * 100).to(int),
-                                max=100,
-                                width="100%",
-                                margin_top="0.5rem",
-                            ),
-                            align="start",
                             spacing="1",
                         ),
-                        padding="1.5rem",
-                        border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
-                    ),
-                    
-                    # Position Usage
-                    rx.box(
-                        rx.vstack(
-                            rx.text(
-                                "Active Positions",
-                                size="2",
-                                color=COLORS.TEXT_SECONDARY,
-                                margin_bottom="0.5rem",
-                            ),
-                            rx.hstack(
-                                rx.text(
-                                    ManagePlanState.current_positions,
-                                    size="6",
-                                    weight="bold",
-                                    color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    f" / {ManagePlanState.current_position_limit}",
-                                    size="3",
-                                    color=COLORS.TEXT_MUTED,
-                                ),
-                                spacing="1",
-                            ),
-                            rx.progress(
-                                value=((ManagePlanState.current_positions / ManagePlanState.current_position_limit) * 100).to(int),
-                                max=100,
-                                width="100%",
-                                margin_top="0.5rem",
-                            ),
-                            align="start",
-                            spacing="1",
+                        rx.progress(
+                            value=((ManagePlanState.current_tvl / ManagePlanState.current_tvl_limit) * 100).to(int),
+                            max=100,
+                            width="100%",
+                            margin_top="0.5rem",
                         ),
-                        padding="1.5rem",
-                        border_radius="8px",
-                        border=f"1px solid {COLORS.CARD_BORDER}",
-                        background=COLORS.CARD_BG,
+                        align="start",
+                        spacing="1",
                     ),
-                    
-                    columns="2",
-                    spacing="4",
+                    padding="1.5rem",
+                    border_radius="8px",
+                    border=f"1px solid {COLORS.CARD_BORDER}",
+                    background=COLORS.CARD_BG,
                     width="100%",
                 ),
                 

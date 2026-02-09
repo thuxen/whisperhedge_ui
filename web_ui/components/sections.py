@@ -80,22 +80,41 @@ def bot_status_section() -> rx.Component:
 
 
 def settings_section() -> rx.Component:
+    from ..pages.settings import (
+        SettingsState,
+        profile_section,
+        security_section,
+        preferences_section,
+        danger_zone_section,
+    )
+    
     return rx.vstack(
         rx.heading("Settings", size="7", margin_bottom="1rem"),
-        rx.card(
-            rx.vstack(
-                rx.heading("Coming Soon", size="6", color="gray"),
-                rx.text(
-                    "This section is under development.",
-                    size="3",
-                    color="gray",
-                ),
-                spacing="3",
-                align_items="center",
-                padding="4rem",
+        
+        rx.cond(
+            SettingsState.success_message != "",
+            rx.callout(
+                SettingsState.success_message,
+                icon="check",
+                color_scheme="green",
+                margin_bottom="1rem",
             ),
-            width="100%",
         ),
+        rx.cond(
+            SettingsState.error_message != "",
+            rx.callout(
+                SettingsState.error_message,
+                icon="alert-triangle",
+                color_scheme="red",
+                margin_bottom="1rem",
+            ),
+        ),
+        
+        profile_section(),
+        security_section(),
+        preferences_section(),
+        danger_zone_section(),
+        
         spacing="4",
         width="100%",
     )
