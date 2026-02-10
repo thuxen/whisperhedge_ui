@@ -129,6 +129,87 @@ def terms_page() -> rx.Component:
                     ),
                 ),
                 
+                # Nature of Software and Financial Risk Disclosure
+                rx.box(
+                    rx.heading(
+                        "4.5. Nature of Software and Financial Risk Disclosure",
+                        size="6",
+                        weight="bold",
+                        margin_bottom="1rem",
+                        color=COLORS.TEXT_PRIMARY,
+                    ),
+                    rx.text(
+                        "Software Provider Status:",
+                        size="3",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                        margin_bottom="0.5rem",
+                    ),
+                    rx.text(
+                        "WhisperCapital (the \"Company\") is a provider of technical software tools for market participants. The Company is NOT a registered investment advisor, broker-dealer, or financial institution. The software provided is a technical \"bridge\" that allows users to automate their own logic.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="1rem",
+                    ),
+                    rx.text(
+                        "Non-Custodial Nature:",
+                        size="3",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                        margin_bottom="0.5rem",
+                    ),
+                    rx.text(
+                        "At no point does the Company have access to, custody of, or control over User funds. All transactions are executed through the User's third-party exchange accounts via API keys provided by the User. Users are solely responsible for the security of their own API keys and exchange accounts.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="1rem",
+                    ),
+                    rx.text(
+                        "Execution Risk:",
+                        size="3",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                        margin_bottom="0.5rem",
+                    ),
+                    rx.text(
+                        "Automated \"hedging\" and trading bots carry inherent risks, including but not limited to API latency, market volatility, and software logic errors. The Company shall not be liable for any financial losses, \"slippage,\" or liquidated positions resulting from the use of the software.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="1rem",
+                    ),
+                    rx.text(
+                        "No Guarantee of Results:",
+                        size="3",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                        margin_bottom="0.5rem",
+                    ),
+                    rx.text(
+                        "Any \"hedge\" strategies or templates provided within the software are for informational and illustrative purposes only. The Company does not guarantee the success of any strategy and does not provide financial advice.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="1rem",
+                    ),
+                    rx.text(
+                        "User Responsibility:",
+                        size="3",
+                        weight="bold",
+                        color=COLORS.TEXT_PRIMARY,
+                        margin_bottom="0.5rem",
+                    ),
+                    rx.text(
+                        "The User acknowledges that they are using the software in a \"Self-Directed\" capacity. The User is responsible for verifying the settings of their \"bot\" and ensuring it aligns with their own risk tolerance.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="2rem",
+                    ),
+                ),
+                
                 # Fees and Payment
                 rx.box(
                     rx.heading(

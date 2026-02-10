@@ -1920,6 +1920,21 @@ def footer() -> rx.Component:
                         display=["flex", "flex", "none"],
                     ),
                 ),
+                # Legal Disclaimer
+                rx.box(
+                    rx.text(
+                        "Disclaimer: WhisperCapital is a software utility and not a financial advisor. All automated strategies are executed at the user's sole risk. We do not have access to your funds and never act as a custodian. Past performance is not indicative of future results. By using this software, you acknowledge that you are responsible for your own trading decisions.",
+                        size="1",
+                        color=COLORS.TEXT_MUTED,
+                        line_height="1.6",
+                        text_align="center",
+                    ),
+                    padding="1.5rem",
+                    border_radius="8px",
+                    background="rgba(15, 23, 42, 0.5)",
+                    border=f"1px solid {COLORS.BORDER_SUBTLE}",
+                    margin_y="2rem",
+                ),
                 # Divider
                 rx.box(
                     width="100%",
