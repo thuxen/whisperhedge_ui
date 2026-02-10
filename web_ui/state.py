@@ -162,7 +162,7 @@ class AuthState(rx.State):
     async def _sync_subscription_status(self):
         """Sync subscription status from Stripe to local database on login"""
         try:
-            from ..services.stripe_service import get_subscription_details
+            from .services.stripe_service import get_subscription_details
             from datetime import datetime
             
             print(f"[AUTH] Syncing subscription status for user {self.user_id}", flush=True)
