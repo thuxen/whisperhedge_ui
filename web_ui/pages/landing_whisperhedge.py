@@ -203,7 +203,7 @@ def hero_section() -> rx.Component:
         rx.container(
             rx.vstack(
                 rx.badge(
-                    "NON-CUSTODIAL RISK AUTOMATION",
+                    "NON-CUSTODIAL LIQUIDITY POOL RISK AUTOMATION",
                     size="2",
                     color_scheme="blue",
                     margin_bottom="1rem",
@@ -974,7 +974,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 text_align="center",
                             ),
                             rx.text(
-                                "Link a \"Trade-Only\" API key from Hyperliquid. Your funds stay in your own account—WhisperHedge only has permission to execute the defensive commands you authorize. Important: Disable withdrawals on your API key.",
+                                "Link a \"Trade-Only\" API key from Hyperliquid. Your funds stay in your own account—WhisperHedge only has permission to execute the defensive commands you authorize.",
                                 size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 text_align="center",

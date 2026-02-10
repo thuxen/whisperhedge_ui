@@ -146,7 +146,7 @@ def terms_page() -> rx.Component:
                         margin_bottom="0.5rem",
                     ),
                     rx.text(
-                        "WhisperCapital (the \"Company\") is a provider of technical software tools for market participants. The Company is NOT a registered investment advisor, broker-dealer, or financial institution. The software provided is a technical \"bridge\" that allows users to automate their own logic.",
+                        "WhisperHedge (the \"Company\") is a provider of technical software tools for market participants. The Company is NOT a registered investment advisor, broker-dealer, or financial institution. The software provided is a technical \"bridge\" that allows users to automate their own logic.",
                         size="3",
                         color=COLORS.TEXT_SECONDARY,
                         line_height="1.8",
