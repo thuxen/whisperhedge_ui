@@ -664,61 +664,38 @@ def overview_tab() -> rx.Component:
                             size="3",
                             color=COLORS.TEXT_SECONDARY,
                         ),
-                        # ALL DATE FIELDS - TO BE CLEANED UP LATER
+                        # Billing Information
                         rx.divider(margin_y="0.75rem"),
-                        rx.text("ALL DATE FIELDS (for review):", size="2", weight="bold", color=COLORS.TEXT_SECONDARY),
-                        
-                        # Account dates
-                        rx.cond(
-                            ManagePlanState.account_created_at != "",
-                            rx.text(f"Account created (auth.users): {ManagePlanState.account_created_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.subscription_created_at != "",
-                            rx.text(f"Subscription record created: {ManagePlanState.subscription_created_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.subscription_updated_at != "",
-                            rx.text(f"Subscription record updated: {ManagePlanState.subscription_updated_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        
-                        # Current Stripe billing dates
-                        rx.text("Stripe Billing (current_period_*):", size="2", weight="bold", color=COLORS.TEXT_SECONDARY, margin_top="0.5rem"),
                         rx.cond(
                             ManagePlanState.current_period_start != "",
-                            rx.text(f"current_period_start: {ManagePlanState.current_period_start[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.current_period_end != "",
-                            rx.text(f"current_period_end: {ManagePlanState.current_period_end[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.subscription_status != "",
-                            rx.text(f"subscription_status: {ManagePlanState.subscription_status}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.text(f"cancel_at_period_end: {ManagePlanState.cancel_at_period_end}", size="1", color=COLORS.TEXT_MUTED),
-                        rx.cond(
-                            ManagePlanState.cancelled_at != "",
-                            rx.text(f"cancelled_at: {ManagePlanState.cancelled_at[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.trial_end != "",
-                            rx.text(f"trial_end: {ManagePlanState.trial_end[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        
-                        # Legacy billing dates
-                        rx.text("Legacy Billing (billing_cycle_*):", size="2", weight="bold", color=COLORS.TEXT_SECONDARY, margin_top="0.5rem"),
-                        rx.cond(
-                            ManagePlanState.billing_cycle_start != "",
-                            rx.text(f"billing_cycle_start: {ManagePlanState.billing_cycle_start[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.billing_cycle_end != "",
-                            rx.text(f"billing_cycle_end: {ManagePlanState.billing_cycle_end[:19]}", size="1", color=COLORS.TEXT_MUTED),
-                        ),
-                        rx.cond(
-                            ManagePlanState.legacy_status != "",
-                            rx.text(f"status (legacy): {ManagePlanState.legacy_status}", size="1", color=COLORS.TEXT_MUTED),
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.text("Billing Cycle Start:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
+                                    rx.text(ManagePlanState.current_period_start[:10], size="2", color=COLORS.TEXT_PRIMARY),
+                                    spacing="2",
+                                ),
+                                rx.hstack(
+                                    rx.text("Next Billing Date:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
+                                    rx.text(ManagePlanState.current_period_end[:10], size="2", color=COLORS.TEXT_PRIMARY),
+                                    spacing="2",
+                                ),
+                                rx.hstack(
+                                    rx.text("Status:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
+                                    rx.text(
+                                        ManagePlanState.subscription_status.capitalize(),
+                                        size="2",
+                                        color=rx.cond(
+                                            ManagePlanState.subscription_status == "active",
+                                            COLORS.SUCCESS,
+                                            COLORS.TEXT_PRIMARY,
+                                        ),
+                                        weight="medium",
+                                    ),
+                                    spacing="2",
+                                ),
+                                align="start",
+                                spacing="1",
+                            ),
                         ),
                         align="start",
                         spacing="1",
