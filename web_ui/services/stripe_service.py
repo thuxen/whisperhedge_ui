@@ -181,6 +181,41 @@ def get_subscription_details(subscription_id: str) -> Optional[Dict[str, Any]]:
         return None
 
 
+def cancel_subscription_at_period_end(subscription_id: str) -> bool:
+    """
+    Cancel subscription at end of billing period (downgrade to free)
+    User retains access until current period ends
+    
+    Args:
+        subscription_id: Stripe subscription ID
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        print(f"[STRIPE] Cancelling subscription at period end: {subscription_id}", flush=True)
+        sys.stdout.flush()
+        
+        subscription = stripe.Subscription.modify(
+            subscription_id,
+            cancel_at_period_end=True
+        )
+        
+        print(f"[STRIPE] ✓ Subscription will cancel at period end", flush=True)
+        sys.stdout.flush()
+        print(f"[STRIPE]   - Access until: {subscription.current_period_end}", flush=True)
+        sys.stdout.flush()
+        
+        return True
+    except Exception as e:
+        print(f"[STRIPE ERROR] Failed to cancel subscription: {e}", flush=True)
+        sys.stdout.flush()
+        import traceback
+        traceback.print_exc()
+        sys.stdout.flush()
+        return False
+
+
 def verify_webhook_signature(payload: bytes, sig_header: str) -> Optional[Dict[str, Any]]:
     """
     Verify Stripe webhook signature and return event

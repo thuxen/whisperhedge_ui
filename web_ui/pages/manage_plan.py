@@ -371,16 +371,16 @@ class ManagePlanState(rx.State):
             print(f"[PORTAL] Opening customer portal for customer: {self.stripe_customer_id}", flush=True)
             sys.stdout.flush()
             
-            # Get base URL for return redirect - use env var or default to localhost
-            base_url = os.getenv("APP_URL", "http://localhost:3000")
-            print(f"[PORTAL]   - Return URL: {base_url}/dashboard", flush=True)
-            sys.stdout.flush()
+            if not self.stripe_customer_id:
+                print(f"[PORTAL ERROR] No Stripe customer ID", flush=True)
+                sys.stdout.flush()
+                self.error_message = "No Stripe customer found"
+                return
             
-            # Create customer portal session
-            portal_url = create_customer_portal_session(
-                customer_id=self.stripe_customer_id,
-                return_url=f"{base_url}/dashboard",
-            )
+            base_url = os.getenv("BASE_URL", "http://localhost:3000")
+            return_url = f"{base_url}/dashboard"
+            
+            portal_url = create_customer_portal_session(self.stripe_customer_id, return_url)
             
             if portal_url:
                 print(f"[PORTAL] ✓ Redirecting to portal: {portal_url}", flush=True)
@@ -390,15 +390,61 @@ class ManagePlanState(rx.State):
             else:
                 print(f"[PORTAL ERROR] No portal URL returned", flush=True)
                 sys.stdout.flush()
-                self.error_message = "Failed to open customer portal. Please contact support."
-                
+                self.error_message = "Failed to open billing portal"
         except Exception as e:
-            self.error_message = f"Error: {str(e)}"
-            print(f"[PORTAL ERROR] Customer portal failed: {e}", flush=True)
+            print(f"[PORTAL ERROR] Exception: {e}", flush=True)
             sys.stdout.flush()
             import traceback
             traceback.print_exc()
             sys.stdout.flush()
+            self.error_message = "An error occurred opening the billing portal"
+    
+    async def downgrade_to_free(self):
+        """Downgrade to free plan - cancels subscription at end of billing period"""
+        try:
+            from ..services.stripe_service import cancel_subscription_at_period_end
+            from ..auth import get_supabase_client
+            from datetime import datetime
+            
+            print(f"[DOWNGRADE] User requesting downgrade to free", flush=True)
+            sys.stdout.flush()
+            
+            if not self.stripe_subscription_id:
+                self.error_message = "No active subscription found"
+                return
+            
+            # Cancel subscription at period end in Stripe
+            success = cancel_subscription_at_period_end(self.stripe_subscription_id)
+            
+            if not success:
+                self.error_message = "Failed to cancel subscription"
+                return
+            
+            # Update local database
+            auth_state = await self.get_state(AuthState)
+            supabase = get_supabase_client(auth_state.access_token)
+            
+            supabase.table("user_subscriptions").update({
+                "cancel_at_period_end": True,
+            }).eq("user_id", auth_state.user_id).execute()
+            
+            # Update state
+            self.cancel_at_period_end = True
+            
+            print(f"[DOWNGRADE] ✓ Subscription will cancel at period end: {self.current_period_end}", flush=True)
+            sys.stdout.flush()
+            
+            # Show success message and switch to overview tab
+            self.success_message = f"Your subscription will end on {self.current_period_end[:10]}. You'll have full access until then."
+            self.set_active_tab("overview")
+            
+        except Exception as e:
+            print(f"[DOWNGRADE ERROR] {e}", flush=True)
+            sys.stdout.flush()
+            import traceback
+            traceback.print_exc()
+            sys.stdout.flush()
+            self.error_message = "An error occurred while downgrading"
     
     async def sync_from_plan_status(self):
         """Sync plan data from PlanStatusState (which loads on dashboard mount)"""
@@ -812,23 +858,8 @@ def change_plan_tab() -> rx.Component:
             margin_bottom="2rem",
         ),
         
-        # Plan options grid
+        # Plan options grid (paid plans only)
         rx.grid(
-            # FREE
-            plan_card(
-                tier_name="free",
-                display_name="Free",
-                price=0.0,
-                positions="",
-                tvl="$2,500 TVL Hard Cap",
-                features=[
-                    "Standard Execution",
-                    "Hyperliquid Integration",
-                    "All Strategies",
-                ],
-                is_current=ManagePlanState.current_tier_name == "free",
-            ),
-            
             # HOBBY
             plan_card(
                 tier_name="hobby",
@@ -893,9 +924,30 @@ def change_plan_tab() -> rx.Component:
                 badge_color="#D4AF37",
             ),
             
-            columns="5",
+            columns="4",
             spacing="4",
             width="100%",
+        ),
+        
+        # Downgrade to Free link
+        rx.cond(
+            ManagePlanState.current_tier_name != "free",
+            rx.box(
+                rx.text(
+                    "Want to downgrade? ",
+                    rx.link(
+                        "Switch to Free plan",
+                        on_click=ManagePlanState.downgrade_to_free,
+                        color=COLORS.TEXT_SECONDARY,
+                        text_decoration="underline",
+                        cursor="pointer",
+                    ),
+                    size="2",
+                    color=COLORS.TEXT_MUTED,
+                ),
+                text_align="center",
+                margin_top="2rem",
+            ),
         ),
         
         align="start",
@@ -905,10 +957,10 @@ def change_plan_tab() -> rx.Component:
 
 
 def billing_tab() -> rx.Component:
-    """Billing tab - manage payment method, view invoices, cancel subscription"""
+    """Billing tab - manage payment method, view invoices, downgrade subscription"""
     return rx.vstack(
         rx.heading(
-            "Billing Management",
+            "Billing & Subscription",
             size="5",
             weight="bold",
             color=COLORS.TEXT_PRIMARY,
@@ -919,20 +971,20 @@ def billing_tab() -> rx.Component:
         rx.cond(
             ManagePlanState.stripe_subscription_id != "",
             rx.vstack(
-                # Stripe Portal Card
+                # Single Billing Management Card
                 rx.box(
                     rx.vstack(
                         rx.hstack(
                             rx.icon("credit-card", size=24, color=COLORS.ACCENT_PRIMARY),
                             rx.vstack(
                                 rx.text(
-                                    "Payment Method & Invoices",
+                                    "Billing & Subscription Management",
                                     size="4",
                                     weight="bold",
                                     color=COLORS.TEXT_PRIMARY,
                                 ),
                                 rx.text(
-                                    "Manage your payment method, view invoices, and download receipts.",
+                                    "View invoices, update payment method, or manage your subscription through Stripe's secure portal.",
                                     size="2",
                                     color=COLORS.TEXT_SECONDARY,
                                 ),
@@ -946,7 +998,7 @@ def billing_tab() -> rx.Component:
                         rx.button(
                             rx.hstack(
                                 rx.icon("external-link", size=16),
-                                rx.text("Open Stripe Billing Portal"),
+                                rx.text("Manage Billing & Subscription"),
                                 spacing="2",
                             ),
                             size="3",
@@ -961,49 +1013,6 @@ def billing_tab() -> rx.Component:
                     border_radius="8px",
                     border=f"1px solid {COLORS.CARD_BORDER}",
                     background=COLORS.CARD_BG,
-                    margin_bottom="1.5rem",
-                ),
-                
-                # Cancel Subscription Card
-                rx.box(
-                    rx.vstack(
-                        rx.hstack(
-                            rx.icon("alert-triangle", size=24, color="#EF4444"),
-                            rx.vstack(
-                                rx.text(
-                                    "Cancel Subscription",
-                                    size="4",
-                                    weight="bold",
-                                    color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    "You can cancel your subscription at any time. You'll retain access until the end of your billing period.",
-                                    size="2",
-                                    color=COLORS.TEXT_SECONDARY,
-                                ),
-                                align="start",
-                                spacing="1",
-                            ),
-                            spacing="3",
-                            align="start",
-                            width="100%",
-                        ),
-                        rx.button(
-                            "Cancel Subscription",
-                            size="3",
-                            color_scheme="red",
-                            variant="outline",
-                            on_click=ManagePlanState.manage_subscription,
-                            width="fit-content",
-                        ),
-                        align="start",
-                        spacing="3",
-                        width="100%",
-                    ),
-                    padding="2rem",
-                    border_radius="8px",
-                    border="1px solid rgba(239, 68, 68, 0.3)",
-                    background="rgba(239, 68, 68, 0.05)",
                 ),
                 
                 align="start",
