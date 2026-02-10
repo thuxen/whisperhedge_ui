@@ -203,13 +203,13 @@ def hero_section() -> rx.Component:
         rx.container(
             rx.vstack(
                 rx.badge(
-                    "AUTOMATED HEDGING BOT FOR LIQUIDITY PROVIDERS",
+                    "NON-CUSTODIAL RISK AUTOMATION",
                     size="2",
                     color_scheme="blue",
                     margin_bottom="1rem",
                 ),
                 rx.heading(
-                    "Automate Your LP Defense. Maximize Fee Retention.",
+                    "Advanced Risk Automation for Liquidity Providers",
                     size="9",
                     weight="bold",
                     text_align="center",
@@ -217,8 +217,17 @@ def hero_section() -> rx.Component:
                     color=COLORS.TEXT_PRIMARY,
                 ),
                 rx.text(
-                    "WhisperHedge is an automated bot that protects your liquidity pool positions from Impermanent Loss. We execute strategic hedges on Hyperliquid while you continue earning fees—no manual intervention required.",
-                    size="5",
+                    "Protect Your LP Positions. Automate Your Defense.",
+                    size="6",
+                    color=COLORS.TEXT_PRIMARY,
+                    text_align="center",
+                    max_width="50rem",
+                    margin_bottom="1rem",
+                    font_weight="600",
+                ),
+                rx.text(
+                    "WhisperHedge is a non-custodial automation engine designed to mitigate Impermanent Loss. We execute user-defined hedging workflows on Hyperliquid, allowing you to focus on yield while our software manages your delta exposure—no manual monitoring required.",
+                    size="4",
                     color=COLORS.TEXT_SECONDARY,
                     text_align="center",
                     max_width="50rem",
@@ -258,7 +267,7 @@ def risk_automation_section() -> rx.Component:
         rx.container(
             rx.vstack(
                 rx.text(
-                    "We focus on risk automation so you can focus on liquidity, yield, and opportunity. As a WhisperHedge user, you can finally close those complex tracking spreadsheets and stop second-guessing your hedge ratios. Our platform provides the real-time precision you need to defend your principal while ensuring your fee earnings aren't being devoured by rebalancing costs. It's time to move beyond manual management and start protecting your capital with institutional-grade logic.",
+                    "WhisperHedge provides the real-time precision needed to defend your capital. Stop second-guessing your hedge ratios and manual tracking. Our platform automates institutional-grade logic to protect your principal, ensuring your fee earnings aren't lost to market volatility.",
                     size="5",
                     color=COLORS.TEXT_SECONDARY,
                     text_align="center",
@@ -341,21 +350,21 @@ def desktop_strategic_philosophy_content() -> rx.Component:
                                 margin_bottom="0.5rem",
                             ),
                             rx.heading(
-                                "Stop the \"Rebalance Bleed\"",
+                                "Minimize Execution Friction",
                                 size="5",
                                 weight="bold",
                                 color=COLORS.TEXT_PRIMARY,
                                 margin_bottom="1rem",
                             ),
                             rx.text(
-                                "The Delta-Neutral Trap",
+                                "Move Beyond Constant Rebalancing",
                                 size="3",
                                 weight="bold",
                                 color=COLORS.TEXT_SECONDARY,
                                 margin_bottom="0.5rem",
                             ),
                             rx.text(
-                                "Chasing a static 0-delta in a dynamic pool is a losing game. Most bots force you to rebalance on every tick, turning \"Impermanent\" loss into \"Permanent\" loss through constant slippage and fees. We allow for strategic variance, protecting your upside while defending the core.",
+                                "Chasing a static 0-delta manually is a drain on your time and capital. WhisperHedge uses algorithmic variance to defend your core position without the excessive fees of \"every-tick\" rebalancing.",
                                 size="2",
                                 color="#94A3B8",
                                 line_height="1.7",
@@ -388,7 +397,7 @@ def desktop_strategic_philosophy_content() -> rx.Component:
                                 margin_bottom="0.5rem",
                             ),
                             rx.heading(
-                                "Defend Your Principal",
+                                "Principal Protection",
                                 size="5",
                                 weight="bold",
                                 color=COLORS.TEXT_PRIMARY,
@@ -402,7 +411,7 @@ def desktop_strategic_philosophy_content() -> rx.Component:
                                 margin_bottom="0.5rem",
                             ),
                             rx.text(
-                                "Impermanent Loss is the \"invisible tax\" on LPs. WhisperHedge identifies price divergence early and opens targeted offsets on perpetual exchanges. We don't just watch your position go out of range; we defend the value of the tokens you started with.",
+                                "Impermanent Loss (IL) is the invisible cost of providing liquidity. WhisperHedge monitors price divergence and triggers targeted offsets on perpetual exchanges. We don't just watch your range; we help you preserve the value of your initial tokens.",
                                 size="2",
                                 color="#94A3B8",
                                 line_height="1.7",
@@ -915,7 +924,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 margin_bottom="1.5rem",
                             ),
                             rx.heading(
-                                "Reference Your Position",
+                                "Define Your Position",
                                 size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
@@ -923,7 +932,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 text_align="center",
                             ),
                             rx.text(
-                                "Input your specific Liquidity Pool Position ID. WhisperHedge doesn't need to scan your entire wallet or request a connection. We simply pull the real-time on-chain data for that specific position to calculate your exposure.",
+                                "Simply input your Liquidity Pool Position ID. WhisperHedge is non-custodial; we only reference public on-chain data to calculate your current exposure.",
                                 size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 text_align="center",
@@ -957,7 +966,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 margin_bottom="1.5rem",
                             ),
                             rx.heading(
-                                "Link Your Defense",
+                                "Connect Your Secure API",
                                 size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
@@ -965,7 +974,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 text_align="center",
                             ),
                             rx.text(
-                                "Generate a restricted, trade-only API key on Hyperliquid and ensure your account has sufficient collateral. Your funds stay in your Hyperliquid account—WhisperHedge simply uses the API to execute the necessary defensive offsets.",
+                                "Link a \"Trade-Only\" API key from Hyperliquid. Your funds stay in your own account—WhisperHedge only has permission to execute the defensive commands you authorize. Important: Disable withdrawals on your API key.",
                                 size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 text_align="center",
@@ -999,7 +1008,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 margin_bottom="1.5rem",
                             ),
                             rx.heading(
-                                "Activate Automation",
+                                "Deploy Automation",
                                 size="5",
                                 weight="bold",
                                 margin_bottom="1rem",
@@ -1007,7 +1016,7 @@ def desktop_how_it_works_content() -> rx.Component:
                                 text_align="center",
                             ),
                             rx.text(
-                                "Choose between Manual tactical hedging or our Dynamic automated engine. Once live, the system monitors price ticks and funding rates 24/7, adjusting your hedge to defend your principal while you collect fees.",
+                                "Activate your defensive workflow. Our system monitors market ticks 24/7, adjusting your hedge to protect your principal while you collect fees.",
                                 size="3",
                                 color=COLORS.TEXT_SECONDARY,
                                 text_align="center",
@@ -1923,7 +1932,7 @@ def footer() -> rx.Component:
                 # Legal Disclaimer
                 rx.box(
                     rx.text(
-                        "Disclaimer: WhisperCapital is a software utility and not a financial advisor. All automated strategies are executed at the user's sole risk. We do not have access to your funds and never act as a custodian. Past performance is not indicative of future results. By using this software, you acknowledge that you are responsible for your own trading decisions.",
+                        "Disclaimer: WhisperHedge is a non-custodial software-as-a-service (SaaS) utility. We are not a financial advisor, broker, or custodian. All automated workflows are executed at the user's risk. We do not have access to your funds and never act as a custodian. Past performance is not indicative of future results. Please see our Terms of Service for full risk disclosures.",
                         size="1",
                         color=COLORS.TEXT_MUTED,
                         line_height="1.6",

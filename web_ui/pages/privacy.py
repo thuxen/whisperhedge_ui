@@ -35,7 +35,7 @@ def privacy_page() -> rx.Component:
                         color=COLORS.TEXT_PRIMARY,
                     ),
                     rx.text(
-                        "WhisperHedge (\"we,\" \"our,\" or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our liquidity pool protection platform.",
+                        "Turtleco Limited, doing business as WhisperHedge (\"we,\" \"our,\" or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our liquidity pool protection platform.",
                         size="3",
                         color=COLORS.TEXT_SECONDARY,
                         line_height="1.8",

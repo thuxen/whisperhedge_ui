@@ -35,7 +35,7 @@ def terms_page() -> rx.Component:
                         color=COLORS.TEXT_PRIMARY,
                     ),
                     rx.text(
-                        "By accessing or using WhisperHedge's platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use our services.",
+                        "These Terms of Service are a legal agreement between you and Turtleco Limited, doing business as 'WhisperHedge' ('the Company'). By accessing or using WhisperHedge's platform, you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use our services.",
                         size="3",
                         color=COLORS.TEXT_SECONDARY,
                         line_height="1.8",
@@ -227,7 +227,7 @@ def terms_page() -> rx.Component:
                         margin_bottom="0.5rem",
                     ),
                     rx.text(
-                        "You agree to pay the subscription fees for your selected tier (FREE, HOBBY, PRO, or ELITE) as described on our pricing page.",
+                        "You agree to pay the subscription fees for your selected tier (FREE, HOBBY, PRO, EXPERT or ELITE) as described on our pricing page.",
                         size="3",
                         color=COLORS.TEXT_SECONDARY,
                         line_height="1.8",
@@ -241,7 +241,7 @@ def terms_page() -> rx.Component:
                         margin_bottom="0.5rem",
                     ),
                     rx.text(
-                        "If your total value locked (TVL) exceeds your tier's included amount, overage charges will apply based on your average monthly managed TVL. Overage rates: HOBBY (0.1%), PRO (0.05%), ELITE (0.05%).",
+                        "If your total value locked (TVL) exceeds your tier's included amount, overage charges will apply based on your average monthly managed TVL. Overage rates: HOBBY (0.1%), PRO (0.05%), EXPERT (0.05%), ELITE (0.05%).",
                         size="3",
                         color=COLORS.TEXT_SECONDARY,
                         line_height="1.8",
@@ -256,6 +256,48 @@ def terms_page() -> rx.Component:
                     ),
                     rx.text(
                         "You may cancel your subscription at any time. Cancellations take effect at the end of the current billing cycle. No refunds for partial months.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="2rem",
+                    ),
+                ),
+                
+                # Refund Policy
+                rx.box(
+                    rx.heading(
+                        "5.5. Refund Policy",
+                        size="6",
+                        weight="bold",
+                        margin_bottom="1rem",
+                        color=COLORS.TEXT_PRIMARY,
+                    ),
+                    rx.text(
+                        "Due to the digital nature of our Software-as-a-Service (SaaS) platform, all sales are final. Once you subscribe to a paid tier and gain access to our services, we do not offer refunds for any subscription fees paid.",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="1rem",
+                    ),
+                    rx.text(
+                        "However, you retain full control over your subscription:",
+                        size="3",
+                        color=COLORS.TEXT_SECONDARY,
+                        line_height="1.8",
+                        margin_bottom="1rem",
+                    ),
+                    rx.vstack(
+                        rx.text("• You may cancel your subscription at any time through your account dashboard", size="3", color=COLORS.TEXT_SECONDARY),
+                        rx.text("• Cancellations take effect at the end of your current billing cycle", size="3", color=COLORS.TEXT_SECONDARY),
+                        rx.text("• You will retain full access to paid features until the end of your billing period", size="3", color=COLORS.TEXT_SECONDARY),
+                        rx.text("• No further charges will be made after cancellation", size="3", color=COLORS.TEXT_SECONDARY),
+                        rx.text("• You may downgrade to the Free tier at any time", size="3", color=COLORS.TEXT_SECONDARY),
+                        align="start",
+                        spacing="2",
+                        margin_bottom="1rem",
+                    ),
+                    rx.text(
+                        "If you experience technical issues preventing you from using the service, please contact our support team at support@whisperhedge.com. We will work with you to resolve any service-related problems.",
                         size="3",
                         color=COLORS.TEXT_SECONDARY,
                         line_height="1.8",
