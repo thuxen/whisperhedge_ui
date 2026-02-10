@@ -664,39 +664,18 @@ def overview_tab() -> rx.Component:
                             size="3",
                             color=COLORS.TEXT_SECONDARY,
                         ),
-                        # Billing Information
+                        rx.divider(margin_y="0.75rem"),
                         rx.cond(
                             ManagePlanState.current_period_start != "",
-                            rx.vstack(
-                                rx.divider(margin_y="0.75rem"),
-                                rx.hstack(
-                                    rx.text("Billing Cycle Start:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
-                                    rx.text(ManagePlanState.current_period_start[:10], size="2", color=COLORS.TEXT_PRIMARY),
-                                    spacing="2",
-                                ),
-                                rx.hstack(
-                                    rx.text("Next Billing Date:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
-                                    rx.text(ManagePlanState.current_period_end[:10], size="2", color=COLORS.TEXT_PRIMARY),
-                                    spacing="2",
-                                ),
-                                rx.hstack(
-                                    rx.text("Status:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
-                                    rx.text(
-                                        ManagePlanState.subscription_status.capitalize(),
-                                        size="2",
-                                        color=rx.cond(
-                                            ManagePlanState.subscription_status == "active",
-                                            COLORS.SUCCESS,
-                                            COLORS.TEXT_PRIMARY,
-                                        ),
-                                        weight="medium",
-                                    ),
-                                    spacing="2",
-                                ),
-                                align="start",
-                                spacing="1",
-                            ),
-                            rx.fragment(),
+                            rx.text(f"Billing Cycle Start: {ManagePlanState.current_period_start[:10]}", size="2", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.current_period_end != "",
+                            rx.text(f"Next Billing Date: {ManagePlanState.current_period_end[:10]}", size="2", color=COLORS.TEXT_MUTED),
+                        ),
+                        rx.cond(
+                            ManagePlanState.subscription_status != "",
+                            rx.text(f"Status: {ManagePlanState.subscription_status}", size="2", color=COLORS.TEXT_MUTED),
                         ),
                         align="start",
                         spacing="1",
