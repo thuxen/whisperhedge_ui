@@ -665,10 +665,10 @@ def overview_tab() -> rx.Component:
                             color=COLORS.TEXT_SECONDARY,
                         ),
                         # Billing Information
-                        rx.divider(margin_y="0.75rem"),
                         rx.cond(
                             ManagePlanState.current_period_start != "",
                             rx.vstack(
+                                rx.divider(margin_y="0.75rem"),
                                 rx.hstack(
                                     rx.text("Billing Cycle Start:", size="2", weight="medium", color=COLORS.TEXT_SECONDARY),
                                     rx.text(ManagePlanState.current_period_start[:10], size="2", color=COLORS.TEXT_PRIMARY),
@@ -696,6 +696,7 @@ def overview_tab() -> rx.Component:
                                 align="start",
                                 spacing="1",
                             ),
+                            rx.fragment(),
                         ),
                         align="start",
                         spacing="1",
