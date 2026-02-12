@@ -26,11 +26,12 @@ def get_supabase_client(access_token: str = "") -> Client:
         print("[SUPABASE] ✓ Client created successfully", flush=True)
         sys.stdout.flush()
         
-        # Set the session token for RLS to work
+        # Set the JWT token in postgrest headers for RLS to work
         if access_token:
-            print("[SUPABASE] Setting session token for RLS", flush=True)
+            print("[SUPABASE] Setting JWT token for RLS enforcement", flush=True)
             sys.stdout.flush()
-            client.auth.set_session(access_token, "")
+            # Set the Authorization header with the JWT token
+            client.postgrest.auth(access_token)
         
         return client
     except Exception as e:
