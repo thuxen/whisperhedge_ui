@@ -87,15 +87,6 @@ def dashboard_page() -> rx.Component:
                     z_index="9999",
                 ),
             ),
-            
-            on_mount=[
-                DashboardLoadingState.reset_loading,
-                PlanStatusState.load_plan_data,
-                ManagePlanState.load_plan_data,
-                APIKeyState.load_api_keys,
-                LPPositionState.load_positions,
-                LPPositionState.load_wallets,
-            ],
         ),
         rx.box(
             rx.center(

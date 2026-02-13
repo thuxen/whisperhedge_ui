@@ -85,6 +85,12 @@ def sidebar_item(label: str, section: str, icon: str = "circle") -> rx.Component
 
 
 def sidebar() -> rx.Component:
+    from ..dashboard_loading_state import DashboardLoadingState
+    from ..components.plan_status import PlanStatusState
+    from ..pages.manage_plan import ManagePlanState
+    from ..api_key_state import APIKeyState
+    from ..lp_position_state import LPPositionState
+    
     return rx.box(
         rx.vstack(
             rx.vstack(
@@ -150,4 +156,12 @@ def sidebar() -> rx.Component:
         position="sticky",
         top="0",
         background=COLORS.BACKGROUND_SURFACE,
+        on_mount=[
+            DashboardLoadingState.reset_loading,
+            PlanStatusState.load_plan_data,
+            ManagePlanState.load_plan_data,
+            APIKeyState.load_api_keys,
+            LPPositionState.load_positions,
+            LPPositionState.load_wallets,
+        ],
     )

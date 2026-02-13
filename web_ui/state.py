@@ -226,16 +226,41 @@ class AuthState(rx.State):
             traceback.print_exc()
             sys.stdout.flush()
 
-    def sign_out(self):
+    async def sign_out(self):
         try:
             supabase = get_supabase_client()
             supabase.auth.sign_out()
+            
+            # Clear auth state
             self.is_authenticated = False
             self.user_email = ""
             self.user_id = ""
             self.access_token = ""
-            self.success_message = "Successfully logged out"
-            # Force full page reload to clear all state and prevent cross-user contamination
-            return rx.redirect("/", external=True)
+            
+            # Clear all dashboard state to prevent cross-user contamination
+            from web_ui.api_key_state import APIKeyState
+            from web_ui.lp_position_state import LPPositionState
+            from web_ui.components.plan_status import PlanStatusState
+            from web_ui.overview_state import OverviewState
+            from web_ui.dashboard_loading_state import DashboardLoadingState
+            
+            api_key_state = await self.get_state(APIKeyState)
+            api_key_state.api_keys = []
+            
+            lp_position_state = await self.get_state(LPPositionState)
+            lp_position_state.lp_positions = []
+            lp_position_state._cached_wallets = []
+            
+            plan_status_state = await self.get_state(PlanStatusState)
+            plan_status_state.tier_name = "free"
+            
+            overview_state = await self.get_state(OverviewState)
+            overview_state.total_value = 0.0
+            overview_state.total_positions = 0
+            
+            dashboard_loading_state = await self.get_state(DashboardLoadingState)
+            dashboard_loading_state.reset_loading()
+            
+            return rx.redirect("/")
         except Exception as e:
             self.error_message = "An error occurred during sign out. Please try again."
