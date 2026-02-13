@@ -131,6 +131,54 @@ def api_key_card(key: APIKeyData) -> rx.Component:
 
 def api_keys_component() -> rx.Component:
     return rx.vstack(
+        # Delete confirmation dialog for in-use keys
+        rx.alert_dialog.root(
+            rx.alert_dialog.content(
+                rx.alert_dialog.title("⚠️ Warning: API Key In Use"),
+                rx.alert_dialog.description(
+                    rx.vstack(
+                        rx.text(
+                            f"This API key is currently being used by position '{APIKeyState.key_to_delete_position}'.",
+                            size="3",
+                        ),
+                        rx.text(
+                            "Deleting this key will leave your position unhedged and could result in losses.",
+                            size="3",
+                            weight="bold",
+                            color="red",
+                        ),
+                        rx.text(
+                            "Are you sure you want to continue?",
+                            size="3",
+                        ),
+                        spacing="2",
+                        align_items="start",
+                    ),
+                ),
+                rx.flex(
+                    rx.alert_dialog.cancel(
+                        rx.button(
+                            "Cancel",
+                            variant="soft",
+                            color_scheme="gray",
+                            on_click=APIKeyState.cancel_delete,
+                        ),
+                    ),
+                    rx.alert_dialog.action(
+                        rx.button(
+                            "Delete Anyway",
+                            variant="solid",
+                            color_scheme="red",
+                            on_click=APIKeyState.confirm_delete,
+                        ),
+                    ),
+                    spacing="3",
+                    justify="end",
+                ),
+            ),
+            open=APIKeyState.show_delete_confirmation,
+        ),
+        
         rx.card(
             rx.vstack(
                 rx.hstack(

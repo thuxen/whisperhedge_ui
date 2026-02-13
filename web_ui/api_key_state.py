@@ -47,6 +47,12 @@ class APIKeyState(rx.State):
     show_private_key: bool = False
     is_editing: bool = False
     
+    # Delete confirmation for in-use keys
+    show_delete_confirmation: bool = False
+    key_to_delete: str = ""
+    key_to_delete_name: str = ""
+    key_to_delete_position: str = ""
+    
     def clear_messages(self):
         self.error_message = ""
         self.success_message = ""
@@ -397,12 +403,19 @@ class APIKeyState(rx.State):
             self._save_form_data = {}
     
     def delete_api_key(self, key_id: str):
-        """Immediate feedback handler for deleting API key"""
-        # Set loading state immediately
-        self.loading_key_id = key_id
-        
-        # Get account name for toast message
+        """Check if key is in use and show confirmation if needed"""
         key_data = next((k for k in self.api_keys if k.id == key_id), None)
+        
+        if key_data and key_data.is_in_use:
+            # Show confirmation dialog for in-use keys
+            self.key_to_delete = key_id
+            self.key_to_delete_name = key_data.account_name
+            self.key_to_delete_position = key_data.used_by_position
+            self.show_delete_confirmation = True
+            return
+        
+        # Not in use, proceed with deletion immediately
+        self.loading_key_id = key_id
         account_name = key_data.account_name if key_data else "account"
         
         # Return toast and chain to async worker
@@ -411,13 +424,34 @@ class APIKeyState(rx.State):
             APIKeyState.delete_api_key_worker
         ]
     
+    def confirm_delete(self):
+        """User confirmed deletion of in-use key"""
+        self.show_delete_confirmation = False
+        self.loading_key_id = self.key_to_delete
+        
+        # Return toast and chain to async worker
+        return [
+            rx.toast.info(f"Deleting '{self.key_to_delete_name}' API key...", duration=5000),
+            APIKeyState.delete_api_key_worker
+        ]
+    
+    def cancel_delete(self):
+        """User cancelled deletion"""
+        self.show_delete_confirmation = False
+        self.key_to_delete = ""
+        self.key_to_delete_name = ""
+        self.key_to_delete_position = ""
+    
     async def delete_api_key_worker(self):
         """Async worker for deleting API key"""
         try:
+            print(f"[DELETE API KEY] Starting deletion for key_id: {self.loading_key_id}", flush=True)
+            
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
             
             if not auth_state.is_authenticated or not auth_state.user_id:
+                print(f"[DELETE API KEY ERROR] Not authenticated", flush=True)
                 self.error_message = "Not authenticated"
                 yield rx.toast.error("Not authenticated", duration=3000)
                 return
@@ -426,18 +460,24 @@ class APIKeyState(rx.State):
             key_data = next((k for k in self.api_keys if k.id == self.loading_key_id), None)
             account_name = key_data.account_name if key_data else "account"
             
+            print(f"[DELETE API KEY] Deleting key for account: {account_name}", flush=True)
             supabase.table("user_api_keys").delete().eq("id", self.loading_key_id).eq("user_id", auth_state.user_id).execute()
+            print(f"[DELETE API KEY] Database deletion successful", flush=True)
             
             self.success_message = f"API keys for '{account_name}' deleted successfully!"
-            self._api_keys_loaded = False  # Reset flag to allow reload
             await self.load_api_keys()
+            print(f"[DELETE API KEY] Reloaded API keys", flush=True)
             
             if self.selected_key_id == self.loading_key_id:
                 self.clear_form()
             
             yield rx.toast.success(f"'{account_name}' API key deleted successfully!", duration=3000)
+            print(f"[DELETE API KEY] Deletion complete", flush=True)
             
         except Exception as e:
+            print(f"[DELETE API KEY ERROR] Exception: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
             self.error_message = "Failed to delete API keys. Please try again."
             yield rx.toast.error("Failed to delete API key. Please try again.", duration=5000)
         finally:
