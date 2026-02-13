@@ -59,7 +59,6 @@ class LPPositionState(rx.State):
     is_editing: bool = False
     show_confirmation: bool = False
     fetched_position_data: dict = {}
-    _positions_loaded: bool = False
     
     # Hedge configuration fields
     hedge_enabled: bool = False
@@ -86,7 +85,6 @@ class LPPositionState(rx.State):
     hedge_ratio: int = 80
     selected_hedge_wallet: str = ""
     _cached_wallets: list[str] = []  # Cache for available wallets
-    _wallets_loaded: bool = False  # Guard flag to prevent duplicate wallet loading
     
     # Balance tracking for selected API key
     selected_wallet_balance: float = 0.0
@@ -248,15 +246,6 @@ class LPPositionState(rx.State):
     
     async def load_wallets(self):
         """Load available API keys for wallet selector - called on mount"""
-        # Guard against duplicate loading
-        if self._wallets_loaded:
-            # Still need to mark as loaded for dashboard loading state
-            from web_ui.dashboard_loading_state import DashboardLoadingState
-            dashboard_loading = await self.get_state(DashboardLoadingState)
-            if not dashboard_loading.wallets_loaded:
-                dashboard_loading.mark_wallets_loaded()
-            return
-        
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
@@ -297,13 +286,11 @@ class LPPositionState(rx.State):
                     await self.fetch_wallet_balance()
             
             # Mark wallets as loaded for dashboard loading state
-            self._wallets_loaded = True
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             dashboard_loading.mark_wallets_loaded()
         except Exception as e:
             # Mark as loaded even on error to prevent infinite loading
-            self._wallets_loaded = True
             from web_ui.dashboard_loading_state import DashboardLoadingState
             dashboard_loading = await self.get_state(DashboardLoadingState)
             dashboard_loading.mark_wallets_loaded()
@@ -534,7 +521,6 @@ class LPPositionState(rx.State):
             
             supabase.table("lp_positions").delete().eq("id", position_id).eq("user_id", auth_state.user_id).execute()
             
-            self._positions_loaded = False  # Reset flag to allow reload
             await self.load_positions()
             if self.selected_position_id == position_id:
                 self.clear_form()
@@ -548,17 +534,6 @@ class LPPositionState(rx.State):
 
     async def load_positions(self):
         print("\n=== LOAD_POSITIONS START ===")
-        
-        # Guard against duplicate loading
-        if self._positions_loaded:
-            print("Positions already loaded, skipping duplicate load")
-            # Still need to mark as loaded for dashboard loading state
-            from web_ui.dashboard_loading_state import DashboardLoadingState
-            dashboard_loading = await self.get_state(DashboardLoadingState)
-            if not dashboard_loading.positions_loaded:
-                dashboard_loading.mark_positions_loaded()
-            print("=== LOAD_POSITIONS END (skipped) ===\n")
-            return
         
         self.is_loading = True
         self.clear_messages()
@@ -672,8 +647,6 @@ class LPPositionState(rx.State):
                 
             print(f"Successfully loaded {len(self.lp_positions)} positions")
             
-            # Mark as loaded to prevent duplicate loading
-            self._positions_loaded = True
             print("=== LOAD_POSITIONS END ===\n")
             
             # Update overview stats
@@ -865,7 +838,6 @@ class LPPositionState(rx.State):
             
             self.success_message = "Position saved successfully!"
             self.clear_form()
-            self._positions_loaded = False  # Reset flag to allow reload
             await self.load_positions()
             yield rx.toast.success("Position saved successfully!", duration=3000)
         except Exception as e:
@@ -1072,7 +1044,6 @@ class LPPositionState(rx.State):
             if position:
                 new_status = not position.is_active
                 supabase.table("lp_positions").update({"is_active": new_status}).eq("id", position_id).eq("user_id", auth_state.user_id).execute()
-                self._positions_loaded = False  # Reset flag to allow reload
                 await self.load_positions()
         except Exception as e:
             self.error_message = "Failed to update status. Please try again."
