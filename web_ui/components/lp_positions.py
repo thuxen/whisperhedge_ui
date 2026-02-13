@@ -1035,7 +1035,7 @@ def lp_positions_component() -> rx.Component:
                             placeholder="e.g., ETH/USDC Main Position",
                             value=LPPositionState.position_name,
                             on_change=LPPositionState.set_position_name,
-                            max_width="500px",
+                            max_width="700px",
                         ),
                         rx.text(
                             "You can customize the position name",

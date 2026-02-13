@@ -65,6 +65,8 @@ class LPPositionState(rx.State):
     hedge_token0: bool = True
     hedge_token1: bool = True
     selected_api_key_id: str = ""
+    show_hedge_enable_confirmation: bool = False
+    pending_hedge_enable: bool = False
     
     # Loading state
     loading_position_id: str = ""
@@ -130,6 +132,32 @@ class LPPositionState(rx.State):
         else:
             self.hedge_ratio = int(value)
             self.use_dynamic_hedging = False
+    
+    def toggle_hedge_enabled(self, value: bool):
+        """Handle hedge enabled toggle with validation and confirmation"""
+        if value:  # User is trying to enable hedging
+            # Check if API key is assigned
+            if not self.selected_hedge_wallet or self.selected_hedge_wallet == "None":
+                self.error_message = "Please assign an API key before enabling hedging"
+                return rx.toast.error("API key required to enable hedging", duration=5000)
+            
+            # Show confirmation dialog
+            self.pending_hedge_enable = True
+            self.show_hedge_enable_confirmation = True
+        else:  # User is disabling hedging
+            self.hedge_enabled = False
+    
+    def confirm_hedge_enable(self):
+        """User confirmed they want to enable hedging"""
+        self.hedge_enabled = True
+        self.pending_hedge_enable = False
+        self.show_hedge_enable_confirmation = False
+        return rx.toast.success("Hedging enabled - live trades will be placed", duration=5000)
+    
+    def cancel_hedge_enable(self):
+        """User cancelled hedge enable"""
+        self.pending_hedge_enable = False
+        self.show_hedge_enable_confirmation = False
     
     async def set_hedge_wallet(self, wallet: str):
         self.selected_hedge_wallet = wallet

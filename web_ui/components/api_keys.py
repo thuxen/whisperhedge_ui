@@ -254,16 +254,17 @@ def api_keys_component() -> rx.Component:
             ),
         ),
         
-        rx.card(
-            rx.vstack(
-                rx.heading(
-                    rx.cond(
-                        APIKeyState.is_editing,
-                        "Edit API Key",
-                        "Add New API Key",
+        rx.center(
+            rx.card(
+                rx.vstack(
+                    rx.heading(
+                        rx.cond(
+                            APIKeyState.is_editing,
+                            "Edit API Key",
+                            "Add New API Key",
+                        ),
+                        size="5",
                     ),
-                    size="5",
-                ),
                 
                 rx.form(
                     rx.vstack(
@@ -521,8 +522,11 @@ def api_keys_component() -> rx.Component:
                     width="100%",
                 ),
                 
-                spacing="3",
+                    spacing="3",
+                    width="100%",
+                ),
                 width="100%",
+                max_width="900px",
             ),
             width="100%",
         ),
