@@ -275,7 +275,7 @@ def api_keys_component() -> rx.Component:
                                 name="account_name",
                                 type="text",
                                 required=True,
-                                width="100%",
+                                width="75%",
                                 default_value=APIKeyState.account_name,
                             ),
                             rx.text(
@@ -351,7 +351,7 @@ def api_keys_component() -> rx.Component:
                                     name="api_secret",
                                     type=rx.cond(APIKeyState.show_api_secret, "text", "password"),
                                     required=True,
-                                    width="100%",
+                                    width="75%",
                                     default_value=APIKeyState.api_secret,
                                 ),
                                 rx.button(
@@ -395,7 +395,7 @@ def api_keys_component() -> rx.Component:
                                         name="wallet_address",
                                         type="text",
                                         required=True,
-                                        width="100%",
+                                        width="75%",
                                         default_value=APIKeyState.wallet_address,
                                     ),
                                     rx.text(
