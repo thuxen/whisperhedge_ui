@@ -235,6 +235,7 @@ class AuthState(rx.State):
             self.user_id = ""
             self.access_token = ""
             self.success_message = "Successfully logged out"
-            return rx.redirect("/")
+            # Force full page reload to clear all state and prevent cross-user contamination
+            return rx.redirect("/", external=True)
         except Exception as e:
             self.error_message = "An error occurred during sign out. Please try again."
