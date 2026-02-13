@@ -339,6 +339,7 @@ def api_keys_component() -> rx.Component:
                                     rx.cond(APIKeyState.show_api_secret, "Hide", "Show"),
                                     size="1",
                                     variant="ghost",
+                                    type="button",
                                     on_click=APIKeyState.toggle_secret_visibility,
                                 ),
                                 width="100%",
