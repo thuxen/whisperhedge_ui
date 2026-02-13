@@ -93,17 +93,6 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                         spacing="1",
                         align_items="center",
                     ),
-                    rx.hstack(
-                        rx.text("Last Hedge Adjustment:", size="2", color="gray"),
-                        rx.text(
-                            "Never",
-                            size="2",
-                            weight="medium",
-                            color="gray",
-                        ),
-                        spacing="1",
-                        align_items="center",
-                    ),
                     spacing="2",
                     align_items="start",
                 ),
@@ -351,9 +340,29 @@ def lp_positions_component() -> rx.Component:
         # Position value chart dialog
         position_value_chart(),
         
+        # Auto-refresh position status every 60 seconds
+        rx.moment(
+            interval=60000,  # 60 seconds
+            on_change=LPPositionState.refresh_position_status,
+        ),
+        
         rx.box(
             rx.vstack(
-            rx.heading("LP Positions", size="6", margin_bottom="1rem"),
+            rx.hstack(
+                rx.heading("LP Positions", size="6"),
+                rx.spacer(),
+                rx.button(
+                    rx.icon("refresh-cw", size=16),
+                    "Refresh Status",
+                    size="2",
+                    variant="soft",
+                    color_scheme="blue",
+                    on_click=LPPositionState.refresh_position_status,
+                ),
+                width="100%",
+                align="center",
+                margin_bottom="1rem",
+            ),
             
             rx.cond(
                 LPPositionState.error_message != "",

@@ -97,8 +97,42 @@ def position_value_chart() -> rx.Component:
                                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                                 rx.recharts.legend(),
                                 rx.recharts.tooltip(
-                                    formatter="function(value, name, props) { return '$' + value.toFixed(2); }",
-                                    content="function(props) { if (!props.payload || props.payload.length === 0) return null; const data = props.payload[0].payload; return React.createElement('div', { style: { backgroundColor: 'white', border: '1px solid #ccc', padding: '10px', borderRadius: '4px' } }, [React.createElement('p', { style: { margin: '0 0 5px 0', fontWeight: 'bold' } }, data.timestamp), React.createElement('p', { style: { margin: '2px 0', color: '#8884d8' } }, 'LP Value: $' + (data.lp_value_usd || 0).toFixed(2)), React.createElement('p', { style: { margin: '2px 0', color: '#82ca9d' } }, 'Hedge Account: $' + (data.hl_account_value || 0).toFixed(2)), React.createElement('p', { style: { margin: '5px 0 0 0', fontWeight: 'bold', borderTop: '1px solid #ccc', paddingTop: '5px' } }, 'Total Position: $' + (data.total_value || 0).toFixed(2))]); }",
+                                    content="""function(props) {
+                                        if (!props.payload || props.payload.length === 0) return null;
+                                        const data = props.payload[0].payload;
+                                        const lpValue = data.lp_value_usd || 0;
+                                        const hedgeValue = data.hl_account_value || 0;
+                                        const total = lpValue + hedgeValue;
+                                        
+                                        return React.createElement('div', {
+                                            style: {
+                                                backgroundColor: 'white',
+                                                border: '1px solid #ccc',
+                                                padding: '10px',
+                                                borderRadius: '4px',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                            }
+                                        }, [
+                                            React.createElement('p', {
+                                                style: { margin: '0 0 8px 0', fontWeight: 'bold', fontSize: '13px' }
+                                            }, data.timestamp),
+                                            React.createElement('p', {
+                                                style: { margin: '4px 0', color: '#8884d8', fontSize: '12px' }
+                                            }, 'LP Value: $' + lpValue.toFixed(2)),
+                                            React.createElement('p', {
+                                                style: { margin: '4px 0', color: '#82ca9d', fontSize: '12px' }
+                                            }, 'Hedge Account: $' + hedgeValue.toFixed(2)),
+                                            React.createElement('p', {
+                                                style: {
+                                                    margin: '8px 0 0 0',
+                                                    fontWeight: 'bold',
+                                                    borderTop: '1px solid #ccc',
+                                                    paddingTop: '8px',
+                                                    fontSize: '13px'
+                                                }
+                                            }, 'Total: $' + total.toFixed(2))
+                                        ]);
+                                    }""",
                                 ),
                                 data=LPPositionState.chart_data,
                                 width="100%",

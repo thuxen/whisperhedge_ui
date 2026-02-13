@@ -537,6 +537,39 @@ class LPPositionState(rx.State):
             self.is_loading = False
             self.loading_position_id = ""
 
+    async def refresh_position_status(self):
+        """Lightweight refresh of position status without full reload"""
+        try:
+            print("[REFRESH STATUS] Starting position status refresh", flush=True)
+            
+            from web_ui.state import AuthState
+            auth_state = await self.get_state(AuthState)
+            
+            if not auth_state.is_authenticated or not auth_state.user_id:
+                print("[REFRESH STATUS] Not authenticated, skipping refresh", flush=True)
+                return
+            
+            # Only update last_hedge_execution for existing positions
+            for position in self.lp_positions:
+                if position.id:
+                    try:
+                        from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
+                        last_hedge_dt = get_last_hedge_execution(position.id)
+                        new_status = format_time_ago(last_hedge_dt)
+                        
+                        # Only log if status changed
+                        if position.last_hedge_execution != new_status:
+                            print(f"[REFRESH STATUS] Position {position.position_name}: {position.last_hedge_execution} -> {new_status}", flush=True)
+                            position.last_hedge_execution = new_status
+                    except Exception as e:
+                        print(f"[REFRESH STATUS] Error refreshing position {position.id}: {e}", flush=True)
+            
+            print("[REFRESH STATUS] Refresh complete", flush=True)
+        except Exception as e:
+            print(f"[REFRESH STATUS ERROR] {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+    
     async def load_positions(self):
         print("\n=== LOAD_POSITIONS START ===")
         
