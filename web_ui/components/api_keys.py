@@ -325,14 +325,22 @@ def api_keys_component() -> rx.Component:
                         
                         rx.vstack(
                             rx.hstack(
-                                rx.text(
-                                    rx.cond(
-                                        APIKeyState.exchange == "hyperliquid",
-                                        "API Secret",
-                                        "API Secret",
+                                rx.hstack(
+                                    rx.text(
+                                        rx.cond(
+                                            APIKeyState.exchange == "hyperliquid",
+                                            "API Secret",
+                                            "API Secret",
+                                        ),
+                                        size="2",
+                                        weight="bold",
                                     ),
-                                    size="2",
-                                    weight="bold",
+                                    rx.tooltip(
+                                        rx.icon("info", size=14, color="gray"),
+                                        content="On the Hyperliquid interface, click on More → API → Authorize API Wallet and copy the 'Private Key' value. The same API Secret can be used for the master and all sub-accounts.",
+                                    ),
+                                    spacing="1",
+                                    align="center",
                                 ),
                                 rx.spacer(),
                                 rx.button(
@@ -373,7 +381,15 @@ def api_keys_component() -> rx.Component:
                             APIKeyState.exchange == "hyperliquid",
                             rx.vstack(
                                 rx.vstack(
-                                    rx.text("Wallet Address", size="2", weight="bold"),
+                                    rx.hstack(
+                                        rx.text("Master Wallet Address / Sub-Account Address", size="2", weight="bold"),
+                                        rx.tooltip(
+                                            rx.icon("info", size=14, color="gray"),
+                                            content="Enter your Hyperliquid wallet address. This is needed for balance and position queries.",
+                                        ),
+                                        spacing="1",
+                                        align="center",
+                                    ),
                                     rx.input(
                                         placeholder="0x...",
                                         name="wallet_address",
@@ -392,10 +408,18 @@ def api_keys_component() -> rx.Component:
                                 ),
                                 
                                 rx.vstack(
-                                    rx.checkbox(
-                                        "Master Account (Default Trading Address)",
-                                        checked=APIKeyState.is_master_account,
-                                        on_change=APIKeyState.set_is_master_account,
+                                    rx.hstack(
+                                        rx.checkbox(
+                                            "Master Account or Sub-Account",
+                                            checked=APIKeyState.is_master_account,
+                                            on_change=APIKeyState.set_is_master_account,
+                                        ),
+                                        rx.tooltip(
+                                            rx.icon("info", size=14, color="gray"),
+                                            content="Check this box if the wallet address above is your MASTER ACCOUNT (main wallet). Uncheck if it's a SUB-ACCOUNT (vault or sub-account). This helps us query the correct account type for balances and positions.",
+                                        ),
+                                        spacing="1",
+                                        align="center",
                                     ),
                                     rx.input(
                                         type="hidden",
@@ -403,7 +427,7 @@ def api_keys_component() -> rx.Component:
                                         value=rx.cond(APIKeyState.is_master_account, "true", "false"),
                                     ),
                                     rx.text(
-                                        "Check if this is your main wallet. Uncheck if trading with a vault/sub-account.",
+                                        "Checked = Master Account | Unchecked = Sub-Account",
                                         size="1",
                                         color="gray",
                                     ),
