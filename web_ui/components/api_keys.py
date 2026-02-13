@@ -248,7 +248,7 @@ def api_keys_component() -> rx.Component:
             APIKeyState.api_keys.length() > 0,
             rx.grid(
                 rx.foreach(APIKeyState.api_keys, api_key_card),
-                columns="2",
+                columns="3",
                 spacing="3",
                 width="100%",
             ),
@@ -353,7 +353,7 @@ def api_keys_component() -> rx.Component:
                                 name="api_secret",
                                 type=rx.cond(APIKeyState.show_api_secret, "text", "password"),
                                 required=True,
-                                width="100%",
+                                max_width="50%",
                                 default_value=APIKeyState.api_secret,
                             ),
                             rx.cond(
@@ -378,7 +378,7 @@ def api_keys_component() -> rx.Component:
                                         name="wallet_address",
                                         type="text",
                                         required=True,
-                                        max_width="500px",
+                                        max_width="50%",
                                         default_value=APIKeyState.wallet_address,
                                     ),
                                     rx.text(
@@ -526,9 +526,8 @@ def api_keys_component() -> rx.Component:
                     width="100%",
                 ),
                 width="100%",
-                max_width="900px",
             ),
-            width="100%",
+            width="70%",
         ),
         
         spacing="4",
