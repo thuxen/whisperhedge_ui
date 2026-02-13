@@ -275,7 +275,7 @@ def api_keys_component() -> rx.Component:
                                 name="account_name",
                                 type="text",
                                 required=True,
-                                max_width="500px",
+                                width="100%",
                                 default_value=APIKeyState.account_name,
                             ),
                             rx.text(
@@ -325,24 +325,35 @@ def api_keys_component() -> rx.Component:
                         
                         rx.vstack(
                             rx.hstack(
-                                rx.hstack(
-                                    rx.text(
-                                        rx.cond(
-                                            APIKeyState.exchange == "hyperliquid",
-                                            "API Secret",
-                                            "API Secret",
-                                        ),
-                                        size="2",
-                                        weight="bold",
+                                rx.text(
+                                    rx.cond(
+                                        APIKeyState.exchange == "hyperliquid",
+                                        "API Secret",
+                                        "API Secret",
                                     ),
-                                    rx.tooltip(
-                                        rx.icon("info", size=14, color="gray"),
-                                        content="On the Hyperliquid interface, click on More → API → Authorize API Wallet and copy the 'Private Key' value. The same API Secret can be used for the master and all sub-accounts.",
-                                    ),
-                                    spacing="1",
-                                    align="center",
+                                    size="2",
+                                    weight="bold",
                                 ),
-                                rx.spacer(),
+                                rx.tooltip(
+                                    rx.icon("info", size=14, color="gray"),
+                                    content="On the Hyperliquid interface, click on More → API → Authorize API Wallet and copy the 'Private Key' value. The same API Secret can be used for the master and all sub-accounts.",
+                                ),
+                                spacing="1",
+                                align="center",
+                            ),
+                            rx.hstack(
+                                rx.input(
+                                    placeholder=rx.cond(
+                                        APIKeyState.exchange == "hyperliquid",
+                                        "Enter your Hyperliquid API Secret",
+                                        "Enter your API Secret",
+                                    ),
+                                    name="api_secret",
+                                    type=rx.cond(APIKeyState.show_api_secret, "text", "password"),
+                                    required=True,
+                                    width="100%",
+                                    default_value=APIKeyState.api_secret,
+                                ),
                                 rx.button(
                                     rx.cond(APIKeyState.show_api_secret, "Hide", "Show"),
                                     size="1",
@@ -350,20 +361,9 @@ def api_keys_component() -> rx.Component:
                                     type="button",
                                     on_click=APIKeyState.toggle_secret_visibility,
                                 ),
-                                width="100%",
+                                spacing="2",
                                 align="center",
-                            ),
-                            rx.input(
-                                placeholder=rx.cond(
-                                    APIKeyState.exchange == "hyperliquid",
-                                    "Enter your Hyperliquid API Secret",
-                                    "Enter your API Secret",
-                                ),
-                                name="api_secret",
-                                type=rx.cond(APIKeyState.show_api_secret, "text", "password"),
-                                required=True,
-                                max_width="50%",
-                                default_value=APIKeyState.api_secret,
+                                width="100%",
                             ),
                             rx.cond(
                                 APIKeyState.exchange == "hyperliquid",
@@ -395,7 +395,7 @@ def api_keys_component() -> rx.Component:
                                         name="wallet_address",
                                         type="text",
                                         required=True,
-                                        max_width="50%",
+                                        width="100%",
                                         default_value=APIKeyState.wallet_address,
                                     ),
                                     rx.text(
@@ -551,8 +551,9 @@ def api_keys_component() -> rx.Component:
                     width="100%",
                 ),
                 width="100%",
+                max_width="1200px",
             ),
-            width="70%",
+            width="100%",
         ),
         
         spacing="4",
