@@ -131,11 +131,15 @@ class LPPositionState(rx.State):
             self.hedge_ratio = int(value)
             self.use_dynamic_hedging = False
     
-    def set_hedge_wallet(self, value: str):
-        self.selected_hedge_wallet = value
-        # Fetch balance for selected wallet
-        if value:
-            return LPPositionState.fetch_wallet_balance
+    async def set_hedge_wallet(self, wallet: str):
+        self.selected_hedge_wallet = wallet
+        
+        # If None is selected, clear the balance and return
+        if wallet == "None":
+            self.selected_wallet_balance = 0.0
+            return
+        
+        await self.fetch_wallet_balance()
     
     def set_dynamic_profile(self, value: str):
         self.dynamic_profile = value
@@ -276,12 +280,13 @@ class LPPositionState(rx.State):
                     if key["id"] not in used_key_ids or key["id"] == current_position_key_id
                 ]
                 
-                wallets = [f"{key['account_name']} ({key['exchange']})" for key in available_keys]
+                # Add None option to allow unassigning API keys
+                wallets = ["None"] + [f"{key['account_name']} ({key['exchange']})" for key in available_keys]
                 # Store in cache for immediate use
                 self._cached_wallets = wallets
-                # Auto-select first wallet if none selected
-                if wallets and not self.selected_hedge_wallet:
-                    self.selected_hedge_wallet = wallets[0]
+                # Auto-select first wallet if none selected (skip None)
+                if wallets and not self.selected_hedge_wallet and len(wallets) > 1:
+                    self.selected_hedge_wallet = wallets[1]  # Select first actual wallet, not None
                     # Auto-fetch balance for the selected wallet
                     await self.fetch_wallet_balance()
             
@@ -861,7 +866,7 @@ class LPPositionState(rx.State):
             # Get wallet ID from selected wallet name
             wallet_id = None
             print(f"selected_hedge_wallet={self.selected_hedge_wallet}")
-            if self.selected_hedge_wallet:
+            if self.selected_hedge_wallet and self.selected_hedge_wallet != "None":
                 # Extract account name from "Account Name (Exchange)" format
                 account_name = self.selected_hedge_wallet.split(" (")[0]
                 print(f"Looking up API key: account_name={account_name}")
@@ -871,6 +876,8 @@ class LPPositionState(rx.State):
                     print(f"Found wallet_id={wallet_id}")
                 else:
                     print("No wallet found for account_name")
+            else:
+                print("No wallet selected or 'None' selected - setting wallet_id to NULL")
             
             # Check if config exists to preserve existing values when editing
             print(f"Checking for existing config: protocol={self.protocol}, network={self.network}, nft_id={self.nft_id}")

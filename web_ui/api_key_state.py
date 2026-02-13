@@ -369,6 +369,19 @@ class APIKeyState(rx.State):
             encrypted_secret = encrypt_value(api_secret)
             encrypted_private_key = encrypt_value(private_key) if private_key else None
             
+            # Check for duplicate API key for this user (when creating new)
+            if not self.is_editing and encrypted_key:
+                print(f"[SAVE API KEY] Checking for duplicate API key for user {auth_state.user_id}", flush=True)
+                duplicate_check = supabase.table("user_api_keys").select("id,account_name").eq("user_id", auth_state.user_id).eq("api_key", encrypted_key).execute()
+                
+                if duplicate_check.data:
+                    existing_account = duplicate_check.data[0]["account_name"]
+                    print(f"[SAVE API KEY] Duplicate found - already exists as '{existing_account}'", flush=True)
+                    self.error_message = f"This API key is already added as '{existing_account}'"
+                    yield rx.toast.error(f"Duplicate API key - already exists as '{existing_account}'", duration=5000)
+                    return
+                print(f"[SAVE API KEY] No duplicate found, proceeding with save", flush=True)
+            
             data = {
                 "user_id": auth_state.user_id,
                 "account_name": account_name,
@@ -421,17 +434,6 @@ class APIKeyState(rx.State):
         # Return toast and chain to async worker
         return [
             rx.toast.info(f"Deleting '{account_name}' API key...", duration=5000),
-            APIKeyState.delete_api_key_worker
-        ]
-    
-    def confirm_delete(self):
-        """User confirmed deletion of in-use key"""
-        self.show_delete_confirmation = False
-        self.loading_key_id = self.key_to_delete
-        
-        # Return toast and chain to async worker
-        return [
-            rx.toast.info(f"Deleting '{self.key_to_delete_name}' API key...", duration=5000),
             APIKeyState.delete_api_key_worker
         ]
     

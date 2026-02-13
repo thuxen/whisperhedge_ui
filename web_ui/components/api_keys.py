@@ -131,24 +131,28 @@ def api_key_card(key: APIKeyData) -> rx.Component:
 
 def api_keys_component() -> rx.Component:
     return rx.vstack(
-        # Delete confirmation dialog for in-use keys
+        # Error dialog for in-use keys - blocks deletion
         rx.alert_dialog.root(
             rx.alert_dialog.content(
-                rx.alert_dialog.title("⚠️ Warning: API Key In Use"),
+                rx.alert_dialog.title("❌ Cannot Delete API Key"),
                 rx.alert_dialog.description(
                     rx.vstack(
                         rx.text(
-                            f"This API key is currently being used by position '{APIKeyState.key_to_delete_position}'.",
+                            f"This API key is currently assigned to position '{APIKeyState.key_to_delete_position}'.",
                             size="3",
                         ),
                         rx.text(
-                            "Deleting this key will leave your position unhedged and could result in losses.",
+                            "Before deleting this API key, you must:",
                             size="3",
                             weight="bold",
-                            color="red",
+                            margin_top="1rem",
                         ),
                         rx.text(
-                            "Are you sure you want to continue?",
+                            "• Go to LP Positions and unassign this key (select 'None' from dropdown), OR",
+                            size="3",
+                        ),
+                        rx.text(
+                            "• Delete the LP position entirely",
                             size="3",
                         ),
                         spacing="2",
@@ -156,20 +160,12 @@ def api_keys_component() -> rx.Component:
                     ),
                 ),
                 rx.flex(
-                    rx.alert_dialog.cancel(
-                        rx.button(
-                            "Cancel",
-                            variant="soft",
-                            color_scheme="gray",
-                            on_click=APIKeyState.cancel_delete,
-                        ),
-                    ),
                     rx.alert_dialog.action(
                         rx.button(
-                            "Delete Anyway",
-                            variant="solid",
-                            color_scheme="red",
-                            on_click=APIKeyState.confirm_delete,
+                            "OK",
+                            variant="soft",
+                            color_scheme="blue",
+                            on_click=APIKeyState.cancel_delete,
                         ),
                     ),
                     spacing="3",
