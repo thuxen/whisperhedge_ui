@@ -577,10 +577,10 @@ class LPPositionState(rx.State):
             
             # Only update last_hedge_execution for existing positions
             for position in self.lp_positions:
-                if position.id:
+                if position.position_config_id:
                     try:
                         from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
-                        last_hedge_dt = get_last_hedge_execution(position.id)
+                        last_hedge_dt = get_last_hedge_execution(position.position_config_id)
                         new_status = format_time_ago(last_hedge_dt)
                         
                         # Only log if status changed
@@ -588,7 +588,7 @@ class LPPositionState(rx.State):
                             print(f"[REFRESH STATUS] Position {position.position_name}: {position.last_hedge_execution} -> {new_status}", flush=True)
                             position.last_hedge_execution = new_status
                     except Exception as e:
-                        print(f"[REFRESH STATUS] Error refreshing position {position.id}: {e}", flush=True)
+                        print(f"[REFRESH STATUS] Error refreshing position {position.position_config_id}: {e}", flush=True)
             
             print("[REFRESH STATUS] Refresh complete", flush=True)
         except Exception as e:
