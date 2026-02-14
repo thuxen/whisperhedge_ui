@@ -411,7 +411,8 @@ def lp_positions_component() -> rx.Component:
                         width="100%",
                     ),
                 ),
-            )
+            ),
+        ),
         
         rx.divider(margin_top="2rem", margin_bottom="2rem"),
         
