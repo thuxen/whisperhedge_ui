@@ -4,3 +4,4 @@ __pycache__/
 .states
 .web
 *.py[cod]
+.aider*

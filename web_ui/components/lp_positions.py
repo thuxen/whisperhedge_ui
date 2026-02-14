@@ -48,7 +48,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                         size="2",
                         variant="soft",
                         color_scheme="red",
-                        on_click=lambda: LPPositionState.delete_position(position.id),
+                        on_click=lambda: LPPositionState.open_delete_dialog(position.id),
                         loading=LPPositionState.loading_position_id == position.id,
                     ),
                     spacing="2",
@@ -337,6 +337,38 @@ def lp_positions_component() -> rx.Component:
         # Toast provider for notifications
         rx.toast.provider(),
         
+        # Delete confirmation dialog
+        rx.alert_dialog.root(
+            rx.alert_dialog.content(
+                rx.alert_dialog.title("⚠️ Delete LP Position"),
+                rx.alert_dialog.description(
+                    "Are you sure you want to delete this LP position? This action cannot be undone.",
+                    size="3",
+                ),
+                rx.flex(
+                    rx.alert_dialog.cancel(
+                        rx.button(
+                            "Cancel",
+                            variant="soft",
+                            color_scheme="gray",
+                            on_click=LPPositionState.cancel_delete,
+                        ),
+                    ),
+                    rx.alert_dialog.action(
+                        rx.button(
+                            "Delete",
+                            variant="solid",
+                            color_scheme="red",
+                            on_click=LPPositionState.delete_position,
+                        ),
+                    ),
+                    spacing="3",
+                    justify="end",
+                ),
+            ),
+            open=LPPositionState.show_delete_dialog,
+        ),
+        
         # Position value chart dialog
         position_value_chart(),
         
@@ -416,9 +448,10 @@ def lp_positions_component() -> rx.Component:
         
         rx.divider(margin_top="2rem", margin_bottom="2rem"),
         
-        rx.box(
-            rx.vstack(
-                rx.heading(
+        rx.center(
+            rx.card(
+                rx.vstack(
+                    rx.heading(
                 rx.cond(
                     LPPositionState.is_editing,
                     "Edit LP Position",
@@ -682,7 +715,7 @@ def lp_positions_component() -> rx.Component:
                                         rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
                                             
                                             rx.vstack(
-                                                rx.text("Hedge Wallet", size="2", weight="bold"),
+                                                rx.text("API Key", size="2", weight="bold"),
                                                 rx.select(
                                                     LPPositionState.available_wallets,
                                                     value=LPPositionState.selected_hedge_wallet,
@@ -1038,7 +1071,7 @@ def lp_positions_component() -> rx.Component:
                             placeholder="e.g., ETH/USDC Main Position",
                             value=LPPositionState.position_name,
                             on_change=LPPositionState.set_position_name,
-                            max_width="700px",
+                            width="100%",
                         ),
                         rx.text(
                             "You can customize the position name",
@@ -1088,14 +1121,11 @@ def lp_positions_component() -> rx.Component:
                 ),
             ),
         
-            width="100%",
-            spacing="3",
+                width="100%",
+                spacing="3",
+            ),
+            width="75%",
         ),
-        width="75%",
-        margin_x="auto",
-        padding="2rem",
-        background="var(--gray-2)",
-        border_radius="12px",
-        box_shadow="0 4px 12px rgba(0, 0, 0, 0.1)",
+        width="100%",
     ),
     )

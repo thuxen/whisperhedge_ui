@@ -45,6 +45,10 @@ class LPPositionState(rx.State):
     lp_positions: list[LPPositionData] = []
     selected_position_id: str = ""
     position_name: str = ""
+    
+    # Delete confirmation dialog
+    show_delete_dialog: bool = False
+    position_to_delete: str = ""
     protocol: str = "uniswap_v3"
     network: str = "ethereum"
     nft_id: str = ""
@@ -523,9 +527,20 @@ class LPPositionState(rx.State):
         finally:
             self.loading_position_id = ""
 
-    def delete_position(self, position_id: str):
-        """Immediate feedback handler"""
-        self.loading_position_id = position_id
+    def open_delete_dialog(self, position_id: str):
+        """Open confirmation dialog before deleting"""
+        self.position_to_delete = position_id
+        self.show_delete_dialog = True
+    
+    def cancel_delete(self):
+        """Cancel deletion and close dialog"""
+        self.show_delete_dialog = False
+        self.position_to_delete = ""
+    
+    def delete_position(self):
+        """Confirmed deletion - immediate feedback handler"""
+        self.loading_position_id = self.position_to_delete
+        self.show_delete_dialog = False
         return [
             rx.toast.info("Deleting position...", duration=5000),
             LPPositionState.delete_worker
