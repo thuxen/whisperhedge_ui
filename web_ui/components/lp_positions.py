@@ -416,8 +416,9 @@ def lp_positions_component() -> rx.Component:
         
         rx.divider(margin_top="2rem", margin_bottom="2rem"),
         
-        rx.vstack(
-            rx.heading(
+        rx.box(
+            rx.vstack(
+                rx.heading(
                 rx.cond(
                     LPPositionState.is_editing,
                     "Edit LP Position",
@@ -1090,4 +1091,11 @@ def lp_positions_component() -> rx.Component:
             width="100%",
             spacing="3",
         ),
+        width="75%",
+        margin_x="auto",
+        padding="2rem",
+        background="var(--gray-2)",
+        border_radius="12px",
+        box_shadow="0 4px 12px rgba(0, 0, 0, 0.1)",
+    ),
     )
