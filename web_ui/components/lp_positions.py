@@ -1090,4 +1090,5 @@ def lp_positions_component() -> rx.Component:
         ),
         
         width="100%",
+    ),
     )
