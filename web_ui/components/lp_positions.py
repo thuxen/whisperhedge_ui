@@ -348,69 +348,70 @@ def lp_positions_component() -> rx.Component:
         
         rx.box(
             rx.vstack(
-            rx.hstack(
-                rx.heading("LP Positions", size="6"),
-                rx.spacer(),
-                rx.button(
-                    rx.icon("refresh-cw", size=16),
-                    "Refresh Status",
-                    size="2",
-                    variant="soft",
-                    color_scheme="blue",
-                    on_click=LPPositionState.refresh_position_status,
-                ),
-                width="100%",
-                align="center",
-                margin_bottom="1rem",
-            ),
-            
-            rx.cond(
-                LPPositionState.error_message != "",
-                rx.callout(
-                    LPPositionState.error_message,
-                    icon="triangle_alert",
-                    color_scheme="red",
-                    role="alert",
-                    margin_bottom="1rem",
-                ),
-            ),
-            
-            rx.cond(
-                LPPositionState.success_message != "",
-                rx.callout(
-                    LPPositionState.success_message,
-                    icon="check",
-                    color_scheme="green",
-                    role="status",
-                    margin_bottom="1rem",
-                ),
-            ),
-            
-            rx.cond(
-                LPPositionState.is_loading,
-                rx.spinner(size="3"),
-                rx.vstack(
-                    rx.cond(
-                        LPPositionState.lp_positions.length() > 0,
-                        rx.grid(
-                            rx.foreach(LPPositionState.lp_positions, lp_position_card),
-                            columns="2",
-                            spacing="3",
-                            width="100%",
-                        ),
-                        rx.box(
-                            rx.text(
-                                "No LP positions added yet. Add your first position below.",
-                                size="2",
-                                color="gray",
-                            ),
-                            padding="2rem",
-                            text_align="center",
-                        ),
+                rx.hstack(
+                    rx.heading("LP Positions", size="6"),
+                    rx.spacer(),
+                    rx.button(
+                        rx.icon("refresh-cw", size=16),
+                        "Refresh Status",
+                        size="2",
+                        variant="soft",
+                        color_scheme="blue",
+                        on_click=LPPositionState.refresh_position_status,
                     ),
                     width="100%",
+                    align="center",
+                    margin_bottom="1rem",
                 ),
-            ),
+                
+                rx.cond(
+                    LPPositionState.error_message != "",
+                    rx.callout(
+                        LPPositionState.error_message,
+                        icon="triangle_alert",
+                        color_scheme="red",
+                        role="alert",
+                        margin_bottom="1rem",
+                    ),
+                ),
+                
+                rx.cond(
+                    LPPositionState.success_message != "",
+                    rx.callout(
+                        LPPositionState.success_message,
+                        icon="check",
+                        color_scheme="green",
+                        role="status",
+                        margin_bottom="1rem",
+                    ),
+                ),
+                
+                rx.cond(
+                    LPPositionState.is_loading,
+                    rx.spinner(size="3"),
+                    rx.vstack(
+                        rx.cond(
+                            LPPositionState.lp_positions.length() > 0,
+                            rx.grid(
+                                rx.foreach(LPPositionState.lp_positions, lp_position_card),
+                                columns="2",
+                                spacing="3",
+                                width="100%",
+                            ),
+                            rx.box(
+                                rx.text(
+                                    "No LP positions added yet. Add your first position below.",
+                                    size="2",
+                                    color="gray",
+                                ),
+                                padding="2rem",
+                                text_align="center",
+                            ),
+                        ),
+                        width="100%",
+                    ),
+                ),
+            )
         
         rx.divider(margin_top="2rem", margin_bottom="2rem"),
         
