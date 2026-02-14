@@ -2,6 +2,7 @@ import reflex as rx
 from ..lp_position_state import LPPositionState, LPPositionData
 from ..config import AppConfig
 from .position_chart import position_value_chart
+from .position_activity import position_activity_dialog
 
 
 def lp_position_card(position: LPPositionData) -> rx.Component:
@@ -28,6 +29,13 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                 ),
                 rx.spacer(),
                 rx.hstack(
+                    rx.button(
+                        "Activity",
+                        size="2",
+                        variant="soft",
+                        color_scheme="purple",
+                        on_click=lambda: LPPositionState.open_activity_dialog(position.position_config_id),
+                    ),
                     rx.button(
                         "View Chart",
                         size="2",
@@ -368,6 +376,9 @@ def lp_positions_component() -> rx.Component:
             ),
             open=LPPositionState.show_delete_dialog,
         ),
+        
+        # Position activity dialog
+        position_activity_dialog(),
         
         # Position value chart dialog
         position_value_chart(),

@@ -81,6 +81,10 @@ class LPPositionState(rx.State):
     selected_chart_position_id: str = ""
     show_chart: bool = False
     
+    # Activity dialog
+    show_activity_dialog: bool = False
+    selected_activity_position_id: str = ""
+    
     # Temporary state for fetch handler
     _fetch_protocol: str = ""
     _fetch_network: str = ""
@@ -1095,6 +1099,16 @@ class LPPositionState(rx.State):
     def close_chart(self):
         """Close the chart dialog"""
         self.show_chart = False
+    
+    def open_activity_dialog(self, position_id: str):
+        """Open activity dialog for a position"""
+        self.selected_activity_position_id = position_id
+        self.show_activity_dialog = True
+    
+    def close_activity_dialog(self):
+        """Close activity dialog"""
+        self.show_activity_dialog = False
+        self.selected_activity_position_id = ""
     
     async def toggle_active(self, position_id: str):
         try:
