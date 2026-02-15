@@ -86,6 +86,16 @@ def position_value_chart() -> rx.Component:
                                     name="Hedge Account",
                                     stack_id="1",
                                 ),
+                                # Add a third invisible area for total to ensure it appears in tooltip
+                                rx.recharts.area(
+                                    data_key="total_value",
+                                    stroke="transparent",
+                                    fill="transparent",
+                                    fill_opacity=0,
+                                    name="Total Value",
+                                    stack_id="1",
+                                    legend_type="none",
+                                ),
                                 rx.recharts.x_axis(
                                     data_key="timestamp",
                                     angle=-45,
@@ -97,70 +107,15 @@ def position_value_chart() -> rx.Component:
                                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                                 rx.recharts.legend(),
                                 rx.recharts.tooltip(
-                                    content="""function(props) {
-                                        if (!props.payload || props.payload.length === 0) {
-                                            return null;
-                                        }
-                                        const data = props.payload[0].payload;
-                                        const lpValue = parseFloat(data.lp_value_usd) || 0;
-                                        const hedgeValue = parseFloat(data.hl_account_value) || 0;
-                                        const total = data.total_value ? parseFloat(data.total_value) : (lpValue + hedgeValue);
-                                        
-                                        return React.createElement('div', {
-                                            style: {
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #ddd',
-                                                padding: '12px',
-                                                borderRadius: '6px',
-                                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                                minWidth: '200px',
-                                                fontFamily: 'Arial, sans-serif'
-                                            }
-                                        }, [
-                                            React.createElement('p', {
-                                                key: 'timestamp',
-                                                style: { 
-                                                    margin: '0 0 10px 0', 
-                                                    fontWeight: 'bold', 
-                                                    fontSize: '14px',
-                                                    color: '#333'
-                                                }
-                                            }, data.timestamp || ''),
-                                            React.createElement('p', {
-                                                key: 'lp',
-                                                style: { 
-                                                    margin: '5px 0', 
-                                                    color: '#8884d8', 
-                                                    fontSize: '13px',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between'
-                                                }
-                                            }, ['LP Value:', React.createElement('span', { style: { fontWeight: 'bold' } }, '$' + lpValue.toFixed(2))]),
-                                            React.createElement('p', {
-                                                key: 'hedge',
-                                                style: { 
-                                                    margin: '5px 0', 
-                                                    color: '#82ca9d', 
-                                                    fontSize: '13px',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between'
-                                                }
-                                            }, ['Hedge Account:', React.createElement('span', { style: { fontWeight: 'bold' } }, '$' + hedgeValue.toFixed(2))]),
-                                            React.createElement('p', {
-                                                key: 'total',
-                                                style: { 
-                                                    margin: '10px 0 0 0',
-                                                    fontWeight: 'bold',
-                                                    borderTop: '2px solid #ff7300',
-                                                    paddingTop: '10px',
-                                                    fontSize: '14px',
-                                                    color: '#ff7300',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between'
-                                                }
-                                            }, ['Total Value:', React.createElement('span', { style: { fontWeight: 'bold' } }, '$' + total.toFixed(2))])
-                                        ]);
-                                    }""",
+                                    formatter=lambda value, name: (
+                                        f"${float(value):.2f}" if isinstance(value, (int, float, str)) and value is not None else "$0.00",
+                                        {
+                                            "lp_value_usd": "LP Value",
+                                            "hl_account_value": "Hedge Account",
+                                            "total_value": "Total Value"
+                                        }.get(name, name)
+                                    ),
+                                    label_formatter=lambda label: f"Time: {label}" if label else "Time: N/A",
                                 ),
                                 data=LPPositionState.chart_data,
                                 width="100%",
