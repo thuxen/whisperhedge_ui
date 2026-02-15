@@ -343,6 +343,17 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
         pb = pb_raw / decimal_adjustment
         
         # Calculate actual token amounts using Uniswap V3 formulas
+        print("\n" + "="*60)
+        print("LP POSITION VALUE CALCULATION DEBUG")
+        print("="*60)
+        print(f"Network: {network}, NFT ID: {nft_id}")
+        print(f"Token0: {token0_symbol} (decimals: {token0_decimals})")
+        print(f"Token1: {token1_symbol} (decimals: {token1_decimals})")
+        print(f"Raw Liquidity: {liquidity}")
+        print(f"Ticks: current={current_tick}, lower={tick_lower}, upper={tick_upper}")
+        print(f"sqrt_price_x96: {sqrt_price_x96}")
+        print(f"Pool Price (ratio): {current_price:.6f}")
+        
         token0_amount_actual = 0.0
         token1_amount_actual = 0.0
         if sqrt_price_x96 > 0:
@@ -356,6 +367,9 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
                     token0_decimals=token0_decimals,
                     token1_decimals=token1_decimals
                 )
+                print(f"\nToken Amounts (from liquidity calculation):")
+                print(f"  token0_amount_actual: {token0_amount_actual}")
+                print(f"  token1_amount_actual: {token1_amount_actual}")
             except Exception as e:
                 print(f"Error calculating token amounts: {e}")
         
@@ -410,10 +424,24 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
                 token0_amount_rounded = round(token0_amount_actual, token0_sz_decimals)
                 token1_amount_rounded = round(token1_amount_actual, token1_sz_decimals)
                 
+                print(f"\nToken Amounts (after rounding to HL decimals):")
+                print(f"  token0_amount_rounded: {token0_amount_rounded} (decimals: {token0_sz_decimals})")
+                print(f"  token1_amount_rounded: {token1_amount_rounded} (decimals: {token1_sz_decimals})")
+                
+                print(f"\nPrices (from Hyperliquid):")
+                print(f"  token0_price_usd: ${token0_price_usd}")
+                print(f"  token1_price_usd: ${token1_price_usd}")
+                
                 # Calculate USD values using ACTUAL Hyperliquid token prices (not pool ratios)
                 token0_amount_usd = round(token0_amount_rounded * token0_price_usd, 2)
                 token1_amount_usd = round(token1_amount_rounded * token1_price_usd, 2)
                 position_value_usd = round(token0_amount_usd + token1_amount_usd, 2)
+                
+                print(f"\nUSD Value Calculations:")
+                print(f"  token0_amount_usd = {token0_amount_rounded} × ${token0_price_usd} = ${token0_amount_usd}")
+                print(f"  token1_amount_usd = {token1_amount_rounded} × ${token1_price_usd} = ${token1_amount_usd}")
+                print(f"  position_value_usd = ${token0_amount_usd} + ${token1_amount_usd} = ${position_value_usd}")
+                print("="*60 + "\n")
                 
                 # Calculate percentage allocation (rounded to 1 decimal place)
                 token0_pct = round((token0_amount_usd / position_value_usd * 100), 1) if position_value_usd > 0 else 0.0

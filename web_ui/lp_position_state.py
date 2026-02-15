@@ -661,19 +661,41 @@ class LPPositionState(rx.State):
                     api_key_name = api_key_info["name"]
                     api_account_value = api_key_info["balance"]
                     
-                    # Calculate total value (LP position + API account)
-                    position_size_usd = float(config.get("position_size_usd", 0.0))
-                    total_value_usd = position_size_usd + api_account_value
-                    
-                    # Get last hedge execution time from QuestDB
+                    # Get LP value from QuestDB (most accurate, updated by hedging bot)
+                    # Fall back to database value only if QuestDB has no data (new positions)
+                    position_size_usd = float(config.get("position_size_usd", 0.0))  # Fallback value
                     last_hedge_time_str = "Never"
+                    
                     if config.get("id"):
                         try:
-                            from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
+                            from web_ui.questdb_utils import get_latest_position_values, get_last_hedge_execution, format_time_ago
+                            
+                            # Try to get latest values from QuestDB
+                            latest_values = get_latest_position_values(config["id"])
+                            if latest_values and latest_values.get('lp_value_usd'):
+                                # Use QuestDB value (most accurate)
+                                position_size_usd = latest_values['lp_value_usd']
+                                
+                                # Sync QuestDB value back to Supabase to keep database fresh
+                                try:
+                                    supabase.table("position_configs").update({
+                                        "position_size_usd": position_size_usd
+                                    }).eq("id", config["id"]).execute()
+                                except Exception as update_error:
+                                    print(f"Warning: Failed to sync position_size_usd to Supabase: {update_error}")
+                                
+                                # Also update hedge account value if available
+                                if latest_values.get('hl_account_value'):
+                                    api_account_value = latest_values['hl_account_value']
+                            
+                            # Get last hedge execution time
                             last_hedge_dt = get_last_hedge_execution(config["id"])
                             last_hedge_time_str = format_time_ago(last_hedge_dt)
                         except Exception as e:
-                            print(f"Error fetching last hedge execution for position {config.get('id')}: {e}")
+                            print(f"Error fetching QuestDB data for position {config.get('id')}: {e}")
+                    
+                    # Calculate total value (LP position + API account)
+                    total_value_usd = position_size_usd + api_account_value
                     
                     position = LPPositionData(
                         id=pos_data["id"],
