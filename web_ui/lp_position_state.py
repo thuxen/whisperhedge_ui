@@ -583,10 +583,7 @@ class LPPositionState(rx.State):
             for position in self.lp_positions:
                 if position.position_config_id:
                     try:
-                        from .config import AppConfig
-                        from .supabase_client import get_supabase_client
-                        from .questdb_utils import get_last_hedge_execution, format_time_ago
-                        from .address_utils import normalize_address_for_storage
+                        from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
                         last_hedge_dt = get_last_hedge_execution(position.position_config_id)
                         new_status = format_time_ago(last_hedge_dt)
                         
