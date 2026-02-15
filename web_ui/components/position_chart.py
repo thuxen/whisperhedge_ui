@@ -98,39 +98,67 @@ def position_value_chart() -> rx.Component:
                                 rx.recharts.legend(),
                                 rx.recharts.tooltip(
                                     content="""function(props) {
-                                        if (!props.payload || props.payload.length === 0) return null;
+                                        if (!props.payload || props.payload.length === 0) {
+                                            return null;
+                                        }
                                         const data = props.payload[0].payload;
-                                        const lpValue = data.lp_value_usd || 0;
-                                        const hedgeValue = data.hl_account_value || 0;
-                                        const total = lpValue + hedgeValue;
+                                        const lpValue = parseFloat(data.lp_value_usd) || 0;
+                                        const hedgeValue = parseFloat(data.hl_account_value) || 0;
+                                        const total = data.total_value ? parseFloat(data.total_value) : (lpValue + hedgeValue);
                                         
                                         return React.createElement('div', {
                                             style: {
-                                                backgroundColor: 'white',
-                                                border: '1px solid #ccc',
-                                                padding: '10px',
-                                                borderRadius: '4px',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #ddd',
+                                                padding: '12px',
+                                                borderRadius: '6px',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                                minWidth: '200px',
+                                                fontFamily: 'Arial, sans-serif'
                                             }
                                         }, [
                                             React.createElement('p', {
-                                                style: { margin: '0 0 8px 0', fontWeight: 'bold', fontSize: '13px' }
-                                            }, data.timestamp),
-                                            React.createElement('p', {
-                                                style: { margin: '4px 0', color: '#8884d8', fontSize: '12px' }
-                                            }, 'LP Value: $' + lpValue.toFixed(2)),
-                                            React.createElement('p', {
-                                                style: { margin: '4px 0', color: '#82ca9d', fontSize: '12px' }
-                                            }, 'Hedge Account: $' + hedgeValue.toFixed(2)),
-                                            React.createElement('p', {
-                                                style: {
-                                                    margin: '8px 0 0 0',
-                                                    fontWeight: 'bold',
-                                                    borderTop: '1px solid #ccc',
-                                                    paddingTop: '8px',
-                                                    fontSize: '13px'
+                                                key: 'timestamp',
+                                                style: { 
+                                                    margin: '0 0 10px 0', 
+                                                    fontWeight: 'bold', 
+                                                    fontSize: '14px',
+                                                    color: '#333'
                                                 }
-                                            }, 'Total: $' + total.toFixed(2))
+                                            }, data.timestamp || ''),
+                                            React.createElement('p', {
+                                                key: 'lp',
+                                                style: { 
+                                                    margin: '5px 0', 
+                                                    color: '#8884d8', 
+                                                    fontSize: '13px',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between'
+                                                }
+                                            }, ['LP Value:', React.createElement('span', { style: { fontWeight: 'bold' } }, '$' + lpValue.toFixed(2))]),
+                                            React.createElement('p', {
+                                                key: 'hedge',
+                                                style: { 
+                                                    margin: '5px 0', 
+                                                    color: '#82ca9d', 
+                                                    fontSize: '13px',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between'
+                                                }
+                                            }, ['Hedge Account:', React.createElement('span', { style: { fontWeight: 'bold' } }, '$' + hedgeValue.toFixed(2))]),
+                                            React.createElement('p', {
+                                                key: 'total',
+                                                style: { 
+                                                    margin: '10px 0 0 0',
+                                                    fontWeight: 'bold',
+                                                    borderTop: '2px solid #ff7300',
+                                                    paddingTop: '10px',
+                                                    fontSize: '14px',
+                                                    color: '#ff7300',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between'
+                                                }
+                                            }, ['Total Value:', React.createElement('span', { style: { fontWeight: 'bold' } }, '$' + total.toFixed(2))])
                                         ]);
                                     }""",
                                 ),
