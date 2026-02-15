@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from .auth import get_supabase_client
 from .crypto_utils import encrypt_value, decrypt_value
 from .hl_utils import get_hl_account_balance
+from .address_utils import normalize_address_for_storage
 
 
 class APIKeyData(BaseModel):
@@ -382,6 +383,9 @@ class APIKeyState(rx.State):
                     return
                 print(f"[SAVE API KEY] No duplicate found, proceeding with save", flush=True)
             
+            # Normalize wallet address for EVM networks (currently all Hyperliquid = EVM)
+            normalized_wallet_address = normalize_address_for_storage(wallet_address, "ethereum") if wallet_address else wallet_address
+            
             data = {
                 "user_id": auth_state.user_id,
                 "account_name": account_name,
@@ -389,7 +393,7 @@ class APIKeyState(rx.State):
                 "api_key": encrypted_key,
                 "api_secret": encrypted_secret,
                 "is_master_account": is_master_account,
-                "wallet_address": wallet_address,
+                "wallet_address": normalized_wallet_address,
                 "subaccount_name": subaccount_name,
                 "private_key": encrypted_private_key,
                 "notes": notes,

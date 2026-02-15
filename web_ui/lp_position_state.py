@@ -583,7 +583,10 @@ class LPPositionState(rx.State):
             for position in self.lp_positions:
                 if position.position_config_id:
                     try:
-                        from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
+                        from .config import AppConfig
+                        from .supabase_client import get_supabase_client
+                        from .questdb_utils import get_last_hedge_execution, format_time_ago
+                        from .address_utils import normalize_address_for_storage
                         last_hedge_dt = get_last_hedge_execution(position.position_config_id)
                         new_status = format_time_ago(last_hedge_dt)
                         
@@ -873,13 +876,16 @@ class LPPositionState(rx.State):
             supabase = get_supabase_client(auth_state.access_token)
             
             # Prepare lp_positions data (legacy table)
+            # Normalize pool address for EVM networks
+            normalized_pool_address = normalize_address_for_storage(self.pool_address, self.network)
+            
             lp_data = {
                 "user_id": auth_state.user_id,
                 "position_name": self.position_name,
                 "protocol": self.protocol,
                 "network": self.network,
                 "nft_id": self.nft_id,
-                "pool_address": self.pool_address,
+                "pool_address": normalized_pool_address,
                 "token0_symbol": self.token0_symbol,
                 "token1_symbol": self.token1_symbol,
                 "fee_tier": self.fee_tier,
@@ -949,6 +955,17 @@ class LPPositionState(rx.State):
             print(f"Existing config found: {bool(existing_config)}")
             
             # Prepare position_configs data (matching actual database schema)
+            # Normalize addresses for EVM networks
+            normalized_pool_address = normalize_address_for_storage(self.pool_address, self.network)
+            normalized_token0_address = normalize_address_for_storage(
+                self.fetched_position_data.get("token0_address", "") or existing_config.get("token0_address", ""),
+                self.network
+            )
+            normalized_token1_address = normalize_address_for_storage(
+                self.fetched_position_data.get("token1_address", "") or existing_config.get("token1_address", ""),
+                self.network
+            )
+            
             config_data = {
                 "user_id": user_id,
                 "position_name": self.position_name,
@@ -957,11 +974,11 @@ class LPPositionState(rx.State):
                 "protocol": self.protocol,
                 "network": self.network,
                 "nft_id": self.nft_id,
-                "pool_address": self.pool_address,
+                "pool_address": normalized_pool_address,
                 "token0_symbol": self.token0_symbol,
-                "token0_address": self.fetched_position_data.get("token0_address", "") or existing_config.get("token0_address", ""),
+                "token0_address": normalized_token0_address,
                 "token1_symbol": self.token1_symbol,
-                "token1_address": self.fetched_position_data.get("token1_address", "") or existing_config.get("token1_address", ""),
+                "token1_address": normalized_token1_address,
                 "fee_tier": int(self.fee_tier) if self.fee_tier and self.fee_tier.isdigit() else 3000,  # INTEGER not VARCHAR
                 "entry_price": self.fetched_position_data.get("current_price", 0) or existing_config.get("entry_price", 0),
                 "position_size_usd": float(self.fetched_position_data.get("position_value_usd", 0)) or existing_config.get("position_size_usd", 0),
