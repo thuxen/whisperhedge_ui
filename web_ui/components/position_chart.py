@@ -107,15 +107,67 @@ def position_value_chart() -> rx.Component:
                                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                                 rx.recharts.legend(),
                                 rx.recharts.tooltip(
-                                    formatter=lambda value, name: (
-                                        f"${float(value):.2f}" if isinstance(value, (int, float, str)) and value is not None else "$0.00",
-                                        {
-                                            "lp_value_usd": "LP Value",
-                                            "hl_account_value": "Hedge Account",
-                                            "total_value": "Total Value"
-                                        }.get(name, name)
-                                    ),
-                                    label_formatter=lambda label: f"Time: {label}" if label else "Time: N/A",
+                                    content="""function(props) {
+                                        if (!props.payload || props.payload.length === 0) {
+                                            return null;
+                                        }
+                                        const data = props.payload[0].payload;
+                                        const lpValue = parseFloat(data.lp_value_usd) || 0;
+                                        const hedgeValue = parseFloat(data.hl_account_value) || 0;
+                                        const totalValue = parseFloat(data.total_value) || (lpValue + hedgeValue);
+                                        
+                                        // Format with dollar signs
+                                        const formatUSD = (val) => '$' + val.toFixed(2);
+                                        
+                                        // Create tooltip content
+                                        const containerStyle = {
+                                            backgroundColor: '#ffffff',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            padding: '10px',
+                                            fontSize: '12px',
+                                            fontFamily: 'sans-serif',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                            minWidth: '180px'
+                                        };
+                                        
+                                        const timeStyle = {
+                                            margin: '0 0 8px 0',
+                                            fontWeight: 'bold',
+                                            color: '#333'
+                                        };
+                                        
+                                        const itemStyle = {
+                                            margin: '2px 0',
+                                            display: 'flex',
+                                            justifyContent: 'space-between'
+                                        };
+                                        
+                                        const totalStyle = {
+                                            margin: '8px 0 0 0',
+                                            paddingTop: '8px',
+                                            borderTop: '1px solid #ddd',
+                                            fontWeight: 'bold',
+                                            display: 'flex',
+                                            justifyContent: 'space-between'
+                                        };
+                                        
+                                        return React.createElement('div', {style: containerStyle}, [
+                                            React.createElement('div', {key: 'time', style: timeStyle}, data.timestamp || ''),
+                                            React.createElement('div', {key: 'lp', style: itemStyle}, [
+                                                React.createElement('span', {style: {color: '#8884d8'}}, 'LP Value'),
+                                                React.createElement('span', {style: {fontWeight: 'bold'}}, formatUSD(lpValue))
+                                            ]),
+                                            React.createElement('div', {key: 'hedge', style: itemStyle}, [
+                                                React.createElement('span', {style: {color: '#82ca9d'}}, 'Hedge Account'),
+                                                React.createElement('span', {style: {fontWeight: 'bold'}}, formatUSD(hedgeValue))
+                                            ]),
+                                            React.createElement('div', {key: 'total', style: totalStyle}, [
+                                                React.createElement('span', {style: {color: '#ff7300'}}, 'Total'),
+                                                React.createElement('span', {style: {fontWeight: 'bold', color: '#ff7300'}}, formatUSD(totalValue))
+                                            ])
+                                        ]);
+                                    }""",
                                 ),
                                 data=LPPositionState.chart_data,
                                 width="100%",
