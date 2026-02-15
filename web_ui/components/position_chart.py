@@ -86,16 +86,6 @@ def position_value_chart() -> rx.Component:
                                     name="Hedge Account",
                                     stack_id="1",
                                 ),
-                                # Add a third invisible area for total to ensure it appears in tooltip
-                                rx.recharts.area(
-                                    data_key="total_value",
-                                    stroke="transparent",
-                                    fill="transparent",
-                                    fill_opacity=0,
-                                    name="Total Value",
-                                    stack_id="1",
-                                    legend_type="none",
-                                ),
                                 rx.recharts.x_axis(
                                     data_key="timestamp",
                                     angle=-45,
