@@ -76,7 +76,6 @@ def position_value_chart() -> rx.Component:
                                     fill="#8884d8",
                                     fill_opacity=0.6,
                                     name="LP Value",
-                                    stack_id="1",
                                 ),
                                 rx.recharts.area(
                                     data_key="hl_account_value",
@@ -84,7 +83,6 @@ def position_value_chart() -> rx.Component:
                                     fill="#82ca9d",
                                     fill_opacity=0.6,
                                     name="Hedge Account",
-                                    stack_id="1",
                                 ),
                                 rx.recharts.x_axis(
                                     data_key="timestamp",
