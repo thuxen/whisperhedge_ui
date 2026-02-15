@@ -76,6 +76,7 @@ def position_value_chart() -> rx.Component:
                                     fill="#8884d8",
                                     fill_opacity=0.6,
                                     name="LP Value",
+                                    stack_id="1",
                                 ),
                                 rx.recharts.area(
                                     data_key="hl_account_value",
@@ -83,6 +84,16 @@ def position_value_chart() -> rx.Component:
                                     fill="#82ca9d",
                                     fill_opacity=0.6,
                                     name="Hedge Account",
+                                    stack_id="1",
+                                ),
+                                # Add a third invisible area for total to ensure it appears in tooltip
+                                rx.recharts.area(
+                                    data_key="total_value",
+                                    stroke="transparent",
+                                    fill="transparent",
+                                    fill_opacity=0,
+                                    name="Total Value",
+                                    legend_type="none",
                                 ),
                                 rx.recharts.x_axis(
                                     data_key="timestamp",
