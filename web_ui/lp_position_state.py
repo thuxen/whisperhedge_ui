@@ -84,6 +84,7 @@ class LPPositionState(rx.State):
     # Activity dialog
     show_activity_dialog: bool = False
     selected_activity_position_id: str = ""
+    activity_tab: str = "trades"  # Current active tab in activity dialog
     
     # Temporary state for fetch handler
     _fetch_protocol: str = ""
@@ -1148,12 +1149,17 @@ class LPPositionState(rx.State):
     def open_activity_dialog(self, position_id: str):
         """Open activity dialog for a position"""
         self.selected_activity_position_id = position_id
+        self.activity_tab = "trades"  # Always start at trades tab
         self.show_activity_dialog = True
     
     def close_activity_dialog(self):
         """Close activity dialog"""
         self.show_activity_dialog = False
         self.selected_activity_position_id = ""
+    
+    def set_activity_tab(self, tab: str):
+        """Set the active tab in the activity dialog"""
+        self.activity_tab = tab
     
     async def toggle_active(self, position_id: str):
         try:

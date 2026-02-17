@@ -105,8 +105,8 @@ def sidebar() -> rx.Component:
             
             rx.vstack(
                 sidebar_item("Overview", "overview", "layout-dashboard"),
-                sidebar_item("API Keys", "api_keys", "key"),
                 sidebar_item("LP Positions", "lp_positions", "coins"),
+                sidebar_item("API Keys", "api_keys", "key"),
                 sidebar_item("Bot Status", "bot_status", "activity"),
                 sidebar_item("Manage Plan", "manage_plan", "credit-card"),
                 sidebar_item("Settings", "settings", "settings"),
