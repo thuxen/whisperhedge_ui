@@ -91,7 +91,7 @@ class ManagePlanState(rx.State):
                 self.current_display_name = plan.get("display_name", "Free")
                 self.current_price = plan.get("price_monthly", 0.0)
                 self.current_tvl_limit = plan.get("effective_tvl_limit", 2500.0)
-                self.current_position_limit = plan.get("effective_position_limit", 1)
+                self.current_position_limit = plan.get("effective_position_limit") or 1
                 
                 # Overrides from view
                 self.has_tvl_override = plan.get("has_tvl_override", False)
@@ -247,7 +247,7 @@ class ManagePlanState(rx.State):
                 self.current_period_start = plan.get("current_period_start", "")
                 self.current_period_end = plan.get("current_period_end", "")
                 self.current_tvl_limit = plan.get("effective_tvl_limit", 2500.0)
-                self.current_position_limit = plan.get("effective_position_limit", 1)
+                self.current_position_limit = plan.get("effective_position_limit") or 1
                 self.has_tvl_override = plan.get("override_tvl_limit") is not None
                 self.has_position_override = plan.get("override_position_limit") is not None
                 self.is_beta_tester = plan.get("is_beta_tester", False)
