@@ -86,6 +86,13 @@ CREATE TABLE IF NOT EXISTS position_configs (
     pa NUMERIC,
     pb NUMERIC,
     
+    -- Token decimals and position parameters (from blockchain)
+    token0_decimals INTEGER,
+    token1_decimals INTEGER,
+    liquidity NUMERIC,
+    tick_lower INTEGER,
+    tick_upper INTEGER,
+    
     -- Hedge Configuration
     hedge_enabled BOOLEAN DEFAULT false,
     hedge_token0 BOOLEAN DEFAULT true,

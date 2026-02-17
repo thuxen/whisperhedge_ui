@@ -877,6 +877,7 @@ class LPPositionState(rx.State):
         """Async worker for saving position"""
         try:
             from web_ui.state import AuthState
+            from web_ui.address_utils import normalize_address_for_storage
             auth_state = await self.get_state(AuthState)
             
             if not auth_state.is_authenticated or not auth_state.user_id:
@@ -948,6 +949,7 @@ class LPPositionState(rx.State):
         print(f"user_id={user_id}, position_id={position_id}")
         try:
             from web_ui.state import AuthState
+            from web_ui.address_utils import normalize_address_for_storage
             auth_state = await self.get_state(AuthState)
             supabase = get_supabase_client(auth_state.access_token)
             
@@ -1018,6 +1020,13 @@ class LPPositionState(rx.State):
                 "drift_min_pct_of_capital": float(self.drift_min_pct_of_capital),
                 "max_hedge_drift_pct": float(self.max_hedge_drift_pct),
                 "hedge_tokens": self.fetched_position_data.get("hedge_tokens", existing_config.get("hedge_tokens", {})),  # JSONB with HL metadata
+                
+                # Token decimals and position parameters (fetched from blockchain)
+                "token0_decimals": self.fetched_position_data.get("token0_decimals") or existing_config.get("token0_decimals"),
+                "token1_decimals": self.fetched_position_data.get("token1_decimals") or existing_config.get("token1_decimals"),
+                "liquidity": self.fetched_position_data.get("liquidity") or existing_config.get("liquidity"),
+                "tick_lower": self.fetched_position_data.get("tick_lower") or existing_config.get("tick_lower"),
+                "tick_upper": self.fetched_position_data.get("tick_upper") or existing_config.get("tick_upper"),
             }
             
             # Debug: Print numeric values to identify overflow
