@@ -38,7 +38,97 @@ def contact_page() -> rx.Component:
                 
                 # Two column layout
                 rx.grid(
-                    # Left: Contact Info
+                    # Right: Contact Form (first in DOM for mobile)
+                    rx.box(
+                        rx.cond(
+                            ContactState.check_url_success,
+                            # Success message
+                            rx.vstack(
+                                rx.box(
+                                    rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='rgba(16, 185, 129, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 11.08V12a10 10 0 1 1-5.93-9.14'></path><polyline points='22 4 12 14.01 9 11.01'></polyline></svg>"),
+                                    margin_bottom="1rem",
+                                ),
+                                rx.heading(
+                                    "Message Sent!",
+                                    size="6",
+                                    weight="bold",
+                                    margin_bottom="0.5rem",
+                                    color=COLORS.TEXT_PRIMARY,
+                                ),
+                                rx.text(
+                                    "Thank you for contacting us. We'll get back to you within 24 hours.",
+                                    size="3",
+                                    color=COLORS.TEXT_SECONDARY,
+                                    text_align="center",
+                                    margin_bottom="2rem",
+                                ),
+                                rx.link(
+                                    rx.button(
+                                        "Send Another Message",
+                                        variant="outline",
+                                        size="3",
+                                    ),
+                                    href="/contact",
+                                ),
+                                align="center",
+                                spacing="3",
+                                padding="3rem",
+                            ),
+                            # Contact form with Formspree
+                            rx.html(
+                                """
+                                <form action="https://formspree.io/f/mjgebrez" method="POST" style="width: 100%;">
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #F1F5F9;">Send us a Message</h3>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Name</label>
+                                        <input type="text" name="name" placeholder="Your name" required 
+                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Email</label>
+                                        <input type="email" name="email" placeholder="your@email.com" required 
+                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Subject</label>
+                                        <input type="text" name="subject" placeholder="How can we help?" required 
+                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Message</label>
+                                        <textarea name="message" placeholder="Tell us more about your inquiry..." required rows="6"
+                                                  style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem; resize: vertical;"></textarea>
+                                    </div>
+                                    
+                                    <input type="hidden" name="_next" value="https://whisperhedge.com/contact?success=true">
+                                    
+                                    <button type="submit" 
+                                            style="width: 100%; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; background: #3B82F6; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                                        Send Message
+                                    </button>
+                                </form>
+                                """
+                            ),
+                        ),
+                        padding="2rem",
+                        border_radius="8px",
+                        border=f"1px solid #1E293B",
+                        background="rgba(15, 23, 42, 0.4)",
+                        style={
+                            "order": "1",
+                            "@media (min-width: 768px)": {
+                                "order": "2",
+                            },
+                        },
+                    ),
+                    
+                    # Left: Contact Info (second in DOM, but first on desktop)
                     rx.vstack(
                         rx.heading(
                             "Get in Touch",
@@ -153,90 +243,12 @@ def contact_page() -> rx.Component:
                         
                         align="start",
                         spacing="3",
-                    ),
-                    
-                    # Right: Contact Form
-                    rx.box(
-                        rx.cond(
-                            ContactState.check_url_success,
-                            # Success message
-                            rx.vstack(
-                                rx.box(
-                                    rx.html("<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='rgba(16, 185, 129, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 11.08V12a10 10 0 1 1-5.93-9.14'></path><polyline points='22 4 12 14.01 9 11.01'></polyline></svg>"),
-                                    margin_bottom="1rem",
-                                ),
-                                rx.heading(
-                                    "Message Sent!",
-                                    size="6",
-                                    weight="bold",
-                                    margin_bottom="0.5rem",
-                                    color=COLORS.TEXT_PRIMARY,
-                                ),
-                                rx.text(
-                                    "Thank you for contacting us. We'll get back to you within 24 hours.",
-                                    size="3",
-                                    color=COLORS.TEXT_SECONDARY,
-                                    text_align="center",
-                                    margin_bottom="2rem",
-                                ),
-                                rx.link(
-                                    rx.button(
-                                        "Send Another Message",
-                                        variant="outline",
-                                        size="3",
-                                    ),
-                                    href="/contact",
-                                ),
-                                align="center",
-                                spacing="3",
-                                padding="3rem",
-                            ),
-                            # Contact form with Formspree
-                            rx.html(
-                                """
-                                <form action="https://formspree.io/f/mjgebrez" method="POST" style="width: 100%;">
-                                    <div style="margin-bottom: 1.5rem;">
-                                        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #F1F5F9;">Send us a Message</h3>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 1rem;">
-                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Name</label>
-                                        <input type="text" name="name" placeholder="Your name" required 
-                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 1rem;">
-                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Email</label>
-                                        <input type="email" name="email" placeholder="your@email.com" required 
-                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 1rem;">
-                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Subject</label>
-                                        <input type="text" name="subject" placeholder="How can we help?" required 
-                                               style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem;">
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 1rem;">
-                                        <label style="display: block; font-size: 0.875rem; font-weight: bold; color: #F1F5F9; margin-bottom: 0.5rem;">Message</label>
-                                        <textarea name="message" placeholder="Tell us more about your inquiry..." required rows="6"
-                                                  style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem; resize: vertical;"></textarea>
-                                    </div>
-                                    
-                                    <input type="hidden" name="_next" value="https://whisperhedge.com/contact?success=true">
-                                    
-                                    <button type="submit" 
-                                            style="width: 100%; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; background: #3B82F6; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
-                                        Send Message
-                                    </button>
-                                </form>
-                                """
-                            ),
-                        ),
-                        padding="2rem",
-                        border_radius="8px",
-                        border=f"1px solid #1E293B",
-                        background="rgba(15, 23, 42, 0.4)",
+                        style={
+                            "order": "2",
+                            "@media (min-width: 768px)": {
+                                "order": "1",
+                            },
+                        },
                     ),
                     
                     columns="2",
