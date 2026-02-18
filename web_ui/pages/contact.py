@@ -33,7 +33,7 @@ def contact_form_box() -> rx.Component:
                     color=COLORS.TEXT_PRIMARY,
                 ),
                 rx.text(
-                    "Thank you for contacting us. We'll get back to you within 24 hours.",
+                    "Thank you for contacting us. We'll get back to you soon!",
                     size="3",
                     color=COLORS.TEXT_SECONDARY,
                     text_align="center",
