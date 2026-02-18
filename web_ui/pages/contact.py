@@ -51,10 +51,10 @@ def contact_form_box() -> rx.Component:
                 spacing="3",
                 padding="3rem",
             ),
-            # Contact form with Formspree
+            # Contact form with Formspark
             rx.html(
                 """
-                <form action="https://formspree.io/f/mjgebrez" method="POST" style="width: 100%;">
+                <form action="https://submit-form.com/3d4vSZNou" method="POST" style="width: 100%;">
                     <div style="margin-bottom: 1.5rem;">
                         <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #F1F5F9;">Send us a Message</h3>
                     </div>
@@ -83,7 +83,8 @@ def contact_form_box() -> rx.Component:
                                   style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: rgba(15, 23, 42, 0.6); color: #F1F5F9; font-size: 1rem; resize: vertical;"></textarea>
                     </div>
                     
-                    <input type="hidden" name="_next" value="https://whisperhedge.com/contact?success=true">
+                    <input type="hidden" name="_redirect" value="https://whisperhedge.com/contact?success=true">
+                    <input type="hidden" name="_append" value="false">
                     
                     <button type="submit" 
                             style="width: 100%; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; background: #3B82F6; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
