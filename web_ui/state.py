@@ -197,10 +197,14 @@ class AuthState(rx.State):
             # Update local database with Stripe status
             update_data = {
                 "subscription_status": stripe_details["status"],
-                "current_period_start": datetime.fromtimestamp(stripe_details["current_period_start"]).isoformat(),
-                "current_period_end": datetime.fromtimestamp(stripe_details["current_period_end"]).isoformat(),
                 "cancel_at_period_end": stripe_details["cancel_at_period_end"],
             }
+            
+            # Add billing dates if available
+            if stripe_details.get("current_period_start"):
+                update_data["current_period_start"] = datetime.fromtimestamp(stripe_details["current_period_start"]).isoformat()
+            if stripe_details.get("current_period_end"):
+                update_data["current_period_end"] = datetime.fromtimestamp(stripe_details["current_period_end"]).isoformat()
             
             # If subscription is cancelled or expired, downgrade to free tier
             if stripe_details["status"] in ["canceled", "unpaid", "incomplete_expired"]:
