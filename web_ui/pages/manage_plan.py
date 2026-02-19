@@ -193,7 +193,6 @@ class ManagePlanState(rx.State):
         """Load user's current plan from Supabase"""
         try:
             import os
-            from supabase import create_client
             from datetime import datetime
             
             print("[PLAN] Loading current plan from Supabase", flush=True)
@@ -211,11 +210,9 @@ class ManagePlanState(rx.State):
             print(f"[PLAN]   - User ID: {user_id}", flush=True)
             sys.stdout.flush()
             
-            # Initialize Supabase client
-            supabase = create_client(
-                os.getenv("SUPABASE_URL"),
-                os.getenv("SUPABASE_KEY")
-            )
+            # Initialize authenticated Supabase client (required for SECURITY INVOKER views)
+            from ..auth import get_supabase_client
+            supabase = get_supabase_client(auth_state.access_token)
             
             # Query user_effective_limits view for complete plan data
             result = supabase.table("user_effective_limits").select("*").eq("user_id", user_id).execute()
