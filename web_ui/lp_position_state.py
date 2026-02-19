@@ -145,7 +145,62 @@ class LPPositionState(rx.State):
                 self.error_message = "Please assign an API key before enabling hedging"
                 return rx.toast.error("API key required to enable hedging", duration=5000)
             
-            # Enable immediately with warning toast
+            # PHASE 1: VALIDATION LOGGING (not blocking yet)
+            print("\n" + "="*60)
+            print("[HEDGE VALIDATION] Checking requirements for enabling hedging")
+            print("="*60)
+            
+            # Check 1: Balance validation (≥15% of position value)
+            position_value = float(self.fetched_position_data.get("position_value_usd", 0))
+            required_balance = position_value * 0.15
+            available_balance = self.selected_wallet_available
+            balance_check_passed = available_balance >= required_balance
+            
+            print(f"\n[CHECK 1] Balance Validation:")
+            print(f"  Position Value USD: ${position_value:,.2f}")
+            print(f"  Required Balance (15%): ${required_balance:,.2f}")
+            print(f"  Available Balance: ${available_balance:,.2f}")
+            print(f"  ✓ PASS" if balance_check_passed else f"  ✗ FAIL - Insufficient balance")
+            
+            # Check 2: Token availability on Hyperliquid
+            from web_ui.hl_utils import get_hl_token_metadata
+            
+            token0 = self.token0_symbol
+            token1 = self.token1_symbol
+            
+            print(f"\n[CHECK 2] Token Availability on Hyperliquid:")
+            print(f"  Token0: {token0}")
+            print(f"  Token1: {token1}")
+            
+            token0_meta = get_hl_token_metadata(token0) if token0 else None
+            token1_meta = get_hl_token_metadata(token1) if token1 else None
+            
+            token0_available = token0_meta is not None
+            token1_available = token1_meta is not None
+            
+            if token0_meta:
+                print(f"  Token0 Mapping: {token0} → {token0_meta.get('hl_symbol', 'N/A')} ✓")
+                print(f"    Price: ${token0_meta.get('price', 'N/A')}")
+            else:
+                print(f"  Token0 Mapping: {token0} → NOT AVAILABLE ✗")
+            
+            if token1_meta:
+                print(f"  Token1 Mapping: {token1} → {token1_meta.get('hl_symbol', 'N/A')} ✓")
+                print(f"    Price: ${token1_meta.get('price', 'N/A')}")
+            else:
+                print(f"  Token1 Mapping: {token1} → NOT AVAILABLE ✗")
+            
+            # Summary
+            all_checks_passed = balance_check_passed and token0_available and token1_available
+            print(f"\n[VALIDATION SUMMARY]")
+            print(f"  Balance Check: {'✓ PASS' if balance_check_passed else '✗ FAIL'}")
+            print(f"  Token0 Available: {'✓ PASS' if token0_available else '✗ FAIL'}")
+            print(f"  Token1 Available: {'✓ PASS' if token1_available else '✗ FAIL'}")
+            print(f"  Overall: {'✓ ALL CHECKS PASSED' if all_checks_passed else '✗ SOME CHECKS FAILED'}")
+            print("="*60 + "\n")
+            
+            # PHASE 1: Still allow enabling (just logging for now)
+            # TODO Phase 2: Block if checks fail
             self.hedge_enabled = True
             return rx.toast.warning("Hedging enabled - live trades will be placed when you save", duration=5000)
         else:  # User is disabling hedging
@@ -1101,6 +1156,8 @@ class LPPositionState(rx.State):
                     if wallet_response.data:
                         wallet = wallet_response.data[0]
                         self.selected_hedge_wallet = f"{wallet['account_name']} ({wallet['exchange']})"
+                        # Fetch balance for the selected wallet so validation has correct data
+                        await self.fetch_wallet_balance()
                 
         except Exception as e:
             pass
