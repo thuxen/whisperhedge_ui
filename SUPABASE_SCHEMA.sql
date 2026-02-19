@@ -270,12 +270,23 @@ SELECT
     pt.tier_name,
     pt.display_name,
     pt.price_monthly,
+    
+    -- Billing dates and Stripe info
+    us.stripe_customer_id,
+    us.stripe_subscription_id,
+    us.current_period_start,
+    us.current_period_end,
+    us.cancel_at_period_end,
+    us.subscription_status,
+    
+    -- Effective limits
     COALESCE(us.override_tvl_limit, us.subscribed_tvl_limit, pt.max_tvl) as effective_tvl_limit,
     COALESCE(us.override_position_limit, us.subscribed_position_limit, pt.max_positions) as effective_position_limit,
     COALESCE(us.override_rebalance_frequency, us.subscribed_rebalance_frequency, pt.rebalance_frequency) as effective_rebalance_frequency,
     COALESCE(us.override_support_level, pt.support_level) as effective_support_level,
+    
+    -- Flags and metadata
     us.is_beta_tester,
-    us.status as subscription_status,
     us.billing_cycle_end,
     CASE WHEN us.override_tvl_limit IS NOT NULL THEN true ELSE false END as has_tvl_override,
     CASE WHEN us.override_position_limit IS NOT NULL THEN true ELSE false END as has_position_override,

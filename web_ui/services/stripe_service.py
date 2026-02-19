@@ -155,12 +155,27 @@ def get_subscription_details(subscription_id: str) -> Optional[Dict[str, Any]]:
         
         subscription = stripe.Subscription.retrieve(subscription_id)
         
+        # Extract billing periods from subscription items
+        # Note: Stripe API 2025-03-31 moved current_period_start/end from subscription to items
+        # Must use subscription['items'] not subscription.items (conflicts with dict.items())
+        current_period_start = None
+        current_period_end = None
+        
+        try:
+            if subscription.get('items') and subscription['items'].get('data') and len(subscription['items']['data']) > 0:
+                first_item = subscription['items']['data'][0]
+                current_period_start = first_item.get('current_period_start')
+                current_period_end = first_item.get('current_period_end')
+        except Exception as e:
+            print(f"[STRIPE] Warning: Could not extract billing periods from items: {e}", flush=True)
+            sys.stdout.flush()
+        
         details = {
             "id": subscription.id,
             "customer": subscription.customer,
             "status": subscription.status,
-            "current_period_start": subscription.current_period_start,
-            "current_period_end": subscription.current_period_end,
+            "current_period_start": current_period_start,
+            "current_period_end": current_period_end,
             "cancel_at_period_end": subscription.cancel_at_period_end,
         }
         
