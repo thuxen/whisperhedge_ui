@@ -262,7 +262,8 @@ CREATE INDEX IF NOT EXISTS idx_user_subscriptions_subscription_status ON user_su
 -- =====================================================
 -- VIEW: user_effective_limits
 -- =====================================================
-CREATE OR REPLACE VIEW user_effective_limits AS
+CREATE OR REPLACE VIEW user_effective_limits
+WITH (security_invoker = true) AS
 SELECT 
     us.user_id,
     us.plan_tier_id,
@@ -347,7 +348,8 @@ ON CONFLICT (tier_name) DO UPDATE SET
 -- ADDITIONAL VIEWS
 -- =====================================================
 -- Quick subscription status check view
-CREATE OR REPLACE VIEW user_subscription_status AS
+CREATE OR REPLACE VIEW user_subscription_status
+WITH (security_invoker = true) AS
 SELECT 
     us.user_id,
     us.plan_tier_id,
