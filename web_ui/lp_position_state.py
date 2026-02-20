@@ -268,6 +268,12 @@ class LPPositionState(rx.State):
         """Calculate estimated hedge amount for token0"""
         if not self.fetched_position_data or not self.hedge_enabled or not self.hedge_token0:
             return 0.0
+        
+        # Don't show hedge estimate for stablecoins
+        from web_ui.hl_utils import is_stablecoin
+        if is_stablecoin(self.token0_symbol):
+            return 0.0
+        
         # Use delta if available (for in-range positions), otherwise use token0_amount
         delta = self.fetched_position_data.get('delta', 0.0)
         if delta == 0.0:
@@ -279,6 +285,12 @@ class LPPositionState(rx.State):
         """Calculate estimated hedge amount for token1"""
         if not self.fetched_position_data or not self.hedge_enabled or not self.hedge_token1:
             return 0.0
+        
+        # Don't show hedge estimate for stablecoins
+        from web_ui.hl_utils import is_stablecoin
+        if is_stablecoin(self.token1_symbol):
+            return 0.0
+        
         token1_amount = self.fetched_position_data.get('token1_amount', 0.0)
         return token1_amount * (self.hedge_ratio / 100.0)
     
