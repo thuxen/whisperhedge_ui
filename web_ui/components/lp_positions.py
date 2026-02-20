@@ -154,17 +154,9 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                         ),
                         rx.text(
                             rx.cond(
-                                position.hedge_token0 & position.hedge_token1,
-                                "Both",
-                                rx.cond(
-                                    position.hedge_token0,
-                                    position.token0_symbol,
-                                    rx.cond(
-                                        position.hedge_token1,
-                                        position.token1_symbol,
-                                        "None"
-                                    )
-                                )
+                                position.hedge_enabled,
+                                "Enabled",
+                                "Disabled"
                             ),
                             size="2",
                             weight="medium"
@@ -776,28 +768,6 @@ def lp_positions_component() -> rx.Component:
                                                             ),
                                                         ),
                                                     ),
-                                                ),
-                                                spacing="1",
-                                                width="100%",
-                                            ),
-                                            
-                                            rx.vstack(
-                                                rx.text("Hedge Assets", size="2", weight="bold"),
-                                                rx.hstack(
-                                                    rx.checkbox(
-                                                        checked=LPPositionState.hedge_token0,
-                                                        on_change=LPPositionState.toggle_hedge_token0,
-                                                    ),
-                                                    rx.text(f"Hedge {LPPositionState.token0_symbol}", size="2"),
-                                                    spacing="2",
-                                                ),
-                                                rx.hstack(
-                                                    rx.checkbox(
-                                                        checked=LPPositionState.hedge_token1,
-                                                        on_change=LPPositionState.toggle_hedge_token1,
-                                                    ),
-                                                    rx.text(f"Hedge {LPPositionState.token1_symbol}", size="2"),
-                                                    spacing="2",
                                                 ),
                                                 spacing="1",
                                                 width="100%",

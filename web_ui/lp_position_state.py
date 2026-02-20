@@ -122,12 +122,6 @@ class LPPositionState(rx.State):
     def set_notes(self, value: str):
         self.notes = value
     
-    def toggle_hedge_token0(self):
-        self.hedge_token0 = not self.hedge_token0
-    
-    def toggle_hedge_token1(self):
-        self.hedge_token1 = not self.hedge_token1
-    
     def set_hedge_ratio(self, value: str):
         # Dynamic is represented as 0 internally
         if value == "Dynamic":
@@ -893,11 +887,10 @@ class LPPositionState(rx.State):
                 self.fetched_position_data = {}
                 return
             
-            # Auto-configure hedge flags based on token types
-            if token0_is_stable:
-                self.hedge_token0 = False  # Don't hedge stablecoins
-            if token1_is_stable:
-                self.hedge_token1 = False  # Don't hedge stablecoins
+            # Always set hedge flags to TRUE (backend handles stablecoin logic)
+            # TODO: Remove these fields after backend is updated to not check them
+            self.hedge_token0 = True
+            self.hedge_token1 = True
             
             # Check if USD values are available
             if self.fetched_position_data.get("hl_price_available"):
