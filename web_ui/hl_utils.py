@@ -17,7 +17,9 @@ def _load_token_mapping() -> Dict[str, str]:
     try:
         with open(config_path, 'r') as f:
             data = json.load(f)
-            return data.get('mappings', {})
+            mappings = data.get('mappings', {})
+            # Normalize keys to uppercase for case-insensitive lookups
+            return {k.upper(): v for k, v in mappings.items()}
     except Exception as e:
         print(f"Warning: Could not load token_mapping.json: {e}")
         # Fallback to basic mappings
@@ -26,9 +28,6 @@ def _load_token_mapping() -> Dict[str, str]:
             'BTC': 'BTC', 'WBTC': 'BTC',
             'LINK': 'LINK', 'ENA': 'ENA',
         }
-
-
-TOKEN_TO_HL_SYMBOL = _load_token_mapping()
 
 
 def is_stablecoin(token_symbol: str) -> bool:
@@ -123,8 +122,10 @@ def get_hl_token_metadata(token_symbol: str) -> Optional[Dict]:
         Dict with price, sz_decimals, hl_symbol or None if not found
     """
     try:
+        # Load mapping fresh each time to pick up changes without restart
+        token_mapping = _load_token_mapping()
         # Map token symbol to Hyperliquid market symbol
-        hl_symbol = TOKEN_TO_HL_SYMBOL.get(token_symbol.upper(), token_symbol.upper())
+        hl_symbol = token_mapping.get(token_symbol.upper(), token_symbol.upper())
         
         info = HLInfo(constants.MAINNET_API_URL, skip_ws=True)
         
