@@ -112,6 +112,9 @@ CREATE TABLE IF NOT EXISTS position_configs (
     hedge_tokens JSONB DEFAULT '{"token0": {"hl_symbol": "", "pool_symbol": "", "sz_decimals": 0, "price_decimals": 2}, "token1": {"hl_symbol": "", "pool_symbol": "", "sz_decimals": 0, "price_decimals": 2}}'::jsonb,
     
     -- API Key Reference
+    -- Note: NULL values allowed - positions can be saved without API keys (hedging configured later)
+    -- Uniqueness enforced in application code when API key is assigned (see lp_position_state.py save_hedge_config)
+    -- Previous constraint 'unique_api_key_per_position' was removed (see migrations/drop_unique_api_key_constraint.sql)
     hl_api_key_id UUID REFERENCES user_api_keys(id),
     
     -- Metadata

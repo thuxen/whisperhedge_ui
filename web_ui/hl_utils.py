@@ -31,6 +31,29 @@ def _load_token_mapping() -> Dict[str, str]:
 TOKEN_TO_HL_SYMBOL = _load_token_mapping()
 
 
+def is_stablecoin(token_symbol: str) -> bool:
+    """
+    Check if token is a stablecoin (doesn't need hedging)
+    Reads from token_mapping.json stablecoins array
+    
+    Args:
+        token_symbol: Token symbol to check (e.g., 'USDC', 'ETH')
+        
+    Returns:
+        True if token is a stablecoin, False otherwise
+    """
+    config_path = os.path.join(os.path.dirname(__file__), 'token_mapping.json')
+    try:
+        with open(config_path, 'r') as f:
+            data = json.load(f)
+            stablecoins = data.get('stablecoins', [])
+            return token_symbol.upper() in [s.upper() for s in stablecoins]
+    except Exception as e:
+        print(f"Warning: Could not load stablecoins from token_mapping.json: {e}")
+        # Fallback to basic list if file read fails
+        return token_symbol.upper() in {'USDC', 'USDT', 'DAI'}
+
+
 def get_hl_account_balance(wallet_address: str) -> Optional[Dict]:
     """
     Fetch Hyperliquid account balance to verify API key works

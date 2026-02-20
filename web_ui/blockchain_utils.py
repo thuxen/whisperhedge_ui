@@ -382,13 +382,22 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
         
         # Try to get USD values and metadata from Hyperliquid
         try:
-            from .hl_utils import get_hl_token_metadata
+            from .hl_utils import get_hl_token_metadata, is_stablecoin
             
+            # Get token metadata from Hyperliquid (or use $1.00 for stablecoins)
             token0_metadata = get_hl_token_metadata(token0_symbol)
             token1_metadata = get_hl_token_metadata(token1_symbol)
             
-            token0_price_usd = token0_metadata['price'] if token0_metadata else None
-            token1_price_usd = token1_metadata['price'] if token1_metadata else None
+            # Use $1.00 for stablecoins, HL price for volatile tokens
+            if is_stablecoin(token0_symbol):
+                token0_price_usd = 1.0
+            else:
+                token0_price_usd = token0_metadata['price'] if token0_metadata else None
+            
+            if is_stablecoin(token1_symbol):
+                token1_price_usd = 1.0
+            else:
+                token1_price_usd = token1_metadata['price'] if token1_metadata else None
             
             # Convert pool price (token ratio) to USD
             current_price_usd = 0.0
@@ -457,9 +466,17 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
                     "in_range": current_tick >= tick_lower and current_tick <= tick_upper,
                 })
             else:
+                # Missing prices for non-stablecoin tokens
+                # This should be rare since validation blocks unavailable tokens
+                missing_tokens = []
+                if not token0_price_usd and not is_stablecoin(token0_symbol):
+                    missing_tokens.append(token0_symbol)
+                if not token1_price_usd and not is_stablecoin(token1_symbol):
+                    missing_tokens.append(token1_symbol)
+                
                 base_result.update({
                     "hl_price_available": False,
-                    "hl_price_error": f"Prices not found on Hyperliquid: {token0_symbol}={token0_price_usd}, {token1_symbol}={token1_price_usd}",
+                    "hl_price_error": f"Price unavailable for: {', '.join(missing_tokens)}" if missing_tokens else "Price data unavailable",
                 })
         except Exception as e:
             print(f"Error fetching HL prices: {e}")

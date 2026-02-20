@@ -140,69 +140,34 @@ class LPPositionState(rx.State):
     def toggle_hedge_enabled(self, value: bool):
         """Handle hedge enabled toggle with validation"""
         if value:  # User is trying to enable hedging
-            # Check if API key is assigned
+            # Check 1: API key assigned
             if not self.selected_hedge_wallet or self.selected_hedge_wallet == "None":
                 self.error_message = "Please assign an API key before enabling hedging"
                 return rx.toast.error("API key required to enable hedging", duration=5000)
             
-            # PHASE 1: VALIDATION LOGGING (not blocking yet)
-            print("\n" + "="*60)
-            print("[HEDGE VALIDATION] Checking requirements for enabling hedging")
-            print("="*60)
-            
-            # Check 1: Balance validation (≥15% of position value)
+            # Check 2: Position data fetched
             position_value = float(self.fetched_position_data.get("position_value_usd", 0))
+            if position_value == 0:
+                self.error_message = "Please fetch position data first"
+                return rx.toast.error("Fetch position data before enabling hedging", duration=5000)
+            
+            # Check 3: Balance validation (≥15% of position value) - ENFORCE
             required_balance = position_value * 0.15
             available_balance = self.selected_wallet_available
-            balance_check_passed = available_balance >= required_balance
             
-            print(f"\n[CHECK 1] Balance Validation:")
-            print(f"  Position Value USD: ${position_value:,.2f}")
-            print(f"  Required Balance (15%): ${required_balance:,.2f}")
-            print(f"  Available Balance: ${available_balance:,.2f}")
-            print(f"  ✓ PASS" if balance_check_passed else f"  ✗ FAIL - Insufficient balance")
+            if available_balance < required_balance:
+                self.error_message = f"Insufficient balance: ${available_balance:,.2f} available, ${required_balance:,.2f} required (15% of position)"
+                return rx.toast.error(
+                    f"Insufficient balance: Need ${required_balance:,.2f} (15% of ${position_value:,.2f}), have ${available_balance:,.2f}",
+                    duration=8000
+                )
             
-            # Check 2: Token availability on Hyperliquid
-            from web_ui.hl_utils import get_hl_token_metadata
-            
-            token0 = self.token0_symbol
-            token1 = self.token1_symbol
-            
-            print(f"\n[CHECK 2] Token Availability on Hyperliquid:")
-            print(f"  Token0: {token0}")
-            print(f"  Token1: {token1}")
-            
-            token0_meta = get_hl_token_metadata(token0) if token0 else None
-            token1_meta = get_hl_token_metadata(token1) if token1 else None
-            
-            token0_available = token0_meta is not None
-            token1_available = token1_meta is not None
-            
-            if token0_meta:
-                print(f"  Token0 Mapping: {token0} → {token0_meta.get('hl_symbol', 'N/A')} ✓")
-                print(f"    Price: ${token0_meta.get('price', 'N/A')}")
-            else:
-                print(f"  Token0 Mapping: {token0} → NOT AVAILABLE ✗")
-            
-            if token1_meta:
-                print(f"  Token1 Mapping: {token1} → {token1_meta.get('hl_symbol', 'N/A')} ✓")
-                print(f"    Price: ${token1_meta.get('price', 'N/A')}")
-            else:
-                print(f"  Token1 Mapping: {token1} → NOT AVAILABLE ✗")
-            
-            # Summary
-            all_checks_passed = balance_check_passed and token0_available and token1_available
-            print(f"\n[VALIDATION SUMMARY]")
-            print(f"  Balance Check: {'✓ PASS' if balance_check_passed else '✗ FAIL'}")
-            print(f"  Token0 Available: {'✓ PASS' if token0_available else '✗ FAIL'}")
-            print(f"  Token1 Available: {'✓ PASS' if token1_available else '✗ FAIL'}")
-            print(f"  Overall: {'✓ ALL CHECKS PASSED' if all_checks_passed else '✗ SOME CHECKS FAILED'}")
-            print("="*60 + "\n")
-            
-            # PHASE 1: Still allow enabling (just logging for now)
-            # TODO Phase 2: Block if checks fail
+            # All checks passed - enable hedging
             self.hedge_enabled = True
-            return rx.toast.warning("Hedging enabled - live trades will be placed when you save", duration=5000)
+            return rx.toast.success(
+                f"Hedging enabled! Balance: ${available_balance:,.2f} (required: ${required_balance:,.2f})",
+                duration=5000
+            )
         else:  # User is disabling hedging
             self.hedge_enabled = False
     
@@ -884,10 +849,74 @@ class LPPositionState(rx.State):
             self.fee_tier = self.fetched_position_data.get("fee_tier", "")
             self.position_name = self.fetched_position_data.get("position_name", "")
             
+            # VALIDATION: Check token availability on Hyperliquid
+            from web_ui.hl_utils import get_hl_token_metadata, is_stablecoin
+            
+            token0 = self.token0_symbol
+            token1 = self.token1_symbol
+            
+            # Determine which tokens are stablecoins
+            token0_is_stable = is_stablecoin(token0)
+            token1_is_stable = is_stablecoin(token1)
+            
+            # BLOCK stablecoin/stablecoin pairs - no hedging possible
+            if token0_is_stable and token1_is_stable:
+                self.error_message = f"Cannot add stablecoin pairs ({token0}/{token1}) - no hedging possible"
+                yield rx.toast.error(
+                    f"Cannot add {token0}/{token1} - stablecoin pairs don't need hedging",
+                    duration=8000
+                )
+                self.fetched_position_data = {}
+                return
+            
+            # Check availability for non-stablecoin tokens on Hyperliquid
+            unavailable_tokens = []
+            
+            if not token0_is_stable:
+                token0_meta = get_hl_token_metadata(token0)
+                if not token0_meta:
+                    unavailable_tokens.append(token0)
+            
+            if not token1_is_stable:
+                token1_meta = get_hl_token_metadata(token1)
+                if not token1_meta:
+                    unavailable_tokens.append(token1)
+            
+            # Block if any volatile token is unavailable on Hyperliquid
+            if unavailable_tokens:
+                tokens_str = ", ".join(unavailable_tokens)
+                self.error_message = f"Cannot add position: {tokens_str} not available on Hyperliquid for hedging"
+                yield rx.toast.error(
+                    f"Position blocked: {tokens_str} not available on Hyperliquid",
+                    duration=8000
+                )
+                self.fetched_position_data = {}
+                return
+            
+            # Auto-configure hedge flags based on token types
+            if token0_is_stable:
+                self.hedge_token0 = False  # Don't hedge stablecoins
+            if token1_is_stable:
+                self.hedge_token1 = False  # Don't hedge stablecoins
+            
             # Check if USD values are available
             if self.fetched_position_data.get("hl_price_available"):
-                self.success_message = "Position data fetched with USD values! Review and confirm to save."
-                yield rx.toast.success("Position fetched successfully!", duration=3000)
+                # Success - show appropriate message
+                if token0_is_stable or token1_is_stable:
+                    stable_tokens = []
+                    if token0_is_stable:
+                        stable_tokens.append(token0)
+                    if token1_is_stable:
+                        stable_tokens.append(token1)
+                    stable_str = ", ".join(stable_tokens)
+                    self.success_message = f"Position fetched! {stable_str} detected as stablecoin (won't be hedged)"
+                    yield rx.toast.success(
+                        f"Position fetched! {stable_str} is stablecoin (won't be hedged)",
+                        duration=5000
+                    )
+                else:
+                    self.success_message = "Position data fetched with USD values! Review and confirm to save."
+                    yield rx.toast.success("Position fetched successfully!", duration=3000)
             else:
                 hl_error = self.fetched_position_data.get("hl_price_error", "")
                 self.success_message = f"Position data fetched (no USD values: {hl_error}). Review and confirm to save."
@@ -1024,6 +1053,37 @@ class LPPositionState(rx.State):
                     print("No wallet found for account_name")
             else:
                 print("No wallet selected or 'None' selected - setting wallet_id to NULL")
+            
+            # Validate API key uniqueness (only if assigning an API key)
+            if wallet_id:
+                print(f"Validating API key uniqueness for wallet_id={wallet_id}")
+                
+                # Check if this API key is already used by another position
+                existing_usage = supabase.table("position_configs").select("id, position_name, network, nft_id").eq("user_id", user_id).eq("hl_api_key_id", wallet_id).execute()
+                
+                if existing_usage.data:
+                    print(f"API key is currently used by {len(existing_usage.data)} position(s)")
+                    
+                    # Check if config exists for this position
+                    existing_check = supabase.table("position_configs").select("id").eq("user_id", user_id).eq("protocol", self.protocol).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+                    
+                    if existing_check.data:
+                        # Editing existing position - allow if it's the same position
+                        existing_id = existing_check.data[0]["id"]
+                        if existing_usage.data[0]["id"] != existing_id:
+                            # API key is used by a different position
+                            other_position = existing_usage.data[0]["position_name"]
+                            print(f"API key validation FAILED - used by different position: {other_position}")
+                            raise Exception(f"API key already assigned to position: {other_position}")
+                        else:
+                            print(f"API key validation PASSED - same position being edited")
+                    else:
+                        # New position - API key must not be in use
+                        other_position = existing_usage.data[0]["position_name"]
+                        print(f"API key validation FAILED - used by position: {other_position}")
+                        raise Exception(f"API key already assigned to position: {other_position}")
+                else:
+                    print(f"API key validation PASSED - not in use by any position")
             
             # Check if config exists to preserve existing values when editing
             print(f"Checking for existing config: protocol={self.protocol}, network={self.network}, nft_id={self.nft_id}")

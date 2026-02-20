@@ -39,5 +39,21 @@
     "DOGE": "DOGE",
     "SHIB": "SHIB",
     "ENA": "ENA"
-  }
+  },
+  "stablecoins": [
+    "USDC",
+    "USDT",
+    "DAI",
+    "FRAX",
+    "LUSD",
+    "BUSD",
+    "TUSD",
+    "USDD",
+    "GUSD",
+    "USDP",
+    "SUSD",
+    "MIM",
+    "USDC.E",
+    "USDCE"
+  ]
 }
