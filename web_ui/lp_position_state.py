@@ -318,11 +318,9 @@ class LPPositionState(rx.State):
                 wallets = ["None"] + [f"{key['account_name']} ({key['exchange']})" for key in available_keys]
                 # Store in cache for immediate use
                 self._cached_wallets = wallets
-                # Auto-select first wallet if none selected (skip None)
-                if wallets and not self.selected_hedge_wallet and len(wallets) > 1:
-                    self.selected_hedge_wallet = wallets[1]  # Select first actual wallet, not None
-                    # Auto-fetch balance for the selected wallet
-                    await self.fetch_wallet_balance()
+                # Don't auto-select - let it default to empty/None
+                # For new positions: User must explicitly select API key
+                # For editing positions: load_hedge_config() will set the correct wallet
             
             # Mark wallets as loaded for dashboard loading state
             from web_ui.dashboard_loading_state import DashboardLoadingState
@@ -424,6 +422,7 @@ class LPPositionState(rx.State):
         self.hedge_token0 = True
         self.hedge_token1 = True
         self.selected_api_key_id = ""
+        self.selected_hedge_wallet = "None"  # Default to None for new positions
         
         # Clear balance tracking
         self.selected_wallet_balance = 0.0
