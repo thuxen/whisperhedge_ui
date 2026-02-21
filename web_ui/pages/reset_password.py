@@ -69,17 +69,19 @@ def reset_password_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
-                                rx.el.input(
+                                rx.input(
                                     type="hidden",
                                     name="access_token",
                                     id="access_token_field",
-                                    value=""
+                                    value="",
+                                    display="none"
                                 ),
-                                rx.el.input(
+                                rx.input(
                                     type="hidden",
                                     name="refresh_token",
                                     id="refresh_token_field",
-                                    value=""
+                                    value="",
+                                    display="none"
                                 ),
                                 
                                 rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
