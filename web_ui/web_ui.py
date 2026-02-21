@@ -48,7 +48,7 @@ app.add_page(landing_page, route="/", image="/favicon.ico")
 app.add_page(login_page, route="/login", image="/favicon.ico")
 app.add_page(signup_page, route="/signup", image="/favicon.ico")
 app.add_page(forgot_password_page, route="/forgot-password", image="/favicon.ico")
-app.add_page(reset_password_page, route="/reset-password", image="/favicon.ico")
+app.add_page(reset_password_page, route="/password-reset", image="/favicon.ico")  # Changed route name to test if route-specific issue
 app.add_page(dashboard_page, route="/dashboard", on_load=DashboardState.on_load, image="/favicon.ico")
 app.add_page(manage_plan_page, route="/manage-plan", on_load=ManagePlanState.on_load, image="/favicon.ico")
 app.add_page(payment_success_page, route="/payment-success", on_load=PaymentSuccessState.on_load, image="/favicon.ico")

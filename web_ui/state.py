@@ -190,7 +190,7 @@ class AuthState(rx.State):
             supabase.auth.reset_password_email(
                 email,
                 options={
-                    "redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/reset-password"
+                    "redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/password-reset"
                 }
             )
             
