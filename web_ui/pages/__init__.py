@@ -1,5 +1,7 @@
 from .login import login_page
 from .signup import signup_page
+from .forgot_password import forgot_password_page
+from .reset_password import reset_password_page
 from .dashboard import dashboard_page
 from .landing import landing_page
 from .privacy import privacy_page
@@ -14,6 +16,8 @@ from .manage_plan import manage_plan_page
 __all__ = [
     "login_page",
     "signup_page",
+    "forgot_password_page",
+    "reset_password_page",
     "dashboard_page",
     "landing_page",
     "privacy_page",

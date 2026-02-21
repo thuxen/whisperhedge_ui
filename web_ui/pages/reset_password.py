@@ -3,12 +3,12 @@ from ..state import AuthState
 from ..branding import brand_logo, COLORS
 
 
-def login_page() -> rx.Component:
+def reset_password_page() -> rx.Component:
     return rx.box(
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
-                rx.text("Sign in to your account", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+                rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
                 AuthState.error_message != "",
@@ -36,26 +36,33 @@ def login_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
-                                rx.text("Email", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
+                                rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
                             rx.input(
-                                placeholder="Enter your email",
-                                name="email",
-                                type="email",
-                                required=True,
-                                width="100%",
-                            ),
-                            
-                                rx.text("Password", size="3", weight="bold", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
-                            rx.input(
-                                placeholder="Enter your password",
+                                placeholder="Enter new password",
                                 name="password",
                                 type="password",
                                 required=True,
                                 width="100%",
                             ),
                             
+                                rx.text("Confirm Password", size="3", weight="bold", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
+                            rx.input(
+                                placeholder="Confirm new password",
+                                name="confirm_password",
+                                type="password",
+                                required=True,
+                                width="100%",
+                            ),
+                            
+                                rx.text(
+                                    "Password must be at least 6 characters",
+                                    size="1",
+                                    color=COLORS.TEXT_MUTED,
+                                    margin_top="0.5rem",
+                                ),
+                            
                                 rx.button(
-                                    "Sign In",
+                                    "Update Password",
                                     type="submit",
                                     size="3",
                                     width="100%",
@@ -69,23 +76,8 @@ def login_page() -> rx.Component:
                             spacing="2",
                             width="100%",
                         ),
-                        on_submit=AuthState.sign_in,
+                        on_submit=AuthState.update_password,
                         reset_on_submit=False,
-                    ),
-                    
-                    rx.hstack(
-                        rx.link("Forgot password?", href="/forgot-password", size="2", color=COLORS.ACCENT_PRIMARY),
-                        justify="center",
-                        margin_top="1rem",
-                    ),
-                    
-                    rx.divider(margin_top="1.5rem", margin_bottom="1.5rem"),
-                    
-                        rx.hstack(
-                            rx.text("Don't have an account?", size="2", color=COLORS.TEXT_SECONDARY),
-                            rx.link("Sign up", href="/signup", size="2", weight="bold", color=COLORS.ACCENT_PRIMARY),
-                        spacing="2",
-                        justify="center",
                     ),
                     
                     width="100%",

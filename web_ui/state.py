@@ -160,6 +160,77 @@ class AuthState(rx.State):
         finally:
             self.is_loading = False
     
+    async def reset_password(self, form_data: dict):
+        """Send password reset email"""
+        self.is_loading = True
+        self.clear_messages()
+        
+        email = form_data.get("email", "").strip()
+        
+        if not email:
+            self.error_message = "Email is required"
+            self.is_loading = False
+            return
+        
+        try:
+            supabase = get_supabase_client()
+            
+            # Send password reset email
+            supabase.auth.reset_password_email(
+                email,
+                options={
+                    "redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/reset-password"
+                }
+            )
+            
+            # Don't reveal if email exists or not (security best practice)
+            self.success_message = "If an account exists with that email, a reset link has been sent. Please check your inbox."
+            
+        except Exception as e:
+            print(f"[RESET PASSWORD ERROR] {e}")
+            # Don't reveal if email exists or not (security)
+            self.success_message = "If an account exists with that email, a reset link has been sent. Please check your inbox."
+        finally:
+            self.is_loading = False
+    
+    async def update_password(self, form_data: dict):
+        """Update password after reset"""
+        self.is_loading = True
+        self.clear_messages()
+        
+        password = form_data.get("password", "")
+        confirm_password = form_data.get("confirm_password", "")
+        
+        if not password or not confirm_password:
+            self.error_message = "Both fields are required"
+            self.is_loading = False
+            return
+        
+        if password != confirm_password:
+            self.error_message = "Passwords do not match"
+            self.is_loading = False
+            return
+        
+        if len(password) < 6:
+            self.error_message = "Password must be at least 6 characters"
+            self.is_loading = False
+            return
+        
+        try:
+            supabase = get_supabase_client()
+            
+            # Update password
+            supabase.auth.update_user({"password": password})
+            
+            self.success_message = "Password updated successfully! Redirecting to login..."
+            return rx.redirect("/login")
+            
+        except Exception as e:
+            print(f"[UPDATE PASSWORD ERROR] {e}")
+            self.error_message = "Failed to update password. Please try again or request a new reset link."
+        finally:
+            self.is_loading = False
+    
     async def _sync_subscription_status(self):
         """Sync subscription status from Stripe to local database on login"""
         try:

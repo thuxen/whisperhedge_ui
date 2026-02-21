@@ -3,12 +3,12 @@ from ..state import AuthState
 from ..branding import brand_logo, COLORS
 
 
-def login_page() -> rx.Component:
+def forgot_password_page() -> rx.Component:
     return rx.box(
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
-                rx.text("Sign in to your account", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+                rx.text("Reset your password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
                 AuthState.error_message != "",
@@ -45,17 +45,8 @@ def login_page() -> rx.Component:
                                 width="100%",
                             ),
                             
-                                rx.text("Password", size="3", weight="bold", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
-                            rx.input(
-                                placeholder="Enter your password",
-                                name="password",
-                                type="password",
-                                required=True,
-                                width="100%",
-                            ),
-                            
                                 rx.button(
-                                    "Sign In",
+                                    "Send Reset Link",
                                     type="submit",
                                     size="3",
                                     width="100%",
@@ -69,21 +60,15 @@ def login_page() -> rx.Component:
                             spacing="2",
                             width="100%",
                         ),
-                        on_submit=AuthState.sign_in,
+                        on_submit=AuthState.reset_password,
                         reset_on_submit=False,
-                    ),
-                    
-                    rx.hstack(
-                        rx.link("Forgot password?", href="/forgot-password", size="2", color=COLORS.ACCENT_PRIMARY),
-                        justify="center",
-                        margin_top="1rem",
                     ),
                     
                     rx.divider(margin_top="1.5rem", margin_bottom="1.5rem"),
                     
                         rx.hstack(
-                            rx.text("Don't have an account?", size="2", color=COLORS.TEXT_SECONDARY),
-                            rx.link("Sign up", href="/signup", size="2", weight="bold", color=COLORS.ACCENT_PRIMARY),
+                            rx.text("Remember your password?", size="2", color=COLORS.TEXT_SECONDARY),
+                            rx.link("Sign in", href="/login", size="2", weight="bold", color=COLORS.ACCENT_PRIMARY),
                         spacing="2",
                         justify="center",
                     ),
