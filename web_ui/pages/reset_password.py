@@ -7,16 +7,34 @@ def reset_password_page() -> rx.Component:
     return rx.box(
         rx.script("""
             window.addEventListener('load', function() {
+                console.log('[RESET PASSWORD] Page loaded, extracting tokens from URL hash');
                 const hash = window.location.hash.substring(1);
+                console.log('[RESET PASSWORD] Hash:', hash ? 'present' : 'empty');
+                
                 const params = new URLSearchParams(hash);
                 const accessToken = params.get('access_token');
                 const refreshToken = params.get('refresh_token');
                 
+                console.log('[RESET PASSWORD] Access token:', accessToken ? 'found' : 'not found');
+                console.log('[RESET PASSWORD] Refresh token:', refreshToken ? 'found' : 'not found');
+                
                 if (accessToken) {
-                    document.getElementById('access_token_field').value = accessToken;
+                    const field = document.getElementById('access_token_field');
+                    if (field) {
+                        field.value = accessToken;
+                        console.log('[RESET PASSWORD] Access token set in hidden field');
+                    } else {
+                        console.error('[RESET PASSWORD] access_token_field not found!');
+                    }
                 }
                 if (refreshToken) {
-                    document.getElementById('refresh_token_field').value = refreshToken;
+                    const field = document.getElementById('refresh_token_field');
+                    if (field) {
+                        field.value = refreshToken;
+                        console.log('[RESET PASSWORD] Refresh token set in hidden field');
+                    } else {
+                        console.error('[RESET PASSWORD] refresh_token_field not found!');
+                    }
                 }
             });
         """),
@@ -51,15 +69,17 @@ def reset_password_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
-                                rx.input(
+                                rx.el.input(
                                     type="hidden",
                                     name="access_token",
-                                    id="access_token_field"
+                                    id="access_token_field",
+                                    value=""
                                 ),
-                                rx.input(
+                                rx.el.input(
                                     type="hidden",
                                     name="refresh_token",
-                                    id="refresh_token_field"
+                                    id="refresh_token_field",
+                                    value=""
                                 ),
                                 
                                 rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
