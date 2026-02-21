@@ -211,10 +211,8 @@ class AuthState(rx.State):
         
         password = form_data.get("password", "")
         confirm_password = form_data.get("confirm_password", "")
-        
-        # Use tokens stored in state (set by client-side event)
-        access_token = self.reset_access_token
-        refresh_token = self.reset_refresh_token
+        access_token = form_data.get("access_token", "")
+        refresh_token = form_data.get("refresh_token", "")
         
         print(f"[UPDATE PASSWORD] Form data received")
         print(f"[UPDATE PASSWORD]   - Password provided: {bool(password)}")
