@@ -16,6 +16,7 @@ class AuthState(rx.State):
     # Password reset tokens (extracted from URL hash on client side)
     reset_access_token: str = ""
     reset_refresh_token: str = ""
+    tokens_extracted: bool = False
 
     def clear_messages(self):
         self.error_message = ""
@@ -25,7 +26,8 @@ class AuthState(rx.State):
         """Store reset tokens extracted from URL hash by client-side script"""
         self.reset_access_token = tokens.get("access_token", "")
         self.reset_refresh_token = tokens.get("refresh_token", "")
-        print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}")
+        self.tokens_extracted = bool(self.reset_access_token and self.reset_refresh_token)
+        print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}, extracted={self.tokens_extracted}")
 
     async def sign_up(self, form_data: dict):
         import sys
@@ -216,8 +218,18 @@ class AuthState(rx.State):
         
         print(f"[UPDATE PASSWORD] Form data received")
         print(f"[UPDATE PASSWORD]   - Password provided: {bool(password)}")
-        print(f"[UPDATE PASSWORD]   - Access token provided: {bool(access_token)}")
-        print(f"[UPDATE PASSWORD]   - Refresh token provided: {bool(refresh_token)}")
+        print(f"[UPDATE PASSWORD]   - Access token from form: {bool(access_token)}")
+        print(f"[UPDATE PASSWORD]   - Refresh token from form: {bool(refresh_token)}")
+        
+        # If form tokens are empty, try state tokens
+        if not access_token or not refresh_token:
+            access_token = self.reset_access_token
+            refresh_token = self.reset_refresh_token
+            print(f"[UPDATE PASSWORD] Using state tokens: access={bool(access_token)}, refresh={bool(refresh_token)}")
+        
+        # Also store form tokens in state for backup
+        if access_token and refresh_token:
+            self.set_reset_tokens({"access_token": access_token, "refresh_token": refresh_token})
         
         if not password or not confirm_password:
             self.error_message = "Both fields are required"
@@ -254,6 +266,10 @@ class AuthState(rx.State):
             print(f"[UPDATE PASSWORD] Password updated successfully")
             
             self.success_message = "Password updated successfully! Redirecting to login..."
+            # Clear reset tokens after successful update
+            self.reset_access_token = ""
+            self.reset_refresh_token = ""
+            self.tokens_extracted = False
             return rx.redirect("/login")
             
         except Exception as e:
