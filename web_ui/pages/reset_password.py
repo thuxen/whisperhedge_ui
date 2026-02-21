@@ -4,55 +4,12 @@ from ..branding import brand_logo, COLORS
 
 
 def reset_password_page() -> rx.Component:
-    return rx.box(
-        rx.script("""
-            (function() {
-                console.log('[RESET PASSWORD] Page loaded - extracting tokens');
-                
-                try {
-                    const hash = window.location.hash.substring(1);
-                    console.log('[RESET PASSWORD] Hash present:', hash ? 'yes' : 'no');
-                    
-                    if (!hash) {
-                        console.warn('[RESET PASSWORD] No hash fragment in URL');
-                        return;
-                    }
-                    
-                    const params = new URLSearchParams(hash);
-                    const accessToken = params.get('access_token');
-                    const refreshToken = params.get('refresh_token');
-                    
-                    console.log('[RESET PASSWORD] Tokens found:', {
-                        access: accessToken ? 'yes' : 'no',
-                        refresh: refreshToken ? 'yes' : 'no'
-                    });
-                    
-                    function setTokens() {
-                        const accessField = document.getElementById('access_token_field');
-                        const refreshField = document.getElementById('refresh_token_field');
-                        
-                        if (accessField && refreshField) {
-                            if (accessToken) accessField.value = accessToken;
-                            if (refreshToken) refreshField.value = refreshToken;
-                            console.log('[RESET PASSWORD] Tokens set in hidden fields');
-                        } else {
-                            console.error('[RESET PASSWORD] Hidden fields not found in DOM');
-                        }
-                    }
-                    
-                    setTokens();
-                    setTimeout(setTokens, 100);
-                    setTimeout(setTokens, 500);
-                    
-                } catch (error) {
-                    console.error('[RESET PASSWORD] Error extracting tokens:', error);
-                }
-            })();
-        """),
-        rx.container(
-            rx.vstack(
-                brand_logo(size="landing", margin_bottom="1rem"),
-                rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+    return rx.fragment(
+        rx.box(
+            rx.container(
+                rx.vstack(
+                    brand_logo(size="landing", margin_bottom="1rem"),
+                    rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
                 AuthState.error_message != "",
@@ -141,9 +98,50 @@ def reset_password_page() -> rx.Component:
                 align="center",
                 min_height="85vh",
                 width="100%",
+                ),
+                size="3",
             ),
-            size="3",
+            background=COLORS.BACKGROUND_PRIMARY,
+            min_height="100vh",
         ),
-        background=COLORS.BACKGROUND_PRIMARY,
-        min_height="100vh",
+        
+        # Script at end of page to ensure DOM elements exist
+        rx.script("""
+            (function() {
+                console.log('[RESET PASSWORD] Page loaded - extracting tokens');
+                
+                try {
+                    const hash = window.location.hash.substring(1);
+                    console.log('[RESET PASSWORD] Hash present:', hash ? 'yes' : 'no');
+                    
+                    if (!hash) {
+                        console.warn('[RESET PASSWORD] No hash fragment in URL');
+                        return;
+                    }
+                    
+                    const params = new URLSearchParams(hash);
+                    const accessToken = params.get('access_token');
+                    const refreshToken = params.get('refresh_token');
+                    
+                    console.log('[RESET PASSWORD] Tokens found:', {
+                        access: accessToken ? 'yes' : 'no',
+                        refresh: refreshToken ? 'yes' : 'no'
+                    });
+                    
+                    const accessField = document.getElementById('access_token_field');
+                    const refreshField = document.getElementById('refresh_token_field');
+                    
+                    if (accessField && refreshField) {
+                        if (accessToken) accessField.value = accessToken;
+                        if (refreshToken) refreshField.value = refreshToken;
+                        console.log('[RESET PASSWORD] Tokens set in hidden fields successfully');
+                    } else {
+                        console.error('[RESET PASSWORD] Hidden fields not found in DOM');
+                    }
+                    
+                } catch (error) {
+                    console.error('[RESET PASSWORD] Error extracting tokens:', error);
+                }
+            })();
+        """),
     )
