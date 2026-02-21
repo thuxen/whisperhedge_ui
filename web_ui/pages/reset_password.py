@@ -20,10 +20,10 @@ def reset_password_page() -> rx.Component:
                             const refresh = params.get('refresh_token') || '';
                             if (access && refresh) {
                                 console.log('[RESET] Sending tokens to state');
-                                return [access, refresh];
+                                return {access_token: access, refresh_token: refresh};
                             }
                         }
-                        return ['', ''];
+                        return {access_token: '', refresh_token: ''};
                     """, callback=AuthState.set_reset_tokens),
                     display="none",
                 ),
