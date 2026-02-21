@@ -73,12 +73,6 @@ def login_page() -> rx.Component:
                         reset_on_submit=False,
                     ),
                     
-                    rx.hstack(
-                        rx.link("Forgot password?", href="/forgot-password", size="2", color=COLORS.ACCENT_PRIMARY),
-                        justify="center",
-                        margin_top="1rem",
-                    ),
-                    
                     rx.divider(margin_top="1.5rem", margin_bottom="1.5rem"),
                     
                         rx.hstack(
