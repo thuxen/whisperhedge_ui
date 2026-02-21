@@ -8,8 +8,8 @@ def reset_password_page() -> rx.Component:
         # Hidden element that triggers token extraction on mount
         rx.box(
             on_mount=lambda: AuthState.extract_tokens_from_hash(
-                rx.Var.create("window.location.hash.includes('access_token') ? new URLSearchParams(window.location.hash.substring(1)).get('access_token') : ''", _var_is_string=False),
-                rx.Var.create("window.location.hash.includes('refresh_token') ? new URLSearchParams(window.location.hash.substring(1)).get('refresh_token') : ''", _var_is_string=False)
+                rx.Var.create("(window.location.hash.includes('access_token') ? new URLSearchParams(window.location.hash.substring(1)).get('access_token') : '')"),
+                rx.Var.create("(window.location.hash.includes('refresh_token') ? new URLSearchParams(window.location.hash.substring(1)).get('refresh_token') : '')")
             ),
             display="none",
         ),
