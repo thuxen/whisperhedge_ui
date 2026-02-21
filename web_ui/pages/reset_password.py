@@ -5,51 +5,28 @@ from ..branding import brand_logo, COLORS
 
 def reset_password_page() -> rx.Component:
     return rx.box(
-        rx.script("""
-            (function() {
-                console.log('[RESET PASSWORD] Extracting tokens');
-                try {
-                    const hash = window.location.hash.substring(1);
-                    if (!hash) {
-                        console.warn('[RESET PASSWORD] No hash in URL');
-                        return;
-                    }
-                    
-                    const params = new URLSearchParams(hash);
-                    const accessToken = params.get('access_token');
-                    const refreshToken = params.get('refresh_token');
-                    
-                    console.log('[RESET PASSWORD] Tokens:', {
-                        access: accessToken ? 'yes' : 'no',
-                        refresh: refreshToken ? 'yes' : 'no'
-                    });
-                    
-                    function setTokens() {
-                        const accessField = document.getElementById('access_token_field');
-                        const refreshField = document.getElementById('refresh_token_field');
-                        if (accessField && refreshField && accessToken && refreshToken) {
-                            accessField.value = accessToken;
-                            refreshField.value = refreshToken;
-                            console.log('[RESET PASSWORD] Tokens set successfully');
-                            return true;
-                        }
-                        return false;
-                    }
-                    
-                    if (!setTokens()) {
-                        setTimeout(setTokens, 100);
-                        setTimeout(setTokens, 500);
-                    }
-                } catch (error) {
-                    console.error('[RESET PASSWORD] Error:', error);
-                }
-            })();
-        """),
-        
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
                 rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+                
+                # Hidden component to trigger token extraction on mount
+                rx.box(
+                    on_mount=rx.call_script("""
+                        const hash = window.location.hash.substring(1);
+                        if (hash) {
+                            const params = new URLSearchParams(hash);
+                            const access = params.get('access_token') || '';
+                            const refresh = params.get('refresh_token') || '';
+                            if (access && refresh) {
+                                console.log('[RESET] Sending tokens to state');
+                                return [access, refresh];
+                            }
+                        }
+                        return ['', ''];
+                    """, callback=AuthState.set_reset_tokens),
+                    display="none",
+                ),
                 
                 rx.cond(
                     AuthState.error_message != "",
@@ -77,9 +54,6 @@ def reset_password_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
-                                rx.html('<input type="hidden" id="access_token_field" name="access_token" value="" />'),
-                                rx.html('<input type="hidden" id="refresh_token_field" name="refresh_token" value="" />'),
-                                
                                 rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
                                 rx.input(
                                     placeholder="Enter new password",

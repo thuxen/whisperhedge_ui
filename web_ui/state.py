@@ -12,10 +12,20 @@ class AuthState(rx.State):
     error_message: str = ""
     success_message: str = ""
     is_loading: bool = False
+    
+    # Password reset tokens (extracted from URL hash on client side)
+    reset_access_token: str = ""
+    reset_refresh_token: str = ""
 
     def clear_messages(self):
         self.error_message = ""
         self.success_message = ""
+    
+    def set_reset_tokens(self, access_token: str, refresh_token: str):
+        """Store reset tokens extracted from URL hash by client-side script"""
+        self.reset_access_token = access_token
+        self.reset_refresh_token = refresh_token
+        print(f"[RESET TOKENS] Stored in state: access={bool(access_token)}, refresh={bool(refresh_token)}")
 
     async def sign_up(self, form_data: dict):
         import sys
@@ -201,8 +211,10 @@ class AuthState(rx.State):
         
         password = form_data.get("password", "")
         confirm_password = form_data.get("confirm_password", "")
-        access_token = form_data.get("access_token", "")
-        refresh_token = form_data.get("refresh_token", "")
+        
+        # Use tokens stored in state (set by client-side event)
+        access_token = self.reset_access_token
+        refresh_token = self.reset_refresh_token
         
         print(f"[UPDATE PASSWORD] Form data received")
         print(f"[UPDATE PASSWORD]   - Password provided: {bool(password)}")
