@@ -201,6 +201,13 @@ class AuthState(rx.State):
         
         password = form_data.get("password", "")
         confirm_password = form_data.get("confirm_password", "")
+        access_token = form_data.get("access_token", "")
+        refresh_token = form_data.get("refresh_token", "")
+        
+        print(f"[UPDATE PASSWORD] Form data received")
+        print(f"[UPDATE PASSWORD]   - Password provided: {bool(password)}")
+        print(f"[UPDATE PASSWORD]   - Access token provided: {bool(access_token)}")
+        print(f"[UPDATE PASSWORD]   - Refresh token provided: {bool(refresh_token)}")
         
         if not password or not confirm_password:
             self.error_message = "Both fields are required"
@@ -217,17 +224,32 @@ class AuthState(rx.State):
             self.is_loading = False
             return
         
+        if not access_token or not refresh_token:
+            print(f"[UPDATE PASSWORD] Missing tokens - invalid reset link")
+            self.error_message = "Invalid or expired reset link. Please request a new one."
+            self.is_loading = False
+            return
+        
         try:
             supabase = get_supabase_client()
             
+            # Set session from URL tokens
+            print(f"[UPDATE PASSWORD] Setting session from tokens")
+            supabase.auth.set_session(access_token, refresh_token)
+            print(f"[UPDATE PASSWORD] Session set successfully")
+            
             # Update password
+            print(f"[UPDATE PASSWORD] Updating password")
             supabase.auth.update_user({"password": password})
+            print(f"[UPDATE PASSWORD] Password updated successfully")
             
             self.success_message = "Password updated successfully! Redirecting to login..."
             return rx.redirect("/login")
             
         except Exception as e:
             print(f"[UPDATE PASSWORD ERROR] {e}")
+            import traceback
+            traceback.print_exc()
             self.error_message = "Failed to update password. Please try again or request a new reset link."
         finally:
             self.is_loading = False

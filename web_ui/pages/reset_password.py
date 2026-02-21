@@ -5,6 +5,21 @@ from ..branding import brand_logo, COLORS
 
 def reset_password_page() -> rx.Component:
     return rx.box(
+        rx.script("""
+            window.addEventListener('load', function() {
+                const hash = window.location.hash.substring(1);
+                const params = new URLSearchParams(hash);
+                const accessToken = params.get('access_token');
+                const refreshToken = params.get('refresh_token');
+                
+                if (accessToken) {
+                    document.getElementById('access_token_field').value = accessToken;
+                }
+                if (refreshToken) {
+                    document.getElementById('refresh_token_field').value = refreshToken;
+                }
+            });
+        """),
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
@@ -36,6 +51,17 @@ def reset_password_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
+                                rx.input(
+                                    type="hidden",
+                                    name="access_token",
+                                    id="access_token_field"
+                                ),
+                                rx.input(
+                                    type="hidden",
+                                    name="refresh_token",
+                                    id="refresh_token_field"
+                                ),
+                                
                                 rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
                             rx.input(
                                 placeholder="Enter new password",
