@@ -6,37 +6,48 @@ from ..branding import brand_logo, COLORS
 def reset_password_page() -> rx.Component:
     return rx.box(
         rx.script("""
-            window.addEventListener('load', function() {
-                console.log('[RESET PASSWORD] Page loaded, extracting tokens from URL hash');
-                const hash = window.location.hash.substring(1);
-                console.log('[RESET PASSWORD] Hash:', hash ? 'present' : 'empty');
+            (function() {
+                console.log('[RESET PASSWORD] Page loaded - extracting tokens');
                 
-                const params = new URLSearchParams(hash);
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-                
-                console.log('[RESET PASSWORD] Access token:', accessToken ? 'found' : 'not found');
-                console.log('[RESET PASSWORD] Refresh token:', refreshToken ? 'found' : 'not found');
-                
-                if (accessToken) {
-                    const field = document.getElementById('access_token_field');
-                    if (field) {
-                        field.value = accessToken;
-                        console.log('[RESET PASSWORD] Access token set in hidden field');
-                    } else {
-                        console.error('[RESET PASSWORD] access_token_field not found!');
+                try {
+                    const hash = window.location.hash.substring(1);
+                    console.log('[RESET PASSWORD] Hash present:', hash ? 'yes' : 'no');
+                    
+                    if (!hash) {
+                        console.warn('[RESET PASSWORD] No hash fragment in URL');
+                        return;
                     }
-                }
-                if (refreshToken) {
-                    const field = document.getElementById('refresh_token_field');
-                    if (field) {
-                        field.value = refreshToken;
-                        console.log('[RESET PASSWORD] Refresh token set in hidden field');
-                    } else {
-                        console.error('[RESET PASSWORD] refresh_token_field not found!');
+                    
+                    const params = new URLSearchParams(hash);
+                    const accessToken = params.get('access_token');
+                    const refreshToken = params.get('refresh_token');
+                    
+                    console.log('[RESET PASSWORD] Tokens found:', {
+                        access: accessToken ? 'yes' : 'no',
+                        refresh: refreshToken ? 'yes' : 'no'
+                    });
+                    
+                    function setTokens() {
+                        const accessField = document.getElementById('access_token_field');
+                        const refreshField = document.getElementById('refresh_token_field');
+                        
+                        if (accessField && refreshField) {
+                            if (accessToken) accessField.value = accessToken;
+                            if (refreshToken) refreshField.value = refreshToken;
+                            console.log('[RESET PASSWORD] Tokens set in hidden fields');
+                        } else {
+                            console.error('[RESET PASSWORD] Hidden fields not found in DOM');
+                        }
                     }
+                    
+                    setTokens();
+                    setTimeout(setTokens, 100);
+                    setTimeout(setTokens, 500);
+                    
+                } catch (error) {
+                    console.error('[RESET PASSWORD] Error extracting tokens:', error);
                 }
-            });
+            })();
         """),
         rx.container(
             rx.vstack(
@@ -69,20 +80,8 @@ def reset_password_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
-                                rx.input(
-                                    type="hidden",
-                                    name="access_token",
-                                    id="access_token_field",
-                                    value="",
-                                    display="none"
-                                ),
-                                rx.input(
-                                    type="hidden",
-                                    name="refresh_token",
-                                    id="refresh_token_field",
-                                    value="",
-                                    display="none"
-                                ),
+                                rx.html('<input type="hidden" id="access_token_field" name="access_token" value="" />'),
+                                rx.html('<input type="hidden" id="refresh_token_field" name="refresh_token" value="" />'),
                                 
                                 rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
                             rx.input(
