@@ -21,11 +21,11 @@ class AuthState(rx.State):
         self.error_message = ""
         self.success_message = ""
     
-    def set_reset_tokens(self, access_token: str, refresh_token: str):
+    def set_reset_tokens(self, tokens: dict):
         """Store reset tokens extracted from URL hash by client-side script"""
-        self.reset_access_token = access_token
-        self.reset_refresh_token = refresh_token
-        print(f"[RESET TOKENS] Stored in state: access={bool(access_token)}, refresh={bool(refresh_token)}")
+        self.reset_access_token = tokens.get("access_token", "")
+        self.reset_refresh_token = tokens.get("refresh_token", "")
+        print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}")
 
     async def sign_up(self, form_data: dict):
         import sys
