@@ -28,6 +28,26 @@ class AuthState(rx.State):
         self.reset_refresh_token = tokens.get("refresh_token", "")
         self.tokens_extracted = bool(self.reset_access_token and self.reset_refresh_token)
         print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}, extracted={self.tokens_extracted}")
+    
+    async def extract_reset_tokens(self):
+        """Extract tokens from URL hash on page load"""
+        print("[EXTRACT TOKENS] on_load handler called")
+        # Tokens will be in URL hash: #access_token=xxx&refresh_token=yyy
+        # We'll use client-side callback to extract them
+        return rx.call_script(
+            """
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const params = new URLSearchParams(hash);
+                const access = params.get('access_token') || '';
+                const refresh = params.get('refresh_token') || '';
+                console.log('[EXTRACT TOKENS] Found:', {access: !!access, refresh: !!refresh});
+                return {access_token: access, refresh_token: refresh};
+            }
+            return {access_token: '', refresh_token: ''};
+            """,
+            callback=AuthState.set_reset_tokens
+        )
 
     async def sign_up(self, form_data: dict):
         import sys
