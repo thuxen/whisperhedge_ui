@@ -17,6 +17,7 @@ class AuthState(rx.State):
     reset_access_token: str = ""
     reset_refresh_token: str = ""
     tokens_extracted: bool = False
+    
 
     def clear_messages(self):
         self.error_message = ""
@@ -29,25 +30,12 @@ class AuthState(rx.State):
         self.tokens_extracted = bool(self.reset_access_token and self.reset_refresh_token)
         print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}, extracted={self.tokens_extracted}")
     
-    async def extract_reset_tokens(self):
-        """Extract tokens from URL hash on page load"""
-        print("[EXTRACT TOKENS] on_load handler called")
-        # Tokens will be in URL hash: #access_token=xxx&refresh_token=yyy
-        # We'll use client-side callback to extract them
-        return rx.call_script(
-            """
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                const params = new URLSearchParams(hash);
-                const access = params.get('access_token') || '';
-                const refresh = params.get('refresh_token') || '';
-                console.log('[EXTRACT TOKENS] Found:', {access: !!access, refresh: !!refresh});
-                return {access_token: access, refresh_token: refresh};
-            }
-            return {access_token: '', refresh_token: ''};
-            """,
-            callback=AuthState.set_reset_tokens
-        )
+    def extract_tokens_from_hash(self, access_token: str, refresh_token: str):
+        """Store tokens extracted from URL hash by client-side code"""
+        self.reset_access_token = access_token
+        self.reset_refresh_token = refresh_token
+        self.tokens_extracted = bool(access_token and refresh_token)
+        print(f"[EXTRACT TOKENS] Stored: access={bool(access_token)}, refresh={bool(refresh_token)}")
 
     async def sign_up(self, form_data: dict):
         import sys
