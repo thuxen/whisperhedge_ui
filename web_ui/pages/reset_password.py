@@ -10,24 +10,6 @@ def reset_password_page() -> rx.Component:
                 brand_logo(size="landing", margin_bottom="1rem"),
                 rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
                 
-                # Hidden component to trigger token extraction on mount
-                rx.box(
-                    on_mount=rx.call_script("""
-                        const hash = window.location.hash.substring(1);
-                        if (hash) {
-                            const params = new URLSearchParams(hash);
-                            const access = params.get('access_token') || '';
-                            const refresh = params.get('refresh_token') || '';
-                            if (access && refresh) {
-                                console.log('[RESET] Sending tokens to state');
-                                return {access_token: access, refresh_token: refresh};
-                            }
-                        }
-                        return {access_token: '', refresh_token: ''};
-                    """, callback=AuthState.set_reset_tokens),
-                    display="none",
-                ),
-                
                 rx.cond(
                     AuthState.error_message != "",
                     rx.callout(
