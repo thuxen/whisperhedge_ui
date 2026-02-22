@@ -8,24 +8,6 @@ def reset_password_page() -> rx.Component:
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
-                
-                # Debug card showing token extraction info
-                rx.card(
-                    rx.vstack(
-                        rx.text("🔍 DEBUG INFO", size="5", weight="bold", color="blue"),
-                        rx.text(AuthState.reset_debug_info, size="2", color="black"),
-                        rx.cond(
-                            AuthState.reset_token_hash != "",
-                            rx.text(f"Token (first 20 chars): {AuthState.reset_token_hash[:20]}...", size="2", color="green"),
-                        ),
-                        spacing="2",
-                    ),
-                    background="yellow",
-                    padding="1rem",
-                    margin_bottom="2rem",
-                    width="100%",
-                ),
-                
                 rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
