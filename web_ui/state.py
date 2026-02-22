@@ -136,10 +136,19 @@ class AuthState(rx.State):
                 return rx.redirect("/login")
                 
         except Exception as e:
-            print(f"[MAGIC LINK ERROR] {e}", flush=True)
-            import traceback
-            traceback.print_exc()
-            self.error_message = "Authentication failed. Please try again."
+            error_msg = str(e).lower()
+            
+            # Handle specific error cases with user-friendly messages
+            if "expired" in error_msg or "invalid" in error_msg:
+                print(f"[MAGIC LINK] Link expired or invalid: {e}", flush=True)
+                self.error_message = "This magic link has expired or is invalid. Please request a new one."
+            elif "403" in error_msg or "forbidden" in error_msg:
+                print(f"[MAGIC LINK] Link expired (403): {e}", flush=True)
+                self.error_message = "This magic link has expired. Please request a new one."
+            else:
+                print(f"[MAGIC LINK ERROR] Unexpected error: {e}", flush=True)
+                self.error_message = "Authentication failed. Please try again."
+            
             return rx.redirect("/login")
     
     async def _sync_subscription_status(self):
