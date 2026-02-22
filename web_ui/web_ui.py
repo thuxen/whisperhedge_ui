@@ -18,7 +18,6 @@ from .pages.manage_plan import manage_plan_page, ManagePlanState
 from .pages.payment_success import payment_success_page, PaymentSuccessState
 from .pages.settings import settings
 from .components import DashboardState
-from .state import AuthState
 
 
 # Analytics scripts that will be injected into the head of every page
