@@ -9,13 +9,15 @@ def reset_password_page() -> rx.Component:
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
                 
+                # Debug card showing token extraction info
                 rx.card(
                     rx.vstack(
                         rx.text("🔍 DEBUG INFO", size="5", weight="bold", color="blue"),
-                        rx.text(f"Full URL Path: {AuthState.router.page.raw_path}", size="2", color="black"),
-                        rx.text(f"Query Params: {AuthState.router.page.params}", size="2", color="black"),
-                        rx.text(f"Token Hash: {AuthState.router.page.params.get('token_hash', 'NOT FOUND')}", size="2", color="black"),
-                        rx.text(f"Type: {AuthState.router.page.params.get('type', 'NOT FOUND')}", size="2", color="black"),
+                        rx.text(AuthState.reset_debug_info, size="2", color="black"),
+                        rx.cond(
+                            AuthState.reset_token_hash != "",
+                            rx.text(f"Token (first 20 chars): {AuthState.reset_token_hash[:20]}...", size="2", color="green"),
+                        ),
                         spacing="2",
                     ),
                     background="yellow",
