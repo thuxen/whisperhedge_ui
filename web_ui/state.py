@@ -235,10 +235,6 @@ class AuthState(rx.State):
             refresh_token = self.reset_refresh_token
             print(f"[UPDATE PASSWORD] Using state tokens: access={bool(access_token)}, refresh={bool(refresh_token)}")
         
-        # Also store form tokens in state for backup
-        if access_token and refresh_token:
-            self.set_reset_tokens({"access_token": access_token, "refresh_token": refresh_token})
-        
         if not password or not confirm_password:
             self.error_message = "Both fields are required"
             self.is_loading = False
