@@ -13,6 +13,9 @@ class AuthState(rx.State):
     success_message: str = ""
     is_loading: bool = False
     
+    # LocalStorage for magic link tokens (set by client-side JS)
+    magic_link_access_token: str = rx.LocalStorage()
+    magic_link_refresh_token: str = rx.LocalStorage()
 
     def clear_messages(self):
         self.error_message = ""
@@ -93,20 +96,35 @@ class AuthState(rx.State):
         print("[MAGIC LINK] Callback handler started", flush=True)
         
         try:
+            # Get tokens from LocalStorage (set by client-side JS)
+            access_token = self.magic_link_access_token
+            refresh_token = self.magic_link_refresh_token
+            
+            print(f"[MAGIC LINK] Access token from LocalStorage: {bool(access_token)}", flush=True)
+            print(f"[MAGIC LINK] Refresh token from LocalStorage: {bool(refresh_token)}", flush=True)
+            
+            if not access_token or not refresh_token:
+                print("[MAGIC LINK] No tokens found - waiting for client-side extraction", flush=True)
+                # Client-side script will reload the page after storing tokens
+                return
+            
             supabase = get_supabase_client()
             
-            # Get current session (Supabase automatically handles the magic link)
-            session = supabase.auth.get_session()
+            # Set session using the tokens from the URL hash
+            print("[MAGIC LINK] Setting session with extracted tokens", flush=True)
+            response = supabase.auth.set_session(access_token, refresh_token)
             
-            print(f"[MAGIC LINK] Session check: {session is not None}", flush=True)
-            
-            if session and session.user:
-                print(f"[MAGIC LINK] User authenticated: {session.user.email}", flush=True)
+            if response and response.user:
+                print(f"[MAGIC LINK] User authenticated: {response.user.email}", flush=True)
                 
                 self.is_authenticated = True
-                self.user_email = session.user.email
-                self.user_id = session.user.id
-                self.access_token = session.access_token
+                self.user_email = response.user.email
+                self.user_id = response.user.id
+                self.access_token = access_token
+                
+                # Clear the LocalStorage tokens
+                self.magic_link_access_token = ""
+                self.magic_link_refresh_token = ""
                 
                 # Sync subscription status
                 await self._sync_subscription_status()
@@ -114,7 +132,7 @@ class AuthState(rx.State):
                 print("[MAGIC LINK] Redirecting to dashboard", flush=True)
                 return rx.redirect("/dashboard")
             else:
-                print("[MAGIC LINK] No valid session found", flush=True)
+                print("[MAGIC LINK] Failed to set session with tokens", flush=True)
                 self.error_message = "Authentication failed. Please try again."
                 return rx.redirect("/login")
                 
