@@ -1,6 +1,5 @@
 import reflex as rx
 import sys
-import os
 from .auth import get_supabase_client
 
 
@@ -12,38 +11,10 @@ class AuthState(rx.State):
     error_message: str = ""
     success_message: str = ""
     is_loading: bool = False
-    
-    # Password reset
-    reset_token_hash: str = ""
-    reset_type: str = ""
-    reset_debug_info: str = "Waiting for page load..."
 
     def clear_messages(self):
         self.error_message = ""
         self.success_message = ""
-    
-    def extract_reset_token(self):
-        """Extract token_hash from URL query params on page load"""
-        try:
-            token_hash = self.router.page.params.get("token_hash", "")
-            recovery_type = self.router.page.params.get("type", "")
-            
-            self.reset_debug_info = f"URL params extracted | token_hash: {bool(token_hash)} ({len(token_hash)} chars) | type: {recovery_type}"
-            
-            if token_hash and recovery_type == "recovery":
-                self.reset_token_hash = token_hash
-                self.reset_type = recovery_type
-                self.reset_debug_info += " | ✅ Token stored in state"
-                print(f"[RESET TOKEN] Extracted token_hash: {token_hash[:20]}... (type: {recovery_type})")
-            else:
-                self.reset_debug_info += " | ❌ No valid token found"
-                print(f"[RESET TOKEN] No valid token found in URL params")
-                
-        except Exception as e:
-            self.reset_debug_info = f"❌ Error extracting token: {str(e)}"
-            print(f"[RESET TOKEN ERROR] {e}")
-            import traceback
-            traceback.print_exc()
 
     async def sign_up(self, form_data: dict):
         import sys
