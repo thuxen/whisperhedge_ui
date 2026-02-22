@@ -13,170 +13,19 @@ class AuthState(rx.State):
     success_message: str = ""
     is_loading: bool = False
     
-    # Password reset tokens (extracted from URL hash on client side)
-    reset_access_token: str = ""
-    reset_refresh_token: str = ""
 
     def clear_messages(self):
         self.error_message = ""
         self.success_message = ""
     
-    def set_reset_tokens(self, tokens: dict):
-        """Store reset tokens extracted from URL hash by client-side script"""
-        self.reset_access_token = tokens.get("access_token", "")
-        self.reset_refresh_token = tokens.get("refresh_token", "")
-        print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}")
-
     async def sign_up(self, form_data: dict):
-        import sys
-        
-        print("=" * 80, flush=True)
-        sys.stdout.flush()
-        print("[SIGNUP] Sign up attempt started", flush=True)
-        sys.stdout.flush()
-        
-        self.is_loading = True
-        self.clear_messages()
-        
-        email = form_data.get("email", "")
-        password = form_data.get("password", "")
-        confirm_password = form_data.get("confirm_password", "")
-        
-        print(f"[SIGNUP] Email: {email}", flush=True)
-        sys.stdout.flush()
-        print(f"[SIGNUP] Password length: {len(password) if password else 0}", flush=True)
-        sys.stdout.flush()
-        print(f"[SIGNUP] Confirm password length: {len(confirm_password) if confirm_password else 0}", flush=True)
-        sys.stdout.flush()
-        
-        if not email or not password:
-            print("[SIGNUP ERROR] Email or password missing", flush=True)
-            sys.stdout.flush()
-            self.error_message = "Email and password are required"
-            self.is_loading = False
-            return
-        
-        if password != confirm_password:
-            print("[SIGNUP ERROR] Passwords do not match", flush=True)
-            sys.stdout.flush()
-            self.error_message = "Passwords do not match"
-            self.is_loading = False
-            return
-        
-        if len(password) < 6:
-            print("[SIGNUP ERROR] Password too short", flush=True)
-            sys.stdout.flush()
-            self.error_message = "Password must be at least 6 characters"
-            self.is_loading = False
-            return
-        
-        try:
-            print("[SIGNUP] Validation passed, calling Supabase...", flush=True)
-            sys.stdout.flush()
-            
-            supabase = get_supabase_client()
-            print("[SIGNUP] Supabase client obtained", flush=True)
-            sys.stdout.flush()
-            
-            response = supabase.auth.sign_up({
-                "email": email,
-                "password": password
-            })
-            
-            print(f"[SIGNUP] Supabase response received", flush=True)
-            sys.stdout.flush()
-            print(f"[SIGNUP]   - User: {response.user is not None}", flush=True)
-            sys.stdout.flush()
-            print(f"[SIGNUP]   - Session: {response.session is not None}", flush=True)
-            sys.stdout.flush()
-            
-            if response.user:
-                print(f"[SIGNUP] User created: {response.user.id}", flush=True)
-                sys.stdout.flush()
-                
-                if response.session:
-                    print("[SIGNUP] Session created, user auto-confirmed", flush=True)
-                    sys.stdout.flush()
-                    self.is_authenticated = True
-                    self.user_email = email
-                    self.user_id = response.user.id
-                    self.access_token = response.session.access_token
-                    self.success_message = "Account created successfully! Redirecting to dashboard..."
-                    print("[SIGNUP] ✓ Signup successful, redirecting to dashboard", flush=True)
-                    sys.stdout.flush()
-                    print("=" * 80, flush=True)
-                    sys.stdout.flush()
-                    return rx.redirect("/dashboard")
-                else:
-                    print("[SIGNUP] No session, email confirmation required", flush=True)
-                    sys.stdout.flush()
-                    self.success_message = "Account created! Please check your email to verify your account before signing in."
-                    self.user_email = email
-                    print("[SIGNUP] ✓ Signup successful, awaiting email confirmation", flush=True)
-                    sys.stdout.flush()
-                    print("=" * 80, flush=True)
-                    sys.stdout.flush()
-            else:
-                print("[SIGNUP ERROR] No user in response", flush=True)
-                sys.stdout.flush()
-                self.error_message = "Failed to create account"
-                print("=" * 80, flush=True)
-                sys.stdout.flush()
-        except Exception as e:
-            print(f"[SIGNUP ERROR] Exception occurred: {e}", flush=True)
-            sys.stdout.flush()
-            import traceback
-            traceback.print_exc()
-            sys.stdout.flush()
-            self.error_message = "An error occurred during sign up. Please try again."
-            print("=" * 80, flush=True)
-            sys.stdout.flush()
-        finally:
-            self.is_loading = False
-
-    async def sign_in(self, form_data: dict):
+        """Send magic link for signup (passwordless)"""
         self.is_loading = True
         self.clear_messages()
         
         email = form_data.get("email", "").strip()
-        password = form_data.get("password", "")
         
-        if not email or not password:
-            self.error_message = "Email and password are required"
-            self.is_loading = False
-            return
-        
-        try:
-            supabase = get_supabase_client()
-            response = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
-            
-            if response.user:
-                self.is_authenticated = True
-                self.user_email = email
-                self.user_id = response.user.id
-                self.access_token = response.session.access_token
-                self.success_message = "Successfully logged in!"
-                
-                # Sync subscription status from Stripe on login
-                await self._sync_subscription_status()
-                
-                return rx.redirect("/dashboard")
-            else:
-                self.error_message = "Invalid credentials"
-        except Exception as e:
-            self.error_message = "An error occurred during sign in. Please try again."
-        finally:
-            self.is_loading = False
-    
-    async def reset_password(self, form_data: dict):
-        """Send password reset email"""
-        self.is_loading = True
-        self.clear_messages()
-        
-        email = form_data.get("email", "").strip()
+        print(f"[SIGNUP] Magic link signup for: {email}", flush=True)
         
         if not email:
             self.error_message = "Email is required"
@@ -186,85 +35,95 @@ class AuthState(rx.State):
         try:
             supabase = get_supabase_client()
             
-            # Send password reset email
-            supabase.auth.reset_password_email(
-                email,
-                options={
-                    "redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/password-reset"
+            supabase.auth.sign_in_with_otp({
+                "email": email,
+                "options": {
+                    "email_redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/auth/callback"
                 }
-            )
+            })
             
-            # Don't reveal if email exists or not (security best practice)
-            self.success_message = "If an account exists with that email, a reset link has been sent. Please check your inbox."
+            self.success_message = "Check your email! We've sent you a magic link to sign up."
+            print(f"[SIGNUP] Magic link sent to {email}", flush=True)
             
         except Exception as e:
-            print(f"[RESET PASSWORD ERROR] {e}")
-            # Don't reveal if email exists or not (security)
-            self.success_message = "If an account exists with that email, a reset link has been sent. Please check your inbox."
+            print(f"[SIGNUP ERROR] {e}", flush=True)
+            self.success_message = "Check your email! We've sent you a magic link to sign up."
         finally:
             self.is_loading = False
-    
-    async def update_password(self, form_data: dict):
-        """Update password after reset"""
+
+    async def sign_in(self, form_data: dict):
+        """Send magic link for login (passwordless)"""
         self.is_loading = True
         self.clear_messages()
         
-        password = form_data.get("password", "")
-        confirm_password = form_data.get("confirm_password", "")
+        email = form_data.get("email", "").strip()
         
-        # Use tokens stored in state (set by client-side event)
-        access_token = self.reset_access_token
-        refresh_token = self.reset_refresh_token
+        print(f"[LOGIN] Magic link login for: {email}", flush=True)
         
-        print(f"[UPDATE PASSWORD] Form data received")
-        print(f"[UPDATE PASSWORD]   - Password provided: {bool(password)}")
-        print(f"[UPDATE PASSWORD]   - Access token provided: {bool(access_token)}")
-        print(f"[UPDATE PASSWORD]   - Refresh token provided: {bool(refresh_token)}")
-        
-        if not password or not confirm_password:
-            self.error_message = "Both fields are required"
-            self.is_loading = False
-            return
-        
-        if password != confirm_password:
-            self.error_message = "Passwords do not match"
-            self.is_loading = False
-            return
-        
-        if len(password) < 6:
-            self.error_message = "Password must be at least 6 characters"
-            self.is_loading = False
-            return
-        
-        if not access_token or not refresh_token:
-            print(f"[UPDATE PASSWORD] Missing tokens - invalid reset link")
-            self.error_message = "Invalid or expired reset link. Please request a new one."
+        if not email:
+            self.error_message = "Email is required"
             self.is_loading = False
             return
         
         try:
             supabase = get_supabase_client()
             
-            # Set session from URL tokens
-            print(f"[UPDATE PASSWORD] Setting session from tokens")
-            supabase.auth.set_session(access_token, refresh_token)
-            print(f"[UPDATE PASSWORD] Session set successfully")
+            supabase.auth.sign_in_with_otp({
+                "email": email,
+                "options": {
+                    "email_redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/auth/callback"
+                }
+            })
             
-            # Update password
-            print(f"[UPDATE PASSWORD] Updating password")
-            supabase.auth.update_user({"password": password})
-            print(f"[UPDATE PASSWORD] Password updated successfully")
-            
-            self.success_message = "Password updated successfully! Redirecting to login..."
-            return rx.redirect("/login")
+            self.success_message = "Check your email! We've sent you a magic link to sign in."
+            print(f"[LOGIN] Magic link sent to {email}", flush=True)
             
         except Exception as e:
-            print(f"[UPDATE PASSWORD ERROR] {e}")
-            import traceback
-            traceback.print_exc()
-            self.error_message = "Failed to update password. Please try again or request a new reset link."
+            print(f"[LOGIN ERROR] {e}", flush=True)
+            self.success_message = "Check your email! We've sent you a magic link to sign in."
         finally:
             self.is_loading = False
+    
+    async def reset_password(self, form_data: dict):
+        """Send magic link (same as sign_in for passwordless)"""
+        return await self.sign_in(form_data)
+    
+    async def handle_magic_link_callback(self):
+        """Handle magic link authentication callback"""
+        print("[MAGIC LINK] Callback handler started", flush=True)
+        
+        try:
+            supabase = get_supabase_client()
+            
+            # Get current session (Supabase automatically handles the magic link)
+            session = supabase.auth.get_session()
+            
+            print(f"[MAGIC LINK] Session check: {session is not None}", flush=True)
+            
+            if session and session.user:
+                print(f"[MAGIC LINK] User authenticated: {session.user.email}", flush=True)
+                
+                self.is_authenticated = True
+                self.user_email = session.user.email
+                self.user_id = session.user.id
+                self.access_token = session.access_token
+                
+                # Sync subscription status
+                await self._sync_subscription_status()
+                
+                print("[MAGIC LINK] Redirecting to dashboard", flush=True)
+                return rx.redirect("/dashboard")
+            else:
+                print("[MAGIC LINK] No valid session found", flush=True)
+                self.error_message = "Authentication failed. Please try again."
+                return rx.redirect("/login")
+                
+        except Exception as e:
+            print(f"[MAGIC LINK ERROR] {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            self.error_message = "Authentication failed. Please try again."
+            return rx.redirect("/login")
     
     async def _sync_subscription_status(self):
         """Sync subscription status from Stripe to local database on login"""

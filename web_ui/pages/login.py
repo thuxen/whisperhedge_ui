@@ -8,7 +8,7 @@ def login_page() -> rx.Component:
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
-                rx.text("Sign in to your account", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+                rx.text("Sign in with email", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
                 AuthState.error_message != "",
@@ -45,17 +45,15 @@ def login_page() -> rx.Component:
                                 width="100%",
                             ),
                             
-                                rx.text("Password", size="3", weight="bold", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
-                            rx.input(
-                                placeholder="Enter your password",
-                                name="password",
-                                type="password",
-                                required=True,
-                                width="100%",
-                            ),
+                                rx.text(
+                                    "We'll send you a magic link to sign in - no password needed!",
+                                    size="1",
+                                    color=COLORS.TEXT_MUTED,
+                                    margin_top="0.5rem",
+                                ),
                             
                                 rx.button(
-                                    "Sign In",
+                                    "Send Magic Link",
                                     type="submit",
                                     size="3",
                                     width="100%",
@@ -71,12 +69,6 @@ def login_page() -> rx.Component:
                         ),
                         on_submit=AuthState.sign_in,
                         reset_on_submit=False,
-                    ),
-                    
-                    rx.hstack(
-                        rx.link("Forgot password?", href="/forgot-password", size="2", color=COLORS.ACCENT_PRIMARY),
-                        justify="center",
-                        margin_top="1rem",
                     ),
                     
                     rx.divider(margin_top="1.5rem", margin_bottom="1.5rem"),

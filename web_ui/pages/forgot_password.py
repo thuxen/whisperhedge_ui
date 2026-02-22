@@ -8,7 +8,7 @@ def forgot_password_page() -> rx.Component:
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
-                rx.text("Reset your password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+                rx.text("Sign in via email", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
                 AuthState.error_message != "",
@@ -46,7 +46,7 @@ def forgot_password_page() -> rx.Component:
                             ),
                             
                                 rx.button(
-                                    "Send Reset Link",
+                                    "Send Magic Link",
                                     type="submit",
                                     size="3",
                                     width="100%",

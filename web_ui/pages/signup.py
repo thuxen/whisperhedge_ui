@@ -8,7 +8,7 @@ def signup_page() -> rx.Component:
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
-                rx.text("Create your account", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
+                rx.text("Get started with email", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
                 AuthState.error_message != "",
@@ -45,33 +45,15 @@ def signup_page() -> rx.Component:
                                 width="100%",
                             ),
                             
-                                rx.text("Password", size="3", weight="bold", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
-                            rx.input(
-                                placeholder="Enter your password",
-                                name="password",
-                                type="password",
-                                required=True,
-                                width="100%",
-                            ),
-                            
-                                rx.text("Confirm Password", size="3", weight="bold", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
-                            rx.input(
-                                placeholder="Confirm your password",
-                                name="confirm_password",
-                                type="password",
-                                required=True,
-                                width="100%",
-                            ),
-                            
                                 rx.text(
-                                    "Password must be at least 6 characters",
+                                    "We'll send you a magic link to sign up - no password needed!",
                                     size="1",
                                     color=COLORS.TEXT_MUTED,
                                     margin_top="0.5rem",
                                 ),
                             
                                 rx.button(
-                                    "Create Account",
+                                    "Send Magic Link",
                                     type="submit",
                                     size="3",
                                     width="100%",
