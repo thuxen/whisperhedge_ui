@@ -13,9 +13,9 @@ class AuthState(rx.State):
     success_message: str = ""
     is_loading: bool = False
     
-    # LocalStorage for magic link tokens (set by client-side JS)
-    magic_link_access_token: str = rx.LocalStorage()
-    magic_link_refresh_token: str = rx.LocalStorage()
+    # Temporary storage for magic link tokens
+    _temp_access_token: str = ""
+    _temp_refresh_token: str = ""
 
     def clear_messages(self):
         self.error_message = ""
@@ -92,27 +92,30 @@ class AuthState(rx.State):
         return await self.sign_in(form_data)
     
     async def handle_magic_link_callback(self):
-        """Handle magic link authentication callback"""
+        """Handle magic link authentication callback using PKCE flow"""
         print("[MAGIC LINK] Callback handler started", flush=True)
         
         try:
-            # Get tokens from LocalStorage (set by client-side JS)
-            access_token = self.magic_link_access_token
-            refresh_token = self.magic_link_refresh_token
+            # Get token_hash from query parameters (PKCE flow)
+            token_hash = self.router.page.params.get("token_hash", "")
+            auth_type = self.router.page.params.get("type", "")
             
-            print(f"[MAGIC LINK] Access token from LocalStorage: {bool(access_token)}", flush=True)
-            print(f"[MAGIC LINK] Refresh token from LocalStorage: {bool(refresh_token)}", flush=True)
+            print(f"[MAGIC LINK] Token hash from URL: {bool(token_hash)}", flush=True)
+            print(f"[MAGIC LINK] Type: {auth_type}", flush=True)
             
-            if not access_token or not refresh_token:
-                print("[MAGIC LINK] No tokens found - waiting for client-side extraction", flush=True)
-                # Client-side script will reload the page after storing tokens
-                return
+            if not token_hash:
+                print("[MAGIC LINK] No token_hash in URL parameters", flush=True)
+                self.error_message = "Invalid magic link. Please try again."
+                return rx.redirect("/login")
             
             supabase = get_supabase_client()
             
-            # Set session using the tokens from the URL hash
-            print("[MAGIC LINK] Setting session with extracted tokens", flush=True)
-            response = supabase.auth.set_session(access_token, refresh_token)
+            # Verify OTP using token_hash (PKCE flow)
+            print("[MAGIC LINK] Verifying OTP with token_hash", flush=True)
+            response = supabase.auth.verify_otp({
+                "token_hash": token_hash,
+                "type": auth_type if auth_type else "magiclink"
+            })
             
             if response and response.user:
                 print(f"[MAGIC LINK] User authenticated: {response.user.email}", flush=True)
@@ -120,11 +123,7 @@ class AuthState(rx.State):
                 self.is_authenticated = True
                 self.user_email = response.user.email
                 self.user_id = response.user.id
-                self.access_token = access_token
-                
-                # Clear the LocalStorage tokens
-                self.magic_link_access_token = ""
-                self.magic_link_refresh_token = ""
+                self.access_token = response.session.access_token
                 
                 # Sync subscription status
                 await self._sync_subscription_status()
@@ -132,7 +131,7 @@ class AuthState(rx.State):
                 print("[MAGIC LINK] Redirecting to dashboard", flush=True)
                 return rx.redirect("/dashboard")
             else:
-                print("[MAGIC LINK] Failed to set session with tokens", flush=True)
+                print("[MAGIC LINK] Failed to verify OTP", flush=True)
                 self.error_message = "Authentication failed. Please try again."
                 return rx.redirect("/login")
                 
