@@ -36,10 +36,6 @@ def reset_password_page() -> rx.Component:
                     rx.vstack(
                         rx.form(
                             rx.vstack(
-                                # Hidden fields for tokens (populated from sessionStorage)
-                                rx.html('<input type="hidden" id="access_token_field" name="access_token" value="" />'),
-                                rx.html('<input type="hidden" id="refresh_token_field" name="refresh_token" value="" />'),
-                                
                                 rx.text("New Password", size="3", weight="bold", color=COLORS.TEXT_PRIMARY),
                                 rx.input(
                                     placeholder="Enter new password",
@@ -101,52 +97,6 @@ def reset_password_page() -> rx.Component:
             ),
             size="3",
         ),
-        # Script to extract tokens from URL hash and populate form fields
-        rx.script("""
-            (function() {
-                // Extract tokens from URL hash
-                const hash = window.location.hash.substring(1);
-                if (hash) {
-                    const params = new URLSearchParams(hash);
-                    const access = params.get('access_token');
-                    const refresh = params.get('refresh_token');
-                    if (access && refresh) {
-                        sessionStorage.setItem('reset_access_token', access);
-                        sessionStorage.setItem('reset_refresh_token', refresh);
-                        console.log('[RESET PASSWORD] Tokens stored in sessionStorage');
-                    } else {
-                        console.warn('[RESET PASSWORD] Tokens not found in URL hash');
-                    }
-                } else {
-                    console.warn('[RESET PASSWORD] No hash in URL');
-                }
-                
-                // Populate hidden form fields from sessionStorage when form is submitted
-                function populateTokenFields() {
-                    const accessField = document.getElementById('access_token_field');
-                    const refreshField = document.getElementById('refresh_token_field');
-                    const access = sessionStorage.getItem('reset_access_token');
-                    const refresh = sessionStorage.getItem('reset_refresh_token');
-                    
-                    if (accessField && access) {
-                        accessField.value = access;
-                        console.log('[RESET PASSWORD] Access token set in form field');
-                    }
-                    if (refreshField && refresh) {
-                        refreshField.value = refresh;
-                        console.log('[RESET PASSWORD] Refresh token set in form field');
-                    }
-                }
-                
-                // Populate fields immediately and before form submission
-                setTimeout(populateTokenFields, 100);
-                
-                // Also populate on form submit
-                document.addEventListener('submit', function(e) {
-                    populateTokenFields();
-                }, true);
-            })();
-        """),
         background=COLORS.BACKGROUND_PRIMARY,
         min_height="100vh",
     )

@@ -36,6 +36,24 @@ class AuthState(rx.State):
         self.reset_refresh_token = refresh_token
         self.tokens_extracted = bool(access_token and refresh_token)
         print(f"[EXTRACT TOKENS] Stored: access={bool(access_token)}, refresh={bool(refresh_token)}")
+    
+    def extract_reset_tokens_from_url(self):
+        """Extract token_hash from URL query params (PKCE flow)"""
+        print("[EXTRACT TOKENS] on_load handler called")
+        try:
+            # Get token_hash from query parameters (PKCE flow)
+            token_hash = self.router.page.params.get("token_hash", "")
+            token_type = self.router.page.params.get("type", "")
+            
+            if token_hash and token_type == "recovery":
+                # Store token_hash for later verification
+                self.reset_access_token = token_hash  # Reusing this field for token_hash
+                self.tokens_extracted = True
+                print(f"[EXTRACT TOKENS] Extracted token_hash from query params")
+            else:
+                print(f"[EXTRACT TOKENS] No token_hash in query params or wrong type")
+        except Exception as e:
+            print(f"[EXTRACT TOKENS] Error: {e}")
 
     async def sign_up(self, form_data: dict):
         import sys
@@ -229,11 +247,8 @@ class AuthState(rx.State):
         print(f"[UPDATE PASSWORD]   - Access token from form: {bool(access_token)}")
         print(f"[UPDATE PASSWORD]   - Refresh token from form: {bool(refresh_token)}")
         
-        # If form tokens are empty, try state tokens
-        if not access_token or not refresh_token:
-            access_token = self.reset_access_token
-            refresh_token = self.reset_refresh_token
-            print(f"[UPDATE PASSWORD] Using state tokens: access={bool(access_token)}, refresh={bool(refresh_token)}")
+        # Get token_hash from state (stored during on_load)
+        token_hash = self.reset_access_token  # We reused this field for token_hash
         
         if not password or not confirm_password:
             self.error_message = "Both fields are required"
@@ -250,8 +265,8 @@ class AuthState(rx.State):
             self.is_loading = False
             return
         
-        if not access_token or not refresh_token:
-            print(f"[UPDATE PASSWORD] Missing tokens - invalid reset link")
+        if not token_hash:
+            print(f"[UPDATE PASSWORD] Missing token_hash - invalid reset link")
             self.error_message = "Invalid or expired reset link. Please request a new one."
             self.is_loading = False
             return
@@ -259,10 +274,13 @@ class AuthState(rx.State):
         try:
             supabase = get_supabase_client()
             
-            # Set session from URL tokens
-            print(f"[UPDATE PASSWORD] Setting session from tokens")
-            supabase.auth.set_session(access_token, refresh_token)
-            print(f"[UPDATE PASSWORD] Session set successfully")
+            # Verify OTP and get session (PKCE flow)
+            print(f"[UPDATE PASSWORD] Verifying OTP with token_hash")
+            response = supabase.auth.verify_otp({
+                "token_hash": token_hash,
+                "type": "recovery"
+            })
+            print(f"[UPDATE PASSWORD] OTP verified successfully")
             
             # Update password
             print(f"[UPDATE PASSWORD] Updating password")
@@ -270,9 +288,8 @@ class AuthState(rx.State):
             print(f"[UPDATE PASSWORD] Password updated successfully")
             
             self.success_message = "Password updated successfully! Redirecting to login..."
-            # Clear reset tokens after successful update
+            # Clear reset token after successful update
             self.reset_access_token = ""
-            self.reset_refresh_token = ""
             self.tokens_extracted = False
             return rx.redirect("/login")
             
