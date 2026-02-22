@@ -8,6 +8,22 @@ def reset_password_page() -> rx.Component:
         rx.container(
             rx.vstack(
                 brand_logo(size="landing", margin_bottom="1rem"),
+                
+                rx.card(
+                    rx.vstack(
+                        rx.text("🔍 DEBUG INFO", size="5", weight="bold", color="blue"),
+                        rx.text(f"Full URL Path: {AuthState.router.page.raw_path}", size="2", color="black"),
+                        rx.text(f"Query Params: {AuthState.router.page.params}", size="2", color="black"),
+                        rx.text(f"Token Hash: {AuthState.router.page.params.get('token_hash', 'NOT FOUND')}", size="2", color="black"),
+                        rx.text(f"Type: {AuthState.router.page.params.get('type', 'NOT FOUND')}", size="2", color="black"),
+                        spacing="2",
+                    ),
+                    background="yellow",
+                    padding="1rem",
+                    margin_bottom="2rem",
+                    width="100%",
+                ),
+                
                 rx.text("Set new password", size="4", color=COLORS.TEXT_SECONDARY, margin_bottom="2rem"),
             
             rx.cond(
