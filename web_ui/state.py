@@ -1,6 +1,5 @@
 import reflex as rx
 import sys
-import os
 from .auth import get_supabase_client
 
 
@@ -12,49 +11,10 @@ class AuthState(rx.State):
     error_message: str = ""
     success_message: str = ""
     is_loading: bool = False
-    
-    # Password reset tokens (extracted from URL hash on client side)
-    reset_access_token: str = ""
-    reset_refresh_token: str = ""
-    tokens_extracted: bool = False
-    
 
     def clear_messages(self):
         self.error_message = ""
         self.success_message = ""
-    
-    def set_reset_tokens(self, tokens: dict):
-        """Store reset tokens extracted from URL hash by client-side script"""
-        self.reset_access_token = tokens.get("access_token", "")
-        self.reset_refresh_token = tokens.get("refresh_token", "")
-        self.tokens_extracted = bool(self.reset_access_token and self.reset_refresh_token)
-        print(f"[RESET TOKENS] Stored in state: access={bool(self.reset_access_token)}, refresh={bool(self.reset_refresh_token)}, extracted={self.tokens_extracted}")
-    
-    def extract_tokens_from_hash(self, access_token: str, refresh_token: str):
-        """Store tokens extracted from URL hash by client-side code"""
-        self.reset_access_token = access_token
-        self.reset_refresh_token = refresh_token
-        self.tokens_extracted = bool(access_token and refresh_token)
-        print(f"[EXTRACT TOKENS] Stored: access={bool(access_token)}, refresh={bool(refresh_token)}")
-    
-    def extract_reset_tokens_from_url(self):
-        """Extract tokens from URL query params (from static redirect page)"""
-        print("[EXTRACT TOKENS] on_load handler called")
-        try:
-            # Get access and refresh tokens from query parameters (from redirect page)
-            access_token = self.router.page.params.get("access_token", "")
-            refresh_token = self.router.page.params.get("refresh_token", "")
-            
-            if access_token and refresh_token:
-                # Store tokens for later use
-                self.reset_access_token = access_token
-                self.reset_refresh_token = refresh_token
-                self.tokens_extracted = True
-                print(f"[EXTRACT TOKENS] Extracted tokens from query params: access={bool(access_token)}, refresh={bool(refresh_token)}")
-            else:
-                print(f"[EXTRACT TOKENS] No tokens in query params")
-        except Exception as e:
-            print(f"[EXTRACT TOKENS] Error: {e}")
 
     async def sign_up(self, form_data: dict):
         import sys
@@ -219,7 +179,7 @@ class AuthState(rx.State):
             supabase.auth.reset_password_email(
                 email,
                 options={
-                    "redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/password-reset"
+                    "redirect_to": f"{os.getenv('SITE_URL', 'http://localhost:3000')}/reset-password"
                 }
             )
             
@@ -240,17 +200,6 @@ class AuthState(rx.State):
         
         password = form_data.get("password", "")
         confirm_password = form_data.get("confirm_password", "")
-        access_token = form_data.get("access_token", "")
-        refresh_token = form_data.get("refresh_token", "")
-        
-        print(f"[UPDATE PASSWORD] Form data received")
-        print(f"[UPDATE PASSWORD]   - Password provided: {bool(password)}")
-        print(f"[UPDATE PASSWORD]   - Access token from form: {bool(access_token)}")
-        print(f"[UPDATE PASSWORD]   - Refresh token from form: {bool(refresh_token)}")
-        
-        # Get tokens from state (stored during on_load)
-        access_token = self.reset_access_token
-        refresh_token = self.reset_refresh_token
         
         if not password or not confirm_password:
             self.error_message = "Both fields are required"
@@ -267,36 +216,17 @@ class AuthState(rx.State):
             self.is_loading = False
             return
         
-        if not access_token or not refresh_token:
-            print(f"[UPDATE PASSWORD] Missing tokens - invalid reset link")
-            self.error_message = "Invalid or expired reset link. Please request a new one."
-            self.is_loading = False
-            return
-        
         try:
             supabase = get_supabase_client()
             
-            # Set session from tokens
-            print(f"[UPDATE PASSWORD] Setting session with tokens")
-            supabase.auth.set_session(access_token, refresh_token)
-            print(f"[UPDATE PASSWORD] Session set successfully")
-            
             # Update password
-            print(f"[UPDATE PASSWORD] Updating password")
             supabase.auth.update_user({"password": password})
-            print(f"[UPDATE PASSWORD] Password updated successfully")
             
             self.success_message = "Password updated successfully! Redirecting to login..."
-            # Clear reset tokens after successful update
-            self.reset_access_token = ""
-            self.reset_refresh_token = ""
-            self.tokens_extracted = False
             return rx.redirect("/login")
             
         except Exception as e:
             print(f"[UPDATE PASSWORD ERROR] {e}")
-            import traceback
-            traceback.print_exc()
             self.error_message = "Failed to update password. Please try again or request a new reset link."
         finally:
             self.is_loading = False
