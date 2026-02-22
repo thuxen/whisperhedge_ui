@@ -38,20 +38,21 @@ class AuthState(rx.State):
         print(f"[EXTRACT TOKENS] Stored: access={bool(access_token)}, refresh={bool(refresh_token)}")
     
     def extract_reset_tokens_from_url(self):
-        """Extract token_hash from URL query params (PKCE flow)"""
+        """Extract tokens from URL query params (from static redirect page)"""
         print("[EXTRACT TOKENS] on_load handler called")
         try:
-            # Get token_hash from query parameters (PKCE flow)
-            token_hash = self.router.page.params.get("token_hash", "")
-            token_type = self.router.page.params.get("type", "")
+            # Get access and refresh tokens from query parameters (from redirect page)
+            access_token = self.router.page.params.get("access_token", "")
+            refresh_token = self.router.page.params.get("refresh_token", "")
             
-            if token_hash and token_type == "recovery":
-                # Store token_hash for later verification
-                self.reset_access_token = token_hash  # Reusing this field for token_hash
+            if access_token and refresh_token:
+                # Store tokens for later use
+                self.reset_access_token = access_token
+                self.reset_refresh_token = refresh_token
                 self.tokens_extracted = True
-                print(f"[EXTRACT TOKENS] Extracted token_hash from query params")
+                print(f"[EXTRACT TOKENS] Extracted tokens from query params: access={bool(access_token)}, refresh={bool(refresh_token)}")
             else:
-                print(f"[EXTRACT TOKENS] No token_hash in query params or wrong type")
+                print(f"[EXTRACT TOKENS] No tokens in query params")
         except Exception as e:
             print(f"[EXTRACT TOKENS] Error: {e}")
 
@@ -247,8 +248,9 @@ class AuthState(rx.State):
         print(f"[UPDATE PASSWORD]   - Access token from form: {bool(access_token)}")
         print(f"[UPDATE PASSWORD]   - Refresh token from form: {bool(refresh_token)}")
         
-        # Get token_hash from state (stored during on_load)
-        token_hash = self.reset_access_token  # We reused this field for token_hash
+        # Get tokens from state (stored during on_load)
+        access_token = self.reset_access_token
+        refresh_token = self.reset_refresh_token
         
         if not password or not confirm_password:
             self.error_message = "Both fields are required"
@@ -265,8 +267,8 @@ class AuthState(rx.State):
             self.is_loading = False
             return
         
-        if not token_hash:
-            print(f"[UPDATE PASSWORD] Missing token_hash - invalid reset link")
+        if not access_token or not refresh_token:
+            print(f"[UPDATE PASSWORD] Missing tokens - invalid reset link")
             self.error_message = "Invalid or expired reset link. Please request a new one."
             self.is_loading = False
             return
@@ -274,13 +276,10 @@ class AuthState(rx.State):
         try:
             supabase = get_supabase_client()
             
-            # Verify OTP and get session (PKCE flow)
-            print(f"[UPDATE PASSWORD] Verifying OTP with token_hash")
-            response = supabase.auth.verify_otp({
-                "token_hash": token_hash,
-                "type": "recovery"
-            })
-            print(f"[UPDATE PASSWORD] OTP verified successfully")
+            # Set session from tokens
+            print(f"[UPDATE PASSWORD] Setting session with tokens")
+            supabase.auth.set_session(access_token, refresh_token)
+            print(f"[UPDATE PASSWORD] Session set successfully")
             
             # Update password
             print(f"[UPDATE PASSWORD] Updating password")
@@ -288,8 +287,9 @@ class AuthState(rx.State):
             print(f"[UPDATE PASSWORD] Password updated successfully")
             
             self.success_message = "Password updated successfully! Redirecting to login..."
-            # Clear reset token after successful update
+            # Clear reset tokens after successful update
             self.reset_access_token = ""
+            self.reset_refresh_token = ""
             self.tokens_extracted = False
             return rx.redirect("/login")
             
