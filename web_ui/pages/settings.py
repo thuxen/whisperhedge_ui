@@ -67,7 +67,7 @@ def profile_section() -> rx.Component:
     """Profile settings section"""
     return settings_section(
         "Profile",
-        "Manage your account profile information",
+        "Your account information (passwordless authentication)",
         rx.vstack(
             rx.hstack(
                 rx.text("Display Name", size="2", weight="medium", width="150px"),
@@ -113,15 +113,14 @@ def security_section() -> rx.Component:
     """Security settings section"""
     return settings_section(
         "Security",
-        "Manage your account security and authentication",
+        "Additional security features (coming soon)",
         rx.vstack(
             rx.hstack(
                 rx.text("Password", size="2", weight="medium", width="150px"),
-                rx.button(
-                    "Change Password",
-                    variant="outline",
+                rx.text(
+                    "Passwordless authentication via magic links",
                     size="2",
-                    disabled=True,  # Placeholder
+                    color="gray",
                 ),
                 width="100%",
                 align="center",
@@ -133,17 +132,16 @@ def security_section() -> rx.Component:
                     on_change=SettingsState.set_two_factor_enabled,
                     disabled=True,  # Placeholder
                 ),
-                rx.text("Not configured", color="gray", size="2"),
+                rx.text("Coming soon - TOTP authenticator support", color="gray", size="2"),
                 width="100%",
                 align="center",
             ),
             rx.hstack(
                 rx.text("Sessions", size="2", weight="medium", width="150px"),
-                rx.button(
-                    "View Active Sessions",
-                    variant="outline",
+                rx.text(
+                    "Managed automatically by magic link authentication",
                     size="2",
-                    disabled=True,  # Placeholder
+                    color="gray",
                 ),
                 width="100%",
                 align="center",
