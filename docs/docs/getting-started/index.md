@@ -17,8 +17,8 @@ Getting started with WhisperHedge takes just a few minutes:
 Before you start, make sure you have:
 
 - ✅ An email address
-- ✅ Access to your Hyperliquid account (for Hyperliquid positions)
-- ✅ Your Uniswap V3 NFT ID (for Uniswap positions)
+- ✅ Access to your Hyperliquid account
+- ✅ Your Liquidity Pool NFT ID
 - ✅ 5-10 minutes to complete setup
 
 ## Step-by-Step Guide
@@ -42,9 +42,6 @@ Follow our guide to [add your first LP position](first-position.md) and start tr
 
 !!! warning "API Key Security"
     Always use **read-only** API keys. Never give WhisperHedge trading permissions.
-
-!!! info "Free Tier Limits"
-    The free tier supports up to $10,000 in total value locked (TVL). [Upgrade](../features/plan-tiers.md) if you need more.
 
 ## Need Help?
 
