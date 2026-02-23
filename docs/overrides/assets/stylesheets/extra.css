@@ -1,0 +1,86 @@
+/* WhisperHedge Custom Color Scheme */
+/* Matching the main website's dark blue branding */
+
+:root {
+  /* Primary dark blue (matching website accent) */
+  --md-primary-fg-color: #1E293B;
+  --md-primary-fg-color--light: #334155;
+  --md-primary-fg-color--dark: #0F172A;
+  
+  /* Accent blue (for links and highlights) */
+  --md-accent-fg-color: #3B82F6;
+  --md-accent-fg-color--transparent: rgba(59, 130, 246, 0.1);
+  
+  /* Background colors (dark theme) */
+  --md-default-bg-color: #020617;
+  --md-default-fg-color: #F8FAFC;
+  
+  /* Code blocks */
+  --md-code-bg-color: #0F172A;
+  --md-code-fg-color: #F8FAFC;
+  
+  /* Links */
+  --md-typeset-a-color: #3B82F6;
+}
+
+/* Header/navbar customization */
+.md-header {
+  background-color: #0F172A;
+  border-bottom: 1px solid #1E293B;
+}
+
+/* Navigation tabs */
+.md-tabs {
+  background-color: #0F172A;
+  border-bottom: 1px solid #1E293B;
+}
+
+/* Sidebar */
+.md-sidebar {
+  background-color: #020617;
+}
+
+/* Search box */
+.md-search__input {
+  background-color: #1E293B;
+  border: 1px solid #334155;
+}
+
+/* Buttons and primary elements */
+.md-button--primary {
+  background-color: #3B82F6;
+  color: #F8FAFC;
+}
+
+.md-button--primary:hover {
+  background-color: #60A5FA;
+}
+
+/* Admonitions (info boxes) */
+.md-typeset .admonition,
+.md-typeset details {
+  border-left: 0.2rem solid #3B82F6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Tables */
+.md-typeset table:not([class]) {
+  border: 1px solid #1E293B;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: #1E293B;
+  color: #F8FAFC;
+}
+
+/* Code blocks */
+.md-typeset code {
+  background-color: #1E293B;
+  color: #3B82F6;
+}
+
+/* Footer */
+.md-footer {
+  background-color: #0F172A;
+  border-top: 1px solid #1E293B;
+}

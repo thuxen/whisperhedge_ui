@@ -6,8 +6,8 @@ theme:
   name: material
   palette:
     scheme: slate
-    primary: blue
-    accent: blue
+    primary: custom
+    accent: custom
   features:
     - navigation.tabs
     - navigation.sections
@@ -19,6 +19,7 @@ theme:
     - content.code.annotate
   logo: assets/logo.png
   favicon: assets/favicon.ico
+  custom_dir: overrides
 
 plugins:
   - search
@@ -89,6 +90,9 @@ markdown_extensions:
   - toc:
       permalink: true
       toc_depth: 3
+
+extra_css:
+  - assets/stylesheets/extra.css
 
 extra:
   social:
