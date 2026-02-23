@@ -1,45 +1,53 @@
 # Welcome to WhisperHedge Documentation
 
-WhisperHedge is a comprehensive LP (Liquidity Provider) position tracking platform that helps you monitor your DeFi positions across multiple protocols, track impermanent loss, and receive real-time alerts about your position health.
+WhisperHedge is a non-custodial automation engine designed to mitigate Impermanent Loss for liquidity providers. We execute automated hedging workflows on Hyperliquid, allowing you to focus on yield while our software manages your delta exposure—no manual monitoring required.
 
 ## Quick Start
 
 New to WhisperHedge? Start here:
 
 1. **[Sign Up](getting-started/signup.md)** - Create your account with passwordless magic link authentication
-2. **[Set Up API Keys](api-keys/hyperliquid-keys.md)** - Connect your Hyperliquid or Uniswap positions
-3. **[Add Your First Position](getting-started/first-position.md)** - Start tracking your LP positions
-4. **[Configure Notifications](features/notifications.md)** - Get alerts about position health
+2. **[Set Up API Keys](api-keys/hyperliquid-keys.md)** - Connect your Hyperliquid trading account
+3. **[Add Your First Position](getting-started/first-position.md)** - Configure automated hedging for your LP positions
+4. **[Configure Hedging](features/hedging-automation.md)** - Set up your risk management strategy
 
-## Supported Protocols
+## Supported LP Protocols
 
-WhisperHedge currently supports:
+WhisperHedge protects liquidity across:
 
-- **Hyperliquid** - Track your HLP (Hyperliquid Liquidity Provider) positions
-- **Uniswap V3** - Monitor your concentrated liquidity positions
+- **Uniswap V3** - Concentrated liquidity positions
+- **Hyperliquid HLP** - Hyperliquid Liquidity Provider positions
 
 More protocols coming soon!
 
+## Hedging Execution
+
+All hedges are executed on:
+
+- **Hyperliquid** - Decentralized perpetual exchange with deep liquidity and institutional-grade execution
+
 ## Key Features
 
-### 📊 Real-Time Position Tracking
-Monitor your LP positions with live updates on:
-- Current value and composition
-- Impermanent loss calculations
-- Position health metrics
-- Historical performance
+### �️ Automated IL Mitigation
+Protect your principal with intelligent hedging:
+- Real-time delta exposure monitoring
+- Automated perpetual hedge execution
+- Asymmetric under-hedging strategy
+- Funding-rate aware optimization
 
-### 🔔 Smart Notifications
-Receive alerts via:
-- Email
-- Pushover (coming soon)
-- Telegram (coming soon)
+### ⚡ Smart Execution
+Minimize costs, maximize protection:
+- Flexible variance-based hedging (not constant rebalancing)
+- Net-profit optimization
+- Execution friction minimization
+- Black swan event protection
 
-### 🔒 Security First
-- Read-only API key permissions
-- No access to trading functions
-- Secure data encryption
-- Passwordless authentication
+### 🔒 Non-Custodial Security
+Your funds stay under your control:
+- Trade-only API keys (restricted permissions)
+- No wallet connection required
+- No access to your principal
+- Transparent on-chain execution
 
 ### 💰 Flexible Pricing
 Choose the plan that fits your needs:
@@ -61,4 +69,4 @@ Check out our [Coming Soon](coming-soon/advanced-features.md) section to see wha
 
 ---
 
-*Ready to get started? [Create your account](https://whisperhedge.com/signup) now!*
+*Ready to protect your LP positions? [Create your account](https://whisperhedge.com/signup) now!*
