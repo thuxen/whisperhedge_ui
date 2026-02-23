@@ -12,7 +12,7 @@
   --md-accent-fg-color--transparent: rgba(59, 130, 246, 0.1);
   
   /* Background colors (dark blue theme matching website) */
-  --md-default-bg-color: #020617;
+  --md-default-bg-color: #020617 !important;
   --md-default-fg-color: #F8FAFC;
   
   /* Code blocks */
@@ -23,17 +23,22 @@
   --md-typeset-a-color: #3B82F6;
 }
 
-/* Main content background - dark blue */
-.md-main__inner {
-  background-color: #020617;
+/* Force dark blue background everywhere */
+body {
+  background-color: #020617 !important;
 }
 
-.md-content__inner {
-  background-color: #020617;
+.md-main {
+  background-color: #020617 !important;
 }
 
-.md-typeset {
-  background-color: #020617;
+.md-content {
+  background-color: #020617 !important;
+}
+
+/* Darken navbar for logo contrast */
+.md-header {
+  background-color: #0F172A !important;
 }
 
 /* Left sidebar - dark blue background */
