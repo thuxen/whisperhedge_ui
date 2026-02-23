@@ -6,10 +6,7 @@ Get help from the WhisperHedge team.
 
 **support@whisperhedge.com**
 
-We typically respond within:
-- Critical issues: 2-4 hours
-- General questions: 24 hours
-- Feature requests: 48 hours
+We'll respond as fast as we can.
 
 ## What to Include
 
@@ -31,27 +28,11 @@ Try these first:
 - Try manual refresh
 - Clear browser cache
 
-## Response Times
-
-### Free Tier
-- Email support
-- 24-48 hour response
-
-### Pro Tier
-- Priority email support
-- 12-24 hour response
-
-### Premium Tier
-- Premium support
-- 2-4 hour response
-- Direct support channel (coming soon)
-
 ## Emergency Issues
 
 For critical security issues:
 - Email: security@whisperhedge.com
 - Include "SECURITY" in subject
-- We respond within 2 hours
 
 ## Feature Requests
 
