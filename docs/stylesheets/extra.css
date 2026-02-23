@@ -1,44 +1,27 @@
 /* WhisperHedge Custom Color Scheme */
 /* Matching the main website's dark blue branding */
 
-:root {
-  /* Primary dark blue (matching website accent) */
-  --md-primary-fg-color: #1E293B;
+/* Override slate theme colors */
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #020617;
+  --md-default-fg-color: #F8FAFC;
+  --md-primary-fg-color: #0F172A;
   --md-primary-fg-color--light: #334155;
   --md-primary-fg-color--dark: #0F172A;
-  
-  /* Accent blue (for links and highlights) */
   --md-accent-fg-color: #3B82F6;
-  --md-accent-fg-color--transparent: rgba(59, 130, 246, 0.1);
-  
-  /* Background colors (dark blue theme matching website) */
-  --md-default-bg-color: #020617 !important;
-  --md-default-fg-color: #F8FAFC;
-  
-  /* Code blocks */
   --md-code-bg-color: #0F172A;
   --md-code-fg-color: #F8FAFC;
-  
-  /* Links */
   --md-typeset-a-color: #3B82F6;
 }
 
-/* Force dark blue background everywhere */
+/* Force body background */
 body {
-  background-color: #020617 !important;
-}
-
-.md-main {
-  background-color: #020617 !important;
-}
-
-.md-content {
-  background-color: #020617 !important;
+  background: #020617;
 }
 
 /* Darken navbar for logo contrast */
 .md-header {
-  background-color: #0F172A !important;
+  background-color: #0F172A;
 }
 
 /* Left sidebar - dark blue background */
