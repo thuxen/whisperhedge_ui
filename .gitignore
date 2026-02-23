@@ -3,5 +3,7 @@ __pycache__/
 *.db
 .states
 .web
+docs/site
+.web
 *.py[cod]
 .aider*
