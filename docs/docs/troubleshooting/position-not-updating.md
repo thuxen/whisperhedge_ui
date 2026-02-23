@@ -56,6 +56,5 @@ Wait for the next scheduled update or use manual refresh.
 
 ## Related Topics
 
-- [Tracking Frequency](../position-setup/tracking-frequency.md)
 - [API Key Issues](api-key-issues.md)
 - [Contact Support](contact-support.md)

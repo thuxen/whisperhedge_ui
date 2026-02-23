@@ -89,5 +89,5 @@ Always test your notifications:
 
 ## Related Topics
 
-- [Position Health](position-health.md)
-- [Settings](../getting-started/dashboard-overview.md#settings)
+- [LP Positions](lp-tracking.md)
+- [Dashboard Overview](../getting-started/dashboard-overview.md)

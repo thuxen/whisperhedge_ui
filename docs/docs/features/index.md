@@ -1,40 +1,28 @@
 # Features
 
-Explore WhisperHedge's powerful LP position tracking and monitoring features.
+Explore WhisperHedge's automated LP hedging features.
 
 ## Core Features
 
-### 📊 Real-Time Position Tracking
-Monitor your LP positions with live updates on value, composition, and performance.
-
-[Learn more →](lp-tracking.md)
-
-### 📉 Impermanent Loss Monitoring
-Track IL in real-time with detailed calculations and historical charts.
+### 📉 Impermanent Loss Protection
+Automated hedging on Hyperliquid to protect your LP positions from IL.
 
 [Learn more →](impermanent-loss.md)
 
-### 🏥 Position Health Monitoring
-Get instant alerts when positions need attention.
-
-[Learn more →](position-health.md)
-
 ### 🔔 Smart Notifications
-Receive alerts via email about position health and critical changes.
+Receive alerts about your positions and hedging activity.
 
 [Learn more →](notifications.md)
 
-### 💰 Flexible Plan Tiers
-Choose the plan that fits your needs, from free to premium.
+### 🔐 API Key Security
+Your keys stay in your control—non-custodial and secure.
 
-[Learn more →](plan-tiers.md)
+[Learn more →](../security/api-key-security.md)
 
 ## Coming Soon
 
-- Pushover notifications
+- Mobile app
 - Telegram notifications
 - Advanced analytics
-- Portfolio optimization
-- API access
 
 [See what's coming →](../coming-soon/advanced-features.md)
