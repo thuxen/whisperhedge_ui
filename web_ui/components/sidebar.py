@@ -111,6 +111,28 @@ def sidebar() -> rx.Component:
                 sidebar_item("Manage Plan", "manage_plan", "credit-card"),
                 sidebar_item("Settings", "settings", "settings"),
                 sidebar_item("FAQ / Info", "faq", "info"),
+                rx.link(
+                    rx.box(
+                        rx.hstack(
+                            rx.icon("book-open", size=18),
+                            rx.text("Documentation", size="3"),
+                            rx.icon("external-link", size=14),
+                            spacing="3",
+                            align="center",
+                        ),
+                        padding="0.75rem 1rem",
+                        border_radius="0.5rem",
+                        color=COLORS.TEXT_SECONDARY,
+                        cursor="pointer",
+                        _hover={
+                            "background": COLORS.BACKGROUND_ELEVATED,
+                        },
+                        width="100%",
+                    ),
+                    href="https://docs.whisperhedge.com",
+                    target="_blank",
+                    text_decoration="none",
+                ),
                 spacing="2",
                 width="100%",
                 margin_top="1.5rem",
