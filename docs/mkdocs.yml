@@ -19,7 +19,6 @@ theme:
     - content.code.annotate
   logo: assets/logo.png
   favicon: assets/favicon.ico
-  custom_dir: overrides
 
 plugins:
   - search
@@ -92,7 +91,7 @@ markdown_extensions:
       toc_depth: 3
 
 extra_css:
-  - assets/stylesheets/extra.css
+  - stylesheets/extra.css
 
 extra:
   social:
