@@ -15,17 +15,18 @@ New to WhisperHedge? Start here:
 
 WhisperHedge protects liquidity across:
 
-- **Uniswap V3** - Concentrated liquidity positions
+- **Uniswap V3**
 
 Coming Soon:
-- **Uniswap V4** - Next-generation concentrated liquidity
-- **Aerodrome** - Base's leading DEX
-- **Raydium** - Solana's premier DEX
-- **Orca** - Solana's user-friendly DEX
-- **PancakeSwap** - BSC's largest DEX
-- **Curve** - Stablecoin-focused DEX
-- **Camelot** - Arbitrum's native DEX
-- **Trader Joe** - Avalanche & Arbitrum DEX
+
+- Uniswap V4
+- Aerodrome
+- Raydium
+- Orca
+- PancakeSwap
+- Curve
+- Camelot
+- Trader Joe
 
 ## Hedging Execution
 
