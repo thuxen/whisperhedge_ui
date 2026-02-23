@@ -65,10 +65,11 @@
 /* Fix navigation section headers (Getting Started, etc.) */
 .md-nav__title {
   background-color: transparent !important;
+  background: transparent !important;
   border-top: none !important;
   font-weight: 600;
-  color: #94A3B8;
-  padding: 0.6rem 0.6rem;
+  color: #94A3B8 !important;
+  padding: 0.6rem 0.6rem !important;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -77,13 +78,20 @@
 /* Remove the weird block background from section headers */
 .md-nav__title[for] {
   background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Fix the label inside nav title */
+.md-nav__title .md-nav__button {
+  display: none;
 }
 
 /* Fix Table of Contents header in right sidebar */
 .md-sidebar--secondary .md-nav__title {
   background-color: transparent !important;
+  background: transparent !important;
   border-top: none !important;
-  padding: 0.6rem 0.6rem;
+  padding: 0.6rem 0.6rem !important;
 }
 
 /* Navigation items */
@@ -92,7 +100,7 @@
 }
 
 .md-nav__link {
-  color: #94A3B8;
+  color: #60A5FA !important;
   padding: 0.4rem 0.6rem;
   border-radius: 0.25rem;
   transition: all 0.2s ease;
