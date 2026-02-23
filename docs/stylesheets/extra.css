@@ -24,24 +24,16 @@
 }
 
 /* Main content background - dark blue */
-.md-main {
+.md-main__inner {
   background-color: #020617;
 }
 
-.md-content {
+.md-content__inner {
   background-color: #020617;
 }
 
-/* Header/navbar customization */
-.md-header {
-  background-color: #0F172A;
-  border-bottom: 1px solid #1E293B;
-}
-
-/* Navigation tabs */
-.md-tabs {
-  background-color: #0F172A;
-  border-bottom: 1px solid #1E293B;
+.md-typeset {
+  background-color: #020617;
 }
 
 /* Left sidebar - dark blue background */
