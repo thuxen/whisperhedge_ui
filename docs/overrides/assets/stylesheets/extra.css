@@ -106,14 +106,14 @@
 /* Active/selected page - high contrast */
 .md-nav__link--active {
   background-color: #3B82F6 !important;
-  color: #F8FAFC !important;
+  color: #FFFFFF !important;
   font-weight: 600;
 }
 
 /* Nested navigation items */
 .md-nav--secondary .md-nav__link--active {
   background-color: #3B82F6 !important;
-  color: #F8FAFC !important;
+  color: #FFFFFF !important;
 }
 
 /* Search box */
