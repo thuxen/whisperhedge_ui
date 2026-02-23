@@ -31,6 +31,14 @@ Before you start, make sure you have:
 ### 3. Add Your First Position
 Follow our guide to [add your first LP position](first-position.md) and start hedging.
 
+## Quick Tips
+
+!!! tip "Verify Your API Key"
+    After adding your API key, check that you can see your account balance. If not, regenerate the key and try again.
+
+!!! tip "TVL Limits"
+    Don't worry if your TVL exceeds the limit. Your positions will continue to be protected—we'll bill any overages later.
+
 ## Need Help?
 
 - Check our [FAQ](../faq.md) for common questions
