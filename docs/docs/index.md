@@ -27,6 +27,7 @@ Coming Soon:
 - Curve
 - Camelot
 - Trader Joe
+- 2FA (Two-Factor Authentication)
 
 ## Hedging Execution
 
