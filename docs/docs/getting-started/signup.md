@@ -74,6 +74,10 @@ We do **not** collect:
 
 See our [data privacy policy](../security/data-privacy.md) for more details.
 
+### Two-Factor Authentication
+
+Coming soon: 2FA via OTP generator app for additional account security.
+
 ### Email Verification
 
 Your email is automatically verified when you click the magic link. No additional verification steps needed!
