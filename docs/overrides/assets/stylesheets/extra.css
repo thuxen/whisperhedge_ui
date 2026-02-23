@@ -11,7 +11,7 @@
   --md-accent-fg-color: #3B82F6;
   --md-accent-fg-color--transparent: rgba(59, 130, 246, 0.1);
   
-  /* Background colors (dark theme) */
+  /* Background colors (dark blue theme matching website) */
   --md-default-bg-color: #020617;
   --md-default-fg-color: #F8FAFC;
   
@@ -21,6 +21,15 @@
   
   /* Links */
   --md-typeset-a-color: #3B82F6;
+}
+
+/* Main content background - dark blue */
+.md-main {
+  background-color: #020617;
+}
+
+.md-content {
+  background-color: #020617;
 }
 
 /* Header/navbar customization */
@@ -35,15 +44,87 @@
   border-bottom: 1px solid #1E293B;
 }
 
-/* Sidebar */
-.md-sidebar {
+/* Left sidebar - dark blue background */
+.md-sidebar--primary {
   background-color: #020617;
+}
+
+.md-sidebar--primary .md-sidebar__scrollwrap {
+  background-color: #020617;
+}
+
+/* Right sidebar (TOC) - dark blue background */
+.md-sidebar--secondary {
+  background-color: #020617;
+}
+
+.md-sidebar--secondary .md-sidebar__scrollwrap {
+  background-color: #020617;
+}
+
+/* Fix navigation section headers (Getting Started, etc.) */
+.md-nav__title {
+  background-color: transparent !important;
+  border-top: none !important;
+  font-weight: 600;
+  color: #94A3B8;
+  padding: 0.6rem 0.6rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Remove the weird block background from section headers */
+.md-nav__title[for] {
+  background-color: transparent !important;
+}
+
+/* Fix Table of Contents header in right sidebar */
+.md-sidebar--secondary .md-nav__title {
+  background-color: transparent !important;
+  border-top: none !important;
+  padding: 0.6rem 0.6rem;
+}
+
+/* Navigation items */
+.md-nav__item {
+  padding: 0;
+}
+
+.md-nav__link {
+  color: #94A3B8;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.md-nav__link:hover {
+  background-color: #1E293B;
+  color: #F8FAFC;
+}
+
+/* Active/selected page - high contrast */
+.md-nav__link--active {
+  background-color: #3B82F6 !important;
+  color: #F8FAFC !important;
+  font-weight: 600;
+}
+
+/* Nested navigation items */
+.md-nav--secondary .md-nav__link--active {
+  background-color: #3B82F6 !important;
+  color: #F8FAFC !important;
 }
 
 /* Search box */
 .md-search__input {
   background-color: #1E293B;
   border: 1px solid #334155;
+  color: #F8FAFC;
+}
+
+.md-search__input::placeholder {
+  color: #64748B;
 }
 
 /* Buttons and primary elements */
@@ -66,11 +147,16 @@
 /* Tables */
 .md-typeset table:not([class]) {
   border: 1px solid #1E293B;
+  background-color: #0F172A;
 }
 
 .md-typeset table:not([class]) th {
   background-color: #1E293B;
   color: #F8FAFC;
+}
+
+.md-typeset table:not([class]) td {
+  border-color: #1E293B;
 }
 
 /* Code blocks */
@@ -79,8 +165,26 @@
   color: #3B82F6;
 }
 
+.md-typeset pre > code {
+  background-color: #0F172A;
+}
+
 /* Footer */
 .md-footer {
   background-color: #0F172A;
   border-top: 1px solid #1E293B;
+}
+
+/* Scrollbar styling for dark theme */
+.md-sidebar__scrollwrap::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+.md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 0.2rem;
+}
+
+.md-sidebar__scrollwrap::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
 }
