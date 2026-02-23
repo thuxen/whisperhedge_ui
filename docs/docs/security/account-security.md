@@ -9,8 +9,6 @@ How we keep your WhisperHedge account secure.
 - Time-limited access tokens
 - Secure PKCE flow
 
-[Learn about magic links →](../getting-started/magic-links.md)
-
 ## Session Management
 
 - Automatic session timeout
@@ -52,6 +50,5 @@ Your email is your primary security factor:
 
 ## Related Topics
 
-- [Magic Links](../getting-started/magic-links.md)
 - [API Key Security](api-key-security.md)
 - [Data Privacy](data-privacy.md)
