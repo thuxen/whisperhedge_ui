@@ -52,18 +52,13 @@ Minimize costs, maximize protection:
 
 ### 🔒 Non-Custodial Security
 Your funds stay under your control:
-- Trade-only API keys (restricted permissions)
 - No wallet connection required
-- No access to your principal
+- Your keys stay in your wallet
 - Transparent on-chain execution
 
-### 💰 Flexible Pricing
-Choose the plan that fits your needs:
-- **Free Tier** - Up to $10K TVL
-- **Pro Tier** - Up to $100K TVL
-- **Premium Tier** - Unlimited TVL
+### ⚙️ Coming Soon
 
-[View Plan Details](features/plan-tiers.md)
+Check out our [Coming Soon](coming-soon/advanced-features.md) section to see what features we're working on next!
 
 ## Need Help?
 
@@ -74,7 +69,3 @@ Choose the plan that fits your needs:
 ## What's New
 
 Check out our [Coming Soon](coming-soon/advanced-features.md) section to see what features we're working on next!
-
----
-
-*Ready to protect your LP positions? [Create your account](https://whisperhedge.com/signup) now!*
