@@ -28,7 +28,6 @@ nav:
   - Home: index.md
   - Getting Started:
       - Overview: getting-started/index.md
-      - Magic Links: getting-started/magic-links.md
       - First Position: getting-started/first-position.md
   - API Keys & Authentication:
       - Overview: api-keys/index.md
