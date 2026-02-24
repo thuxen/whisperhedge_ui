@@ -1,32 +1,48 @@
 # Getting Started with WhisperHedge
 
-This guide will get you up and running with automated IL hedging in minutes. If you're semi-competent, this is all you need.
+This guide will get you up and running with automated LP hedging in minutes. 
 
 ## Prerequisites
 
 Before you start, make sure you have:
 
-- ✅ A Hyperliquid account with API access
-- ✅ An active LP position (Uniswap V3 NFT)
+- ✅ A WhisperHedge account
+- ✅ A Hyperliquid account
+- ✅ An active Liquidity Pool position (check our supported LP protocols here)
 - ✅ Your LP position's NFT Token ID
 
-## Step 1: Add Your Hyperliquid API Keys
+Each LP position you want to hedge requires its own unique Hyperliquid account, this can be the Master account or a Sub-Account, the Master and multiple Sub-Accounts can share the same API key, but they each require their own funds for hedging.
 
-Each LP position you want to hedge requires its own unique Hyperliquid API key with read-only permissions.
-
-### Creating API Keys
+## Step 1: Create Your Hyperliquid API Keys
 
 1. Log into Hyperliquid
-2. Navigate to API settings
-3. Create a new API key with **read-only** permissions
-4. Copy both the API key and secret (you'll need these in the next step)
+2. Navigate to More > API 
+3. Give the new API key a name, click Generate and Authorize API Wallet
+4. Select the number of days validity for the key (max 180 days)
+5. Copy the PRIVATE KEY (in red at the bottom), make sure you save this, it won't be displayed again.
 
-!!! warning "One Key Per Position"
-    You cannot reuse the same API key for multiple positions. Each position needs its own dedicated key.
+We only require the PRIVATE KEY for the API account, the API WALLET ADDRESS is not required.
+
+You can reuse the same PRIVATE KEY for multiple positions. However each LP position requires a separate Hyperliquid account/sub-account.
 
 **Detailed instructions:** [Hyperliquid API Keys Guide](../api-keys/hyperliquid-keys.md)
 
-## Step 2: Add Your LP Position
+## Step 2: Add Your API Key to WhisperHedge
+
+1. Log into your WhisperHedge dashboard
+2. Navigate to **Settings** in the sidebar
+3. Click on **API Keys** tab
+4. Click the **"+ Add API Key"** button
+5. Fill in the following fields:
+   - **Label** (optional) - Give this API key a friendly name (e.g., "Main Account" or "ETH-USDC Sub")
+   - **API Private Key** - Paste your Hyperliquid PRIVATE KEY from Step 1
+   - **Subaccount** (optional) - Enter the subaccount name if you're using a Hyperliquid subaccount
+6. Click **"Save API Key"** to add it to your account
+
+!!! success "API Key Added!"
+    Your API key is now saved and can be used when adding LP positions. You can add multiple API keys for different Hyperliquid accounts/subaccounts.
+
+## Step 3: Add Your LP Position
 
 ### Navigate to Dashboard
 
@@ -53,7 +69,7 @@ Fill in the following fields:
 !!! success "Position Added!"
     Your position will appear on the dashboard within seconds. The first data fetch may take 1-2 minutes.
 
-## Step 3: Configure Hedging Strategy
+## Step 4: Configure Hedging Strategy
 
 Once your position is added, configure your automated hedging strategy:
 
