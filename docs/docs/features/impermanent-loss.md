@@ -80,5 +80,5 @@ ETH price doubles to $4000:
 ## Related Topics
 
 - [LP Tracking](lp-tracking.md)
-- [Position Health](position-health.md)
+- [Hedging Automation](hedging-automation.md)
 - [Notifications](notifications.md)

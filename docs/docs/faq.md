@@ -25,27 +25,13 @@ A: For security isolation. If one key is compromised, only that position is affe
 **Q: How often should I rotate API keys?**
 A: Every 3-6 months is recommended. [Rotation guide →](api-keys/rotating-keys.md)
 
-## Pricing & Plans
-
-**Q: Is there a free tier?**
-A: Yes! Free tier supports up to $10K TVL and 3 positions. [See all plans →](features/plan-tiers.md)
-
-**Q: Can I upgrade/downgrade anytime?**
-A: Yes. Upgrades are instant, downgrades take effect next billing cycle.
-
-**Q: What happens if I exceed my plan limits?**
-A: Position updates pause until you upgrade or remove positions. No data is lost.
-
 ## Position Tracking
-
-**Q: How often do positions update?**
-A: Depends on your plan: Free (15 min), Pro (5 min), Premium (1 min). [Details →](position-setup/tracking-frequency.md)
 
 **Q: Can I manually refresh?**
 A: Yes, anytime! Click the refresh button on any position.
 
 **Q: Why isn't my position updating?**
-A: Check API key permissions and plan limits. [Troubleshooting guide →](troubleshooting/position-not-updating.md)
+A: Check API key permissions. [Troubleshooting guide →](troubleshooting/position-not-updating.md)
 
 ## Impermanent Loss
 

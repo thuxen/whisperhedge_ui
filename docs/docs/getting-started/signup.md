@@ -52,10 +52,6 @@ That's it! Your account is now active and you can start adding positions.
 
 Magic links expire after 1 hour. Simply request a new one from the [login page](https://whisperhedge.com/login).
 
-**Link not working?**
-
-If you're testing locally, you may need to manually change the URL from `https://whisperhedge.com` to `http://localhost:3000`. See our [magic links guide](magic-links.md) for details.
-
 ## Account Information
 
 ### What We Collect
@@ -74,6 +70,10 @@ We do **not** collect:
 
 See our [data privacy policy](../security/data-privacy.md) for more details.
 
+### Two-Factor Authentication
+
+Coming soon: 2FA via OTP generator app for additional account security.
+
 ### Email Verification
 
 Your email is automatically verified when you click the magic link. No additional verification steps needed!
@@ -82,10 +82,8 @@ Your email is automatically verified when you click the magic link. No additiona
 
 After signing up:
 
-1. **[Understand Magic Links](magic-links.md)** - Learn how our authentication works
-2. **[Explore the Dashboard](dashboard-overview.md)** - Get familiar with the interface
-3. **[Set Up API Keys](../api-keys/hyperliquid-keys.md)** - Connect your trading platforms
-4. **[Add Your First Position](first-position.md)** - Start tracking
+1. **[Add API Keys](../api-keys/hyperliquid-keys.md)** - Connect your Hyperliquid account
+2. **[Add Your First Position](first-position.md)** - Start hedging
 
 ---
 

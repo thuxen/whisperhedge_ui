@@ -140,4 +140,3 @@ If using multiple subaccounts:
 - [Hyperliquid API Keys](../api-keys/hyperliquid-keys.md)
 - [Subaccounts](../api-keys/subaccounts.md)
 - [One Key Per Position](../api-keys/one-key-per-position.md)
-- [Tracking Frequency](tracking-frequency.md)

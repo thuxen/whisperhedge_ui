@@ -179,6 +179,5 @@ Decrease hedge ratio if:
 ## Related Topics
 
 - [Impermanent Loss](impermanent-loss.md)
-- [Position Health](position-health.md)
+- [LP Positions](lp-tracking.md)
 - [API Keys](../api-keys/hyperliquid-keys.md)
-- [Plan Tiers](plan-tiers.md)
