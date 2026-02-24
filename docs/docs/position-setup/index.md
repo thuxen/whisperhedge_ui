@@ -33,7 +33,7 @@ WhisperHedge currently supports:
 2. **Add position** - Enter your LP details
 3. **Start hedging** - Automatic protection begins
 
-[Add your first position →](../getting-started/first-position.md)
+[Add your first position →](../getting-started/index.md)
 
 ## Related Topics
 

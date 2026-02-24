@@ -120,5 +120,5 @@ If you have multiple Uniswap V3 positions:
 ## Related Topics
 
 - [Supported Protocols](supported-protocols.md)
-- [Adding Your First Position](../getting-started/first-position.md)
+- [Adding Your First Position](../getting-started/index.md)
 - [Hyperliquid Positions](hyperliquid-positions.md)

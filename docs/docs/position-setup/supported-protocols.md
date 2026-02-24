@@ -136,4 +136,4 @@ We prioritize based on user demand and technical feasibility.
 
 - [Hyperliquid Positions](hyperliquid-positions.md)
 - [Uniswap V3 NFT ID](uniswap-v3-nft-id.md)
-- [Adding Your First Position](../getting-started/first-position.md)
+- [Adding Your First Position](../getting-started/index.md)

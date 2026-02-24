@@ -6,7 +6,7 @@
 A: No! WhisperHedge uses passwordless magic link authentication. Just enter your email and click the link we send you.
 
 **Q: How do I add my first position?**
-A: See our [step-by-step guide](getting-started/first-position.md).
+A: See our [step-by-step guide](getting-started/index.md).
 
 **Q: What protocols do you support?**
 A: Currently Hyperliquid and Uniswap V3. [See all supported protocols →](position-setup/supported-protocols.md)

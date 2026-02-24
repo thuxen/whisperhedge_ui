@@ -54,4 +54,4 @@ We fetch data directly from:
 
 - [Impermanent Loss](impermanent-loss.md)
 - [Hedging Strategy](../hedging-strategy/index.md)
-- [Adding Positions](../getting-started/first-position.md)
+- [Adding Positions](../getting-started/index.md)
