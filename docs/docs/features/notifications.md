@@ -90,4 +90,3 @@ Always test your notifications:
 ## Related Topics
 
 - [LP Positions](lp-tracking.md)
-- [Dashboard Overview](../getting-started/dashboard-overview.md)
