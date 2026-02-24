@@ -29,7 +29,6 @@ nav:
   - Getting Started:
       - Overview: getting-started/index.md
       - Sign Up: getting-started/signup.md
-      - Magic Links: getting-started/magic-links.md
       - Dashboard: getting-started/dashboard-overview.md
       - First Position: getting-started/first-position.md
   - API Keys & Authentication:
@@ -44,7 +43,6 @@ nav:
       - Uniswap V3 NFT ID: position-setup/uniswap-v3-nft-id.md
       - Hyperliquid Positions: position-setup/hyperliquid-positions.md
       - Supported Protocols: position-setup/supported-protocols.md
-      - Tracking Frequency: position-setup/tracking-frequency.md
   - Hedging Strategy:
       - Overview: hedging-strategy/index.md
       - Automated Hedging: hedging-strategy/automated-hedging.md
@@ -54,9 +52,7 @@ nav:
       - Overview: features/index.md
       - LP Tracking: features/lp-tracking.md
       - Impermanent Loss: features/impermanent-loss.md
-      - Position Health: features/position-health.md
       - Notifications: features/notifications.md
-      - Plan Tiers: features/plan-tiers.md
   - Security:
       - Overview: security/index.md
       - API Key Security: security/api-key-security.md

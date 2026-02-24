@@ -53,5 +53,5 @@ We fetch data directly from:
 ## Related Topics
 
 - [Impermanent Loss](impermanent-loss.md)
-- [Hedging Automation](hedging-automation.md)
+- [Hedging Strategy](../hedging-strategy/index.md)
 - [Adding Positions](../getting-started/first-position.md)

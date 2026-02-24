@@ -84,7 +84,3 @@ After signing up:
 
 1. **[Add API Keys](../api-keys/hyperliquid-keys.md)** - Connect your Hyperliquid account
 2. **[Add Your First Position](first-position.md)** - Start hedging
-
----
-
-**Next:** [Magic Links Explained →](magic-links.md)
