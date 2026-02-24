@@ -9,6 +9,7 @@ theme:
     primary: custom
     accent: custom
   features:
+    - navigation.tabs
     - navigation.sections
     - navigation.top
     - navigation.expand
