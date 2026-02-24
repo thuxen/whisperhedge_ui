@@ -45,6 +45,11 @@ nav:
       - Hyperliquid Positions: position-setup/hyperliquid-positions.md
       - Supported Protocols: position-setup/supported-protocols.md
       - Tracking Frequency: position-setup/tracking-frequency.md
+  - Hedging Strategy:
+      - Overview: hedging-strategy/index.md
+      - Automated Hedging: hedging-strategy/automated-hedging.md
+      - Strategy Options: hedging-strategy/strategy-options.md
+      - Risk Management: hedging-strategy/risk-management.md
   - Features:
       - Overview: features/index.md
       - LP Tracking: features/lp-tracking.md

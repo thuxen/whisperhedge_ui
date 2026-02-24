@@ -5,9 +5,9 @@ Explore WhisperHedge's automated LP hedging features.
 ## Core Features
 
 ### 📉 Impermanent Loss Protection
-Automated hedging on Hyperliquid to protect your LP positions from IL.
+Automated hedging strategies to protect your LP positions from IL.
 
-[Learn more →](impermanent-loss.md)
+[Learn more →](../hedging-strategy/index.md)
 
 ### 🔔 Smart Notifications
 Receive alerts about your positions and hedging activity.
