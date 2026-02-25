@@ -94,7 +94,7 @@ Provide trade-enabled API keys:
 - **Restricted to trading only** - No withdrawal access
 - **Separate key per position** - Security isolation
 
-[API Key Setup →](../api-keys/hyperliquid-keys.md)
+[API Key Setup →](../trading-accounts/hyperliquid-keys.md)
 
 ## Monitoring
 
@@ -181,4 +181,4 @@ Decrease hedge ratio if:
 - [Strategy Options](strategy-options.md)
 - [Risk Management](risk-management.md)
 - [Impermanent Loss](../features/impermanent-loss.md)
-- [API Keys](../api-keys/hyperliquid-keys.md)
+- [API Keys](../trading-accounts/hyperliquid-keys.md)

@@ -233,6 +233,6 @@ A: Contact us. We may not support that platform for security reasons.
 ## Related Topics
 
 - [API Key Security](api-key-security.md)
-- [API Key Permissions](../api-keys/permissions.md)
+- [API Key Permissions](../trading-accounts/permissions.md)
 - [What We Store](what-we-store.md)
 - [Data Privacy](data-privacy.md)

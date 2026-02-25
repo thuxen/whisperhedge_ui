@@ -19,7 +19,7 @@ To track Hyperliquid positions, you need:
 2. **API Secret** - Private key for authentication
 3. **Subaccount** (optional) - If using subaccounts
 
-[How to get API keys →](../api-keys/hyperliquid-keys.md)
+[How to get API keys →](../trading-accounts/hyperliquid-keys.md)
 
 ## Setting Up Tracking
 
@@ -30,7 +30,7 @@ To track Hyperliquid positions, you need:
 3. Create new API key with read-only permissions
 4. Save key and secret securely
 
-[Detailed guide →](../api-keys/hyperliquid-keys.md)
+[Detailed guide →](../trading-accounts/hyperliquid-keys.md)
 
 ### Step 2: Add to WhisperHedge
 
@@ -76,7 +76,7 @@ If you have multiple HLP positions in the same subaccount:
 - Each key scoped to same subaccount
 - Track independently in WhisperHedge
 
-[Why one key per position →](../api-keys/one-key-per-position.md)
+[Why one key per position →](../trading-accounts/one-key-per-position.md)
 
 ### Different Subaccounts
 
@@ -86,7 +86,7 @@ If using multiple subaccounts:
 - Specify correct subaccount name
 - Track each separately
 
-[Understanding subaccounts →](../api-keys/subaccounts.md)
+[Understanding subaccounts →](../trading-accounts/subaccounts.md)
 
 ## Troubleshooting
 
@@ -137,6 +137,6 @@ If using multiple subaccounts:
 
 ## Related Topics
 
-- [Hyperliquid API Keys](../api-keys/hyperliquid-keys.md)
-- [Subaccounts](../api-keys/subaccounts.md)
-- [One Key Per Position](../api-keys/one-key-per-position.md)
+- [Hyperliquid API Keys](../trading-accounts/hyperliquid-keys.md)
+- [Subaccounts](../trading-accounts/subaccounts.md)
+- [One Key Per Position](../trading-accounts/one-key-per-position.md)

@@ -36,7 +36,7 @@ The API WALLET ADDRESS is not required.
 
 **Remember:** One API key works across all trading accounts in your wallet, but each LP position needs its own dedicated trading account.
 
-**Detailed instructions:** [Hyperliquid API Keys Guide](../api-keys/hyperliquid-keys.md)
+**Detailed instructions:** [Hyperliquid API Keys Guide](../trading-accounts/hyperliquid-keys.md)
 
 ## Step 2: Add Your Trading Account to WhisperHedge
 

@@ -17,7 +17,7 @@ WhisperHedge currently supports:
 - API secret
 - Subaccount name (if using subaccounts)
 
-[Get Hyperliquid API keys →](../api-keys/hyperliquid-keys.md)
+[Get Hyperliquid API keys →](../trading-accounts/hyperliquid-keys.md)
 
 ### For Uniswap V3
 

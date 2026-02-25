@@ -51,6 +51,6 @@ Troubleshooting API key problems.
 
 ## Related Topics
 
-- [Hyperliquid API Keys](../api-keys/hyperliquid-keys.md)
-- [Rotating Keys](../api-keys/rotating-keys.md)
+- [Hyperliquid API Keys](../trading-accounts/hyperliquid-keys.md)
+- [Rotating Keys](../trading-accounts/rotating-keys.md)
 - [Contact Support](contact-support.md)

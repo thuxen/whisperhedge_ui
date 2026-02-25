@@ -20,10 +20,10 @@ A: To read your position data and calculate metrics. We only require read-only a
 A: No. We only accept read-only keys that cannot execute trades or move funds.
 
 **Q: Why one API key per position?**
-A: For security isolation. If one key is compromised, only that position is affected. [Learn more →](api-keys/one-key-per-position.md)
+A: For security isolation. If one key is compromised, only that position is affected. [Learn more →](trading-accounts/one-key-per-position.md)
 
 **Q: How often should I rotate API keys?**
-A: Every 3-6 months is recommended. [Rotation guide →](api-keys/rotating-keys.md)
+A: Every 3-6 months is recommended. [Rotation guide →](trading-accounts/rotating-keys.md)
 
 ## Position Tracking
 

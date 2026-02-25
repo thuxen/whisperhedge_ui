@@ -210,6 +210,6 @@ A: Yes, we provide access logs showing when keys were used.
 ## Related Topics
 
 - [Read-Only Permissions](read-only-permissions.md)
-- [API Key Permissions](../api-keys/permissions.md)
-- [Rotating Keys](../api-keys/rotating-keys.md)
+- [API Key Permissions](../trading-accounts/permissions.md)
+- [Rotating Keys](../trading-accounts/rotating-keys.md)
 - [Data Privacy](data-privacy.md)
