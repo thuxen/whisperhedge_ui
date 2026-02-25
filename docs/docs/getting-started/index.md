@@ -42,17 +42,18 @@ The API WALLET ADDRESS is not required.
 
 1. Log into your WhisperHedge dashboard
 2. Navigate to **Trading Accounts** in the sidebar
-3. Click the **"+ Add New Trading Account"** button
+3. In the **"Add New Trading Account"** box
 4. Fill in the following fields:
-   - **Account Name** - Give this trading account a friendly name (e.g., "Main Account" or "ETH-USDC Sub")
-   - **API Private Key** - Paste your Hyperliquid PRIVATE KEY from Step 1
-   - **Master Account** - Check this if using your main account, uncheck for sub-accounts
-   - **Wallet Address** - Your Hyperliquid wallet address (0x...)
-   - **Subaccount Name** (optional) - Enter the subaccount name if you're using a Hyperliquid subaccount
+   - **Account Name** - Give this trading account a name (e.g., "Main Account" or "ETH-USDC Sub")
+   - **Exchange** - Leave this as hyperliquid
+   - **API Secret** - Paste your Hyperliquid PRIVATE KEY from Step 1
+   - **Master Wallet Address / Sub-Account Address** - Enter your main wallet address or the Sub-Account address
+   - **Master Account or Sub-Account** - If you're using your Master account, check this box, otherwise leave it unchecked
+   - **Notes** (optional) - For any notes you want to add
 5. Click **"Add Trading Account"** to save it
 
 !!! success "Trading Account Added!"
-    Your trading account is now saved and can be assigned to LP positions for hedging. You can add multiple trading accounts for different Hyperliquid accounts/subaccounts.
+    Your trading account is now saved and can be assigned to LP positions for hedging. You can verify this works by clicking the **Check Balance** button. If it works, you should see your wallet balance displayed.
 
 ## Step 3: Add Your LP Position
 
