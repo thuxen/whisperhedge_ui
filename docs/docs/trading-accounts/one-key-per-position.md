@@ -1,20 +1,20 @@
-# One API Key Per Position
+# One Trading Account Per Position
 
-WhisperHedge requires a unique API key for each position you track. This page explains why this requirement exists and how to manage multiple keys effectively.
+WhisperHedge requires a dedicated trading account for each position you track. This page explains why this requirement exists and how to manage multiple trading accounts effectively.
 
 ## The Requirement
 
-**Each LP position must have its own dedicated API key.**
+**Each LP position must have its own dedicated trading account.**
 
 You cannot:
-- ❌ Use the same API key for multiple positions
-- ❌ Share keys between positions
-- ❌ Reuse keys after deleting a position
+- ❌ Use the same trading account for multiple positions
+- ❌ Share trading accounts between positions
+- ❌ Reuse trading accounts after deleting a position
 
 You must:
-- ✅ Create a new API key for each position
-- ✅ Use unique keys per position
-- ✅ Delete keys when removing positions
+- ✅ Create a new trading account for each position
+- ✅ Use unique trading accounts per position
+- ✅ Delete trading accounts when removing positions
 
 ## Why This Requirement Exists
 
@@ -22,9 +22,9 @@ You must:
 
 **Principle of Least Privilege**
 
-Each API key should have access to only what it needs. By using separate keys:
+Each trading account should have access to only what it needs. By using separate trading accounts:
 
-- Compromised key affects only one position
+- Compromised credentials affects only one position
 - Easier to identify which position had the breach
 - Simpler to revoke access to specific positions
 - Reduced blast radius of security incidents
@@ -32,10 +32,10 @@ Each API key should have access to only what it needs. By using separate keys:
 **Example Scenario:**
 
 ```
-❌ Bad: One key for all positions
+❌ Bad: One trading account for all positions
 If key is compromised → All positions at risk
 
-✅ Good: One key per position
+✅ Good: One trading account per position
 If key is compromised → Only that position at risk
 ```
 
@@ -43,7 +43,7 @@ If key is compromised → Only that position at risk
 
 **Position-Level Management**
 
-Separate keys allow you to:
+Separate trading accounts allow you to:
 
 - Remove individual positions without affecting others
 - Rotate keys for specific positions
@@ -54,7 +54,7 @@ Separate keys allow you to:
 
 **Data Integrity**
 
-Using separate keys ensures:
+Using separate trading accounts ensures:
 
 - Clear mapping between keys and positions
 - No confusion about which data belongs where
@@ -214,7 +214,7 @@ Each position gets its own key, even within the same subaccount.
 
 **Scenario:** API Key 2 is compromised
 
-**With separate keys:**
+**With separate trading accounts:**
 - Only Position 2 data is exposed
 - Positions 1 and 3 remain secure
 - Revoke only Key 2
@@ -228,7 +228,7 @@ Each position gets its own key, even within the same subaccount.
 
 ### Audit Trail
 
-**With separate keys:**
+**With separate trading accounts:**
 
 ```
 2024-02-15: Key 1 accessed Position 1 data
@@ -248,7 +248,7 @@ Unclear which position was accessed.
 
 ### Rotation Strategy
 
-**With separate keys:**
+**With separate trading accounts:**
 
 - Rotate keys on different schedules
 - High-value positions: rotate monthly
@@ -280,7 +280,7 @@ Unclear which position was accessed.
 
 ### Deletion
 
-- ✅ Delete keys when removing positions
+- ✅ Delete trading accounts when removing positions
 - ✅ Don't leave orphaned keys
 - ✅ Clean up regularly
 - ✅ Audit key list quarterly
@@ -299,7 +299,7 @@ Unclear which position was accessed.
 **Solution:**
 
 1. Remove one of the positions
-2. Create a new API key
+2. Create a new trading account
 3. Re-add the position with the new key
 
 ### "I lost track of which key is for which position"
