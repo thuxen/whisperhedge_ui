@@ -11,9 +11,18 @@ Before you start, make sure you have:
 - ✅ An active Liquidity Pool position (check our supported LP protocols here)
 - ✅ Your LP position's NFT Token ID
 
-Each LP position you want to hedge requires its own unique Hyperliquid account, this can be the Master account or a Sub-Account, the Master and multiple Sub-Accounts can share the same API key, but they each require their own funds for hedging.
+## Understanding Hyperliquid Account Structure
 
-## Step 1: Create Your Hyperliquid API Keys
+Your Hyperliquid **wallet** (0x address) contains multiple **trading accounts**:
+- 1 Master account
+- Multiple Sub-accounts (you can create as many as needed)
+
+**Key points:**
+- ✅ One API key works for all trading accounts in your wallet
+- ✅ Each LP position you hedge needs its own dedicated trading account (master or sub-account)
+- ✅ Each trading account needs its own funds for hedging
+
+## Step 1: Create Your Hyperliquid API Key
 
 1. Log into Hyperliquid
 2. Navigate to More > API 
@@ -21,9 +30,9 @@ Each LP position you want to hedge requires its own unique Hyperliquid account, 
 4. Select the number of days validity for the key (max 180 days)
 5. Copy the PRIVATE KEY (in red at the bottom), make sure you save this, it won't be displayed again.
 
-We only require the PRIVATE KEY for the API account, the API WALLET ADDRESS is not required.
+The API WALLET ADDRESS is not required.
 
-You can reuse the same PRIVATE KEY for multiple positions. However each LP position requires a separate Hyperliquid account/sub-account.
+**Remember:** One API key works across all trading accounts in your wallet, but each LP position needs its own dedicated trading account.
 
 **Detailed instructions:** [Hyperliquid API Keys Guide](../api-keys/hyperliquid-keys.md)
 
