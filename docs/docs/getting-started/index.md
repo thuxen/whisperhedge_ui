@@ -13,13 +13,15 @@ Before you start, make sure you have:
 
 ## Understanding Hyperliquid Account Structure
 
-Your Hyperliquid **wallet** (0x address) contains multiple **trading accounts**:
+Your Hyperliquid **wallet** (0x address) can contain multiple **trading accounts**:
+
 - 1 Master account
 - Multiple Sub-accounts (total trading volume of at least 100k USD is required to create Sub-Accounts)
 
 **Key points:**
+
 - ✅ One API key works for all trading accounts in your wallet
-- ✅ Each LP position you hedge needs its own dedicated trading account (master or sub-account)
+- ✅ Each LP position you hedge needs its own dedicated trading account (Master or Sub-Account)
 - ✅ Each trading account needs its own funds for hedging
 
 ## Step 1: Create Your Hyperliquid API Key
