@@ -123,7 +123,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     spacing="1",
                 ),
                 rx.vstack(
-                    rx.text("API Key", size="1", color="gray"),
+                    rx.text("Trading Account", size="1", color="gray"),
                     rx.text(rx.cond(position.api_key_name != "", position.api_key_name, "Not assigned"), size="2", weight="medium"),
                     spacing="1",
                 ),

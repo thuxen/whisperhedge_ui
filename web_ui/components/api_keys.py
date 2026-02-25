@@ -134,15 +134,15 @@ def api_keys_component() -> rx.Component:
         # Error dialog for in-use keys - blocks deletion
         rx.alert_dialog.root(
             rx.alert_dialog.content(
-                rx.alert_dialog.title("❌ Cannot Delete API Key"),
+                rx.alert_dialog.title("❌ Cannot Delete Trading Account"),
                 rx.alert_dialog.description(
                     rx.vstack(
                         rx.text(
-                            f"This API key is currently assigned to position '{APIKeyState.key_to_delete_position}'.",
+                            f"This trading account is currently assigned to position '{APIKeyState.key_to_delete_position}'.",
                             size="3",
                         ),
                         rx.text(
-                            "Before deleting this API key, you must:",
+                            "Before deleting this trading account, you must:",
                             size="3",
                             weight="bold",
                             margin_top="1rem",
@@ -178,7 +178,7 @@ def api_keys_component() -> rx.Component:
         rx.card(
             rx.vstack(
                 rx.hstack(
-                    rx.heading("API Keys", size="6"),
+                    rx.heading("Trading Accounts", size="6"),
                     rx.spacer(),
                     rx.cond(
                         APIKeyState.is_editing,
@@ -195,12 +195,12 @@ def api_keys_component() -> rx.Component:
                 ),
                 rx.vstack(
                     rx.text(
-                        "Manage your exchange API credentials for hedging operations.",
+                        "Manage your exchange trading accounts for hedging operations.",
                         size="2",
                         color="gray",
                     ),
                     rx.text(
-                        "• Each LP position requires its own dedicated API key",
+                        "• Each LP position requires its own dedicated trading account",
                         size="2",
                         color="gray",
                     ),
@@ -260,8 +260,8 @@ def api_keys_component() -> rx.Component:
                     rx.heading(
                         rx.cond(
                             APIKeyState.is_editing,
-                            "Edit API Key",
-                            "Add New API Key",
+                            "Edit Trading Account",
+                            "Add New Trading Account",
                         ),
                         size="5",
                     ),
@@ -505,7 +505,7 @@ def api_keys_component() -> rx.Component:
                                     width="50%",
                                 ),
                                 rx.button(
-                                    "Update API Key",
+                                    "Update Trading Account",
                                     type="submit",
                                     size="3",
                                     variant="soft",
@@ -518,7 +518,7 @@ def api_keys_component() -> rx.Component:
                             ),
                             # Add mode: Single Add button
                             rx.button(
-                                "Add API Key",
+                                "Add Trading Account",
                                 type="submit",
                                 size="3",
                                 variant="soft",

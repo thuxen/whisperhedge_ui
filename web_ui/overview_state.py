@@ -9,7 +9,7 @@ class OverviewState(rx.State):
     hedged_positions: int = 0
     total_value: float = 0.0
     
-    # API Key stats
+    # Trading Account stats
     total_api_keys: int = 0
     in_use_api_keys: int = 0
     
@@ -30,7 +30,7 @@ class OverviewState(rx.State):
     
     @rx.var
     def api_keys_text(self) -> str:
-        """Descriptive text for API keys"""
+        """Descriptive text for trading accounts"""
         return f"{self.in_use_api_keys} In Use"
     
     @rx.var
@@ -39,12 +39,12 @@ class OverviewState(rx.State):
         return f"${self.total_value:,.2f}"
     
     def update_stats(self, lp_positions: list, api_keys: list):
-        """Update overview statistics from LP positions and API keys"""
+        """Update overview statistics from LP positions and trading accounts"""
         # LP Position stats
         self.total_positions = len(lp_positions)
         self.hedged_positions = sum(1 for pos in lp_positions if pos.get('hedge_enabled', False))
         self.total_value = sum(pos.get('total_value_usd', 0.0) for pos in lp_positions)
         
-        # API Key stats
+        # Trading Account stats
         self.total_api_keys = len(api_keys)
         self.in_use_api_keys = sum(1 for key in api_keys if key.get('is_in_use', False))

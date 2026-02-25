@@ -116,7 +116,7 @@ class APIKeyState(rx.State):
         
         # Clear loading state after a short delay (edit is instant)
         return [
-            rx.toast.info("Loading API key for editing...", duration=1000),
+            rx.toast.info("Loading trading account for editing...", duration=1000),
             APIKeyState.clear_edit_loading
         ]
     
@@ -331,7 +331,7 @@ class APIKeyState(rx.State):
         # Return toast and chain to async worker
         action = "Updating" if self.is_editing else "Saving"
         return [
-            rx.toast.info(f"{action} API key '{account_name}'...", duration=5000),
+            rx.toast.info(f"{action} trading account '{account_name}'...", duration=5000),
             APIKeyState.save_api_keys_worker
         ]
     
@@ -378,8 +378,8 @@ class APIKeyState(rx.State):
                 if duplicate_check.data:
                     existing_account = duplicate_check.data[0]["account_name"]
                     print(f"[SAVE API KEY] Duplicate found - already exists as '{existing_account}'", flush=True)
-                    self.error_message = f"This API key is already added as '{existing_account}'"
-                    yield rx.toast.error(f"Duplicate API key - already exists as '{existing_account}'", duration=5000)
+                    self.error_message = f"This trading account is already added as '{existing_account}'"
+                    yield rx.toast.error(f"This trading account already exists as '{existing_account}'", duration=5000)
                     return
                 print(f"[SAVE API KEY] No duplicate found, proceeding with save", flush=True)
             
@@ -402,19 +402,19 @@ class APIKeyState(rx.State):
             
             if self.is_editing and self.selected_key_id:
                 supabase.table("user_api_keys").update(data).eq("id", self.selected_key_id).execute()
-                self.success_message = f"API keys for '{account_name}' updated successfully!"
-                yield rx.toast.success(f"'{account_name}' API key updated successfully!", duration=3000)
+                self.success_message = f"Trading account '{account_name}' updated successfully!"
+                yield rx.toast.success(f"'{account_name}' trading account updated successfully!", duration=3000)
             else:
                 supabase.table("user_api_keys").insert(data).execute()
-                self.success_message = f"API keys for '{account_name}' saved successfully!"
-                yield rx.toast.success(f"'{account_name}' API key saved successfully!", duration=3000)
+                self.success_message = f"Trading account '{account_name}' saved successfully!"
+                yield rx.toast.success(f"'{account_name}' trading account saved successfully!", duration=3000)
             
             await self.load_api_keys()
             self.clear_form()
             
         except Exception as e:
-            self.error_message = "Failed to save API keys. Please try again."
-            yield rx.toast.error("Failed to save API key. Please try again.", duration=5000)
+            self.error_message = "Failed to save trading account. Please try again."
+            yield rx.toast.error("Failed to save trading account. Please try again.", duration=5000)
         finally:
             self.is_loading = False
             self._save_form_data = {}
@@ -437,7 +437,7 @@ class APIKeyState(rx.State):
         
         # Return toast and chain to async worker
         return [
-            rx.toast.info(f"Deleting '{account_name}' API key...", duration=5000),
+            rx.toast.info(f"Deleting '{account_name}' trading account...", duration=5000),
             APIKeyState.delete_api_key_worker
         ]
     
@@ -470,22 +470,22 @@ class APIKeyState(rx.State):
             supabase.table("user_api_keys").delete().eq("id", self.loading_key_id).eq("user_id", auth_state.user_id).execute()
             print(f"[DELETE API KEY] Database deletion successful", flush=True)
             
-            self.success_message = f"API keys for '{account_name}' deleted successfully!"
+            self.success_message = f"Trading account '{account_name}' deleted successfully!"
             await self.load_api_keys()
             print(f"[DELETE API KEY] Reloaded API keys", flush=True)
             
             if self.selected_key_id == self.loading_key_id:
                 self.clear_form()
             
-            yield rx.toast.success(f"'{account_name}' API key deleted successfully!", duration=3000)
+            yield rx.toast.success(f"'{account_name}' trading account deleted successfully!", duration=3000)
             print(f"[DELETE API KEY] Deletion complete", flush=True)
             
         except Exception as e:
             print(f"[DELETE API KEY ERROR] Exception: {e}", flush=True)
             import traceback
             traceback.print_exc()
-            self.error_message = "Failed to delete API keys. Please try again."
-            yield rx.toast.error("Failed to delete API key. Please try again.", duration=5000)
+            self.error_message = "Failed to delete trading account. Please try again."
+            yield rx.toast.error("Failed to delete trading account. Please try again.", duration=5000)
         finally:
             self.loading_key_id = ""
     

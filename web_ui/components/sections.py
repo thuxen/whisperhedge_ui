@@ -122,7 +122,7 @@ def settings_section() -> rx.Component:
 
 def api_keys_section() -> rx.Component:
     return rx.vstack(
-        rx.heading("API Keys", size="7", margin_bottom="1rem"),
+        rx.heading("Trading Accounts", size="7", margin_bottom="1rem"),
         api_keys_component(),
         spacing="4",
         width="100%",
@@ -271,7 +271,7 @@ def getting_started_content() -> rx.Component:
         
         rx.card(
             rx.vstack(
-                rx.heading("Step 2: Configure Your Hyperliquid API Key", size="5", weight="bold", color="var(--accent-11)"),
+                rx.heading("Step 2: Configure Your Hyperliquid Trading Account", size="5", weight="bold", color="var(--accent-11)"),
                 rx.text(
                     "Create a trade-only API key on Hyperliquid with the following permissions:",
                     size="3",
@@ -288,7 +288,7 @@ def getting_started_content() -> rx.Component:
                     margin_bottom="0.5rem",
                 ),
                 rx.text(
-                    "Add your API key in the 'API Keys' section. WhisperHedge will verify the key has proper permissions and sufficient margin.",
+                    "Add your trading account in the 'Trading Accounts' section. WhisperHedge will verify the credentials have proper permissions and sufficient margin.",
                     size="3",
                     line_height="1.7",
                 ),
