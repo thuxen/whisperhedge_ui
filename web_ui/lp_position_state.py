@@ -95,7 +95,7 @@ class LPPositionState(rx.State):
     selected_hedge_wallet: str = ""
     _cached_wallets: list[str] = []  # Cache for available wallets
     
-    # Balance tracking for selected API key
+    # Balance tracking for selected trading account
     selected_wallet_balance: float = 0.0
     selected_wallet_available: float = 0.0
     balance_loading: bool = False
@@ -134,10 +134,10 @@ class LPPositionState(rx.State):
     def toggle_hedge_enabled(self, value: bool):
         """Handle hedge enabled toggle with validation"""
         if value:  # User is trying to enable hedging
-            # Check 1: API key assigned
+            # Check 1: Trading account assigned
             if not self.selected_hedge_wallet or self.selected_hedge_wallet == "None":
-                self.error_message = "Please assign an API key before enabling hedging"
-                return rx.toast.error("API key required to enable hedging", duration=5000)
+                self.error_message = "Please assign a trading account before enabling hedging"
+                return rx.toast.error("Trading account required to enable hedging", duration=5000)
             
             # Check 2: Position data fetched
             position_value = float(self.fetched_position_data.get("position_value_usd", 0))
@@ -295,7 +295,7 @@ class LPPositionState(rx.State):
         return token1_amount * (self.hedge_ratio / 100.0)
     
     async def load_wallets(self):
-        """Load available API keys for wallet selector - called on mount"""
+        """Load available trading accounts for wallet selector - called on mount"""
         try:
             from web_ui.state import AuthState
             auth_state = await self.get_state(AuthState)
@@ -305,15 +305,15 @@ class LPPositionState(rx.State):
             
             supabase = get_supabase_client(auth_state.access_token)
             
-            # Get all active API keys
+            # Get all active trading accounts
             response = supabase.table("user_api_keys").select("id,account_name,exchange").eq("user_id", auth_state.user_id).eq("is_active", True).execute()
             
             if response.data:
-                # Get API keys that are already in use by other positions
+                # Get trading accounts that are already in use by other positions
                 used_keys_response = supabase.table("position_configs").select("hl_api_key_id").eq("user_id", auth_state.user_id).execute()
                 used_key_ids = {config["hl_api_key_id"] for config in used_keys_response.data if config.get("hl_api_key_id")}
                 
-                # When editing, allow the current position's API key to appear
+                # When editing, allow the current position's trading account to appear
                 current_position_key_id = None
                 if self.is_editing and self.selected_position_id:
                     current_config = supabase.table("position_configs").select("hl_api_key_id").eq("user_id", auth_state.user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
@@ -326,12 +326,12 @@ class LPPositionState(rx.State):
                     if key["id"] not in used_key_ids or key["id"] == current_position_key_id
                 ]
                 
-                # Add None option to allow unassigning API keys
+                # Add None option to allow unassigning trading accounts
                 wallets = ["None"] + [f"{key['account_name']} ({key['exchange']})" for key in available_keys]
                 # Store in cache for immediate use
                 self._cached_wallets = wallets
                 # Don't auto-select - let it default to empty/None
-                # For new positions: User must explicitly select API key
+                # For new positions: User must explicitly select trading account
                 # For editing positions: load_hedge_config() will set the correct wallet
             
             # Mark wallets as loaded for dashboard loading state
@@ -347,7 +347,7 @@ class LPPositionState(rx.State):
     
     @rx.var
     def available_wallets(self) -> list[str]:
-        """Get list of available API keys for wallet selector"""
+        """Get list of available trading accounts for wallet selector"""
         return self._cached_wallets
     
     async def fetch_wallet_balance(self):
@@ -374,7 +374,7 @@ class LPPositionState(rx.State):
             # Extract account name from "Account Name (exchange)" format
             account_name = self.selected_hedge_wallet.split(" (")[0]
             
-            # Get API key details
+            # Get trading account details
             response = supabase.table("user_api_keys").select("*").eq("user_id", auth_state.user_id).eq("account_name", account_name).execute()
             
             if response.data and len(response.data) > 0:
@@ -406,7 +406,7 @@ class LPPositionState(rx.State):
                 else:
                     self.balance_error = "Only Hyperliquid supported"
             else:
-                self.balance_error = "API key not found"
+                self.balance_error = "Trading account not found"
             
             self.balance_loading = False
             
@@ -443,9 +443,9 @@ class LPPositionState(rx.State):
         self.balance_error = ""
         
     async def check_api_key_availability(self, api_key_id: str) -> bool:
-        """Check if API key is available (not used by another position)"""
+        """Check if trading account is available (not used by another position)"""
         if not api_key_id:
-            return True  # No API key selected is always allowed
+            return True  # No trading account selected is always allowed
         
         try:
             from web_ui.state import AuthState
@@ -456,25 +456,25 @@ class LPPositionState(rx.State):
             
             supabase = get_supabase_client(auth_state.access_token)
             
-            # Check if this API key is already used by another position
+            # Check if this trading account is already used by another position
             try:
                 result = supabase.table("position_configs").select("id").eq("hl_api_key_id", api_key_id).execute()
                 
-                # If editing, allow the same API key for the same position
+                # If editing, allow the same trading account for the same position
                 if self.is_editing and self.selected_position_id:
                     # Check if the existing usage is by this same position
                     existing_result = supabase.table("position_configs").select("id").eq("hl_api_key_id", api_key_id).eq("position_name", self.position_name).execute()
                     return len(existing_result.data) > 0
                 
-                # For new positions, API key must not be used by any other position
+                # For new positions, trading account must not be used by any other position
                 return len(result.data) == 0
             except Exception as table_error:
-                # If position_configs table doesn't exist, assume API key is available
+                # If position_configs table doesn't exist, assume trading account is available
                 print(f"Warning: position_configs table not accessible: {table_error}")
                 return True
             
         except Exception as e:
-            print(f"Error checking API key availability: {e}")
+            print(f"Error checking trading account availability: {e}")
             return False
     
     def edit_position(self, position_id: str):
@@ -516,7 +516,7 @@ class LPPositionState(rx.State):
         self.show_confirmation = True  # Show the full position form
 
         try:
-            # 3. Load available API keys
+            # 3. Load available trading accounts
             await self.load_wallets()
             
             # 4. Fetch fresh blockchain data
@@ -667,7 +667,7 @@ class LPPositionState(rx.State):
                             config_map[f"{protocol}_{c['network']}_{nft_id}"] = c
                 print(f"Built config_map with {len(config_map)} entries")
                 
-                # Fetch API keys to get account names and balances
+                # Fetch trading accounts to get account names and balances
                 api_keys_response = supabase.table("user_api_keys").select("id, account_name, account_value, available_balance").eq("user_id", auth_state.user_id).execute()
                 api_key_map = {k["id"]: {"name": k["account_name"], "balance": float(k.get("account_value", 0.0))} for k in api_keys_response.data} if api_keys_response.data else {}
                 
@@ -678,7 +678,7 @@ class LPPositionState(rx.State):
                     config = config_map.get(config_key, {})
                     print(f"Position: network={pos_data['network']}, nft_id={pos_data['nft_id']}, config_found={bool(config)}")
                     
-                    # Get API key name and balance if assigned
+                    # Get trading account name and balance if assigned
                     api_key_id = config.get("hl_api_key_id", "")
                     api_key_info = api_key_map.get(api_key_id, {"name": "", "balance": 0.0})
                     api_key_name = api_key_info["name"]
@@ -804,7 +804,7 @@ class LPPositionState(rx.State):
                 for pos in self.lp_positions
             ]
             
-            # Convert API keys to dicts
+            # Convert trading accounts to dicts
             api_keys_data = [
                 {
                     'is_in_use': key.is_in_use,
@@ -948,7 +948,7 @@ class LPPositionState(rx.State):
             self.error_message = "NFT ID is required"
             return
         
-        # Check API key availability if hedge is enabled
+        # Check trading account availability if hedge is enabled
         if self.hedge_enabled and self.selected_api_key_id:
             # This will be checked asynchronously in the worker
             pass
@@ -974,7 +974,7 @@ class LPPositionState(rx.State):
                 yield rx.toast.error("Not authenticated", duration=3000)
                 return
             
-            # Check API key availability if hedge is enabled
+            # Check trading account availability if hedge is enabled
             if self.hedge_enabled and self.selected_api_key_id:
                 is_available = await self.check_api_key_availability(self.selected_api_key_id)
                 if not is_available:

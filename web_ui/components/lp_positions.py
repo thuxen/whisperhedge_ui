@@ -718,12 +718,12 @@ def lp_positions_component() -> rx.Component:
                                         rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
                                             
                                             rx.vstack(
-                                                rx.text("API Key", size="2", weight="bold"),
+                                                rx.text("Trading Account", size="2", weight="bold"),
                                                 rx.select(
                                                     LPPositionState.available_wallets,
                                                     value=LPPositionState.selected_hedge_wallet,
                                                     on_change=LPPositionState.set_hedge_wallet,
-                                                    placeholder="Select API key for hedging",
+                                                    placeholder="Select trading account for hedging",
                                                     on_mount=LPPositionState.load_wallets,
                                                 ),
                                                 rx.text(

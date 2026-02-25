@@ -22,7 +22,7 @@ def overview_section() -> rx.Component:
             
             rx.card(
                 rx.vstack(
-                    rx.text("API Keys", size="2", color="gray", weight="medium"),
+                    rx.text("Trading Accounts", size="2", color="gray", weight="medium"),
                     rx.text(OverviewState.api_keys_display, size="8", weight="bold", color="purple"),
                     rx.text(OverviewState.api_keys_text, size="2", color="gray"),
                     spacing="2",
@@ -349,7 +349,7 @@ def troubleshooting_content() -> rx.Component:
     return rx.vstack(
         rx.card(
             rx.vstack(
-                rx.heading("API Key Not Connecting", size="5", weight="bold", color="var(--accent-11)"),
+                rx.heading("Trading Account Not Connecting", size="5", weight="bold", color="var(--accent-11)"),
                 rx.text("Common issues:", size="3", line_height="1.7", weight="bold", margin_bottom="0.5rem"),
                 rx.unordered_list(
                     rx.list_item("Verify the API key has trading permissions enabled"),
@@ -428,7 +428,7 @@ def api_docs_content() -> rx.Component:
     return rx.vstack(
         rx.card(
             rx.vstack(
-                rx.heading("Hyperliquid API Key Setup", size="5", weight="bold", color="var(--accent-11)"),
+                rx.heading("Hyperliquid Trading Account Setup", size="5", weight="bold", color="var(--accent-11)"),
                 rx.text(
                     "To create a trade-only API key on Hyperliquid:",
                     size="3",
