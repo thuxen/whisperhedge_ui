@@ -7,8 +7,8 @@ WhisperHedge is a non-custodial automation engine designed to mitigate Impermane
 New to WhisperHedge? Getting started is simple:
 
 1. **[Sign Up](https://whisperhedge.com/signup)** - Create your account with passwordless magic link authentication
-2. **[Set Up API Keys](api-keys/hyperliquid-keys.md)** - Connect your Hyperliquid trading accounts
-3. **[Add Your First Position](getting-started/first-position.md)** - Add your LP positions
+2. **[Set Up Trading Accounts](getting-started/index.md#step-1-create-your-hyperliquid-api-key)** - Connect your Hyperliquid trading accounts
+3. **[Add Your First Position](getting-started/index.md#step-3-add-your-lp-position)** - Add your LP positions
 4. **[Configure Hedging](hedging-strategy/index.md)** - Set up your risk management strategy
 
 ## Supported LP Protocols

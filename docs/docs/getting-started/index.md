@@ -38,20 +38,21 @@ The API WALLET ADDRESS is not required.
 
 **Detailed instructions:** [Hyperliquid API Keys Guide](../api-keys/hyperliquid-keys.md)
 
-## Step 2: Add Your API Key to WhisperHedge
+## Step 2: Add Your Trading Account to WhisperHedge
 
 1. Log into your WhisperHedge dashboard
-2. Navigate to **Settings** in the sidebar
-3. Click on **API Keys** tab
-4. Click the **"+ Add API Key"** button
-5. Fill in the following fields:
-   - **Label** (optional) - Give this API key a friendly name (e.g., "Main Account" or "ETH-USDC Sub")
+2. Navigate to **Trading Accounts** in the sidebar
+3. Click the **"+ Add New Trading Account"** button
+4. Fill in the following fields:
+   - **Account Name** - Give this trading account a friendly name (e.g., "Main Account" or "ETH-USDC Sub")
    - **API Private Key** - Paste your Hyperliquid PRIVATE KEY from Step 1
-   - **Subaccount** (optional) - Enter the subaccount name if you're using a Hyperliquid subaccount
-6. Click **"Save API Key"** to add it to your account
+   - **Master Account** - Check this if using your main account, uncheck for sub-accounts
+   - **Wallet Address** - Your Hyperliquid wallet address (0x...)
+   - **Subaccount Name** (optional) - Enter the subaccount name if you're using a Hyperliquid subaccount
+5. Click **"Add Trading Account"** to save it
 
-!!! success "API Key Added!"
-    Your API key is now saved and can be used when adding LP positions. You can add multiple API keys for different Hyperliquid accounts/subaccounts.
+!!! success "Trading Account Added!"
+    Your trading account is now saved and can be assigned to LP positions for hedging. You can add multiple trading accounts for different Hyperliquid accounts/subaccounts.
 
 ## Step 3: Add Your LP Position
 
@@ -63,11 +64,11 @@ After logging in, click the **"+ Add Position"** button on your dashboard.
 
 Fill in the following fields:
 
-1. **API Key** - Your Hyperliquid read-only API key
-2. **API Secret** - Your Hyperliquid API secret
-3. **Subaccount** (optional) - Enter subaccount name if you're using Hyperliquid subaccounts
-4. **Label** (optional) - Give this position a friendly name for easy identification
-5. **NFT Token ID** - Your Uniswap V3 LP position NFT ID
+1. **Position Name** - Give this position a friendly name for easy identification
+2. **Network** - Select the blockchain network (e.g., Arbitrum, Base)
+3. **NFT Token ID** - Your Uniswap V3 LP position NFT ID
+4. **Trading Account** - Select which trading account to use for hedging this position
+5. **Hedge Ratio** - Set your desired hedge ratio (e.g., 80% for asymmetric hedging)
 
 **Need your NFT ID?** [How to find your Uniswap V3 NFT ID →](../position-setup/uniswap-v3-nft-id.md)
 
@@ -103,12 +104,12 @@ Once your position is active, you'll see:
 
 ## Troubleshooting
 
-### "Invalid API Key"
+### "Trading Account Connection Failed"
 
-- Verify the key is copied correctly (no extra spaces)
-- Ensure the key has read permissions enabled
-- Check if the key is for the correct account/subaccount
-- Try generating a new key
+- Verify the private key is copied correctly (no extra spaces)
+- Ensure the key has trading permissions enabled
+- Check if the wallet address and subaccount name are correct
+- Try generating a new API key on Hyperliquid
 
 ### "Position Already Tracked"
 
@@ -120,7 +121,7 @@ You cannot add the same position twice. To update a position:
 ### Position Not Updating
 
 - Wait 1-2 minutes for the initial data fetch
-- Check that your API key hasn't been revoked
+- Check that your trading account credentials are still valid
 - Verify the NFT ID is correct
 
 **More help:** [Troubleshooting Guide](../troubleshooting/index.md)
@@ -132,5 +133,5 @@ You cannot add the same position twice. To update a position:
 ## Need Help?
 
 - [FAQ](../faq.md) - Common questions
-- [API Key Issues](../troubleshooting/api-key-issues.md) - API problems
+- [Troubleshooting Guide](../troubleshooting/index.md) - Common issues
 - [Contact Support](../troubleshooting/contact-support.md) - Get personalized help
