@@ -71,7 +71,7 @@ def dashboard_page() -> rx.Component:
                         rx.vstack(
                             rx.spinner(size="3", color=COLORS.ACCENT_PRIMARY),
                             rx.heading("Loading Dashboard...", size="6", margin_top="1rem", color=COLORS.TEXT_PRIMARY),
-                            rx.text("Fetching your positions and API keys", size="3", color=COLORS.TEXT_SECONDARY),
+                            rx.text("Fetching your positions and trading accounts", size="3", color=COLORS.TEXT_SECONDARY),
                             spacing="4",
                             align="center",
                         ),
