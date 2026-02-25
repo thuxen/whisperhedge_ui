@@ -15,7 +15,7 @@ Before you start, make sure you have:
 
 Your Hyperliquid **wallet** (0x address) contains multiple **trading accounts**:
 - 1 Master account
-- Multiple Sub-accounts (however a total trading volume of at least 100k USD is required to create these)
+- Multiple Sub-accounts (total trading volume of at least 100k USD is required to create Sub-Accounts)
 
 **Key points:**
 - ✅ One API key works for all trading accounts in your wallet
