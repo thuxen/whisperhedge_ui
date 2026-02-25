@@ -774,20 +774,37 @@ def lp_positions_component() -> rx.Component:
                                             ),
                                             
                                             rx.vstack(
-                                                rx.text("Hedge Strategy", size="2", weight="bold"),
+                                                rx.text("Hedge Strategy Type", size="2", weight="bold"),
                                                 rx.select(
-                                                    ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100", "Dynamic"],
-                                                    value=LPPositionState.hedge_ratio_display,
-                                                    on_change=LPPositionState.set_hedge_ratio,
-                                                    placeholder="Select hedge strategy",
+                                                    ["Static", "Dynamic"],
+                                                    value=LPPositionState.hedge_strategy_type_display,
+                                                    on_change=LPPositionState.set_hedge_strategy_type,
+                                                    placeholder="Select strategy type",
                                                 ),
                                                 rx.cond(
                                                     LPPositionState.use_dynamic_hedging,
                                                     rx.text("Dynamic hedging adjusts ratio based on market conditions", size="1", color="blue"),
-                                                    rx.text(f"Static hedge at {LPPositionState.hedge_ratio}% of position exposure", size="1", color="gray"),
+                                                    rx.text("Static hedge maintains a fixed ratio", size="1", color="gray"),
                                                 ),
                                                 spacing="1",
                                                 width="100%",
+                                            ),
+                                            
+                                            # Conditional: Static Hedge Ratio Selection
+                                            rx.cond(
+                                                ~LPPositionState.use_dynamic_hedging,
+                                                rx.vstack(
+                                                    rx.text("Hedge Ratio", size="2", weight="bold"),
+                                                    rx.select(
+                                                        ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
+                                                        value=LPPositionState.hedge_ratio_display,
+                                                        on_change=LPPositionState.set_hedge_ratio,
+                                                        placeholder="Select hedge ratio",
+                                                    ),
+                                                    rx.text(f"Hedge at {LPPositionState.hedge_ratio}% of position exposure", size="1", color="gray"),
+                                                    spacing="1",
+                                                    width="100%",
+                                                ),
                                             ),
                                             
                                             # Dynamic Hedging Configuration
@@ -800,20 +817,12 @@ def lp_positions_component() -> rx.Component:
                                                     rx.vstack(
                                                         rx.text("Profile", size="2", weight="bold"),
                                                         rx.select(
-                                                            ["balanced", "whisper_dynamic", "aggressive_upside", "aggressive_downside", "volatility_adaptive"],
+                                                            ["whisper_dynamic"],
                                                             value=LPPositionState.dynamic_profile,
                                                             on_change=LPPositionState.set_dynamic_profile,
                                                             placeholder="Select profile",
                                                         ),
-                                                        rx.match(
-                                                            LPPositionState.dynamic_profile,
-                                                            ("balanced", rx.text("Standard delta-neutral hedging with moderate adjustments", size="1", color="gray")),
-                                                            ("whisper_dynamic", rx.text("Whisper Capital's proprietary dynamic hedging algorithm", size="1", color="blue")),
-                                                            ("aggressive_upside", rx.text("Reduce hedge on upward moves to capture more gains", size="1", color="gray")),
-                                                            ("aggressive_downside", rx.text("Increase hedge on downward moves for protection", size="1", color="gray")),
-                                                            ("volatility_adaptive", rx.text("Adjust based on implied/realized volatility", size="1", color="gray")),
-                                                            rx.text("Select a profile", size="1", color="gray"),
-                                                        ),
+                                                        rx.text("Whisper Capital's proprietary dynamic hedging algorithm", size="1", color="blue"),
                                                         spacing="1",
                                                         width="100%",
                                                     ),

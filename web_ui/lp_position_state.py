@@ -92,6 +92,7 @@ class LPPositionState(rx.State):
     _fetch_nft_id: str = ""
     
     hedge_ratio: int = 80
+    hedge_strategy_type: str = "Static"  # "Static" or "Dynamic"
     selected_hedge_wallet: str = ""
     _cached_wallets: list[str] = []  # Cache for available wallets
     
@@ -103,7 +104,7 @@ class LPPositionState(rx.State):
     
     # Dynamic hedging fields
     use_dynamic_hedging: bool = False
-    dynamic_profile: str = "balanced"
+    dynamic_profile: str = "whisper_dynamic"
     rebalance_cooldown_hours: float = 8.0
     delta_drift_threshold_pct: float = 0.38
     down_threshold: float = -0.065
@@ -122,14 +123,22 @@ class LPPositionState(rx.State):
     def set_notes(self, value: str):
         self.notes = value
     
-    def set_hedge_ratio(self, value: str):
-        # Dynamic is represented as 0 internally
+    def set_hedge_strategy_type(self, value: str):
+        """Handle strategy type selection (Static or Dynamic)"""
+        self.hedge_strategy_type = value
         if value == "Dynamic":
-            self.hedge_ratio = 0
             self.use_dynamic_hedging = True
-        else:
-            self.hedge_ratio = int(value)
+            self.hedge_ratio = 0
+            self.dynamic_profile = "whisper_dynamic"  # Default to only available profile
+        else:  # Static
             self.use_dynamic_hedging = False
+            if self.hedge_ratio == 0:
+                self.hedge_ratio = 80  # Default static ratio
+    
+    def set_hedge_ratio(self, value: str):
+        """Handle static hedge ratio selection (only called when Static is selected)"""
+        self.hedge_ratio = int(value)
+        self.use_dynamic_hedging = False
     
     def toggle_hedge_enabled(self, value: bool):
         """Handle hedge enabled toggle with validation"""
@@ -249,10 +258,15 @@ class LPPositionState(rx.State):
         self.max_hedge_drift_pct = mapping.get(value, 0.50)
     
     @rx.var
+    def hedge_strategy_type_display(self) -> str:
+        """Display value for strategy type dropdown"""
+        return "Dynamic" if self.use_dynamic_hedging else "Static"
+    
+    @rx.var
     def hedge_ratio_display(self) -> str:
-        """Display value for hedge ratio dropdown"""
+        """Display value for hedge ratio dropdown (static ratios only)"""
         if self.hedge_ratio == 0:
-            return "Dynamic"
+            return "80"  # Default display if somehow 0 in static mode
         return str(self.hedge_ratio)
     
     @rx.var

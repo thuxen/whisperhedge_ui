@@ -16,13 +16,14 @@ Before you start, make sure you have:
 Your Hyperliquid **wallet** (0x address) can contain multiple **trading accounts**:
 
 - 1 Master account
-- Multiple Sub-accounts (total trading volume of at least 100k USD is required to create Sub-Accounts)
+- Multiple Sub-accounts 
 
 **Key points:**
 
 - ✅ One API key works for all trading accounts in your wallet
 - ✅ Each LP position you hedge needs its own dedicated trading account (Master or Sub-Account)
 - ✅ Each trading account needs its own funds for hedging
+- ✅ You need 100k USD of trading volume before you can create Sub-Accounts. If you need to hedge multiple LP positions, you may need multiple Wallet accounts on Hyperliquid, each will require its own API key.
 
 ## Step 1: Create Your Hyperliquid API Key
 
@@ -40,17 +41,16 @@ The API WALLET ADDRESS is not required.
 
 ## Step 2: Add Your Trading Account to WhisperHedge
 
-1. Log into your WhisperHedge dashboard
-2. Navigate to **Trading Accounts** in the sidebar
-3. In the **"Add New Trading Account"** box
-4. Fill in the following fields:
+1. Navigate to **Trading Accounts** in the sidebar
+2. In the **"Add New Trading Account"** box
+3. Fill in the following fields:
    - **Account Name** - Give this trading account a name (e.g., "Main Account" or "ETH-USDC Sub")
    - **Exchange** - Leave this as hyperliquid
    - **API Secret** - Paste your Hyperliquid PRIVATE KEY from Step 1
    - **Master Wallet Address / Sub-Account Address** - Enter your main wallet address or the Sub-Account address
    - **Master Account or Sub-Account** - If you're using your Master account, check this box, otherwise leave it unchecked
    - **Notes** (optional) - For any notes you want to add
-5. Click **"Add Trading Account"** to save it
+4. Click **"Add Trading Account"** to save it
 
 !!! success "Trading Account Added!"
     Your trading account is now saved and can be assigned to LP positions for hedging. You can verify this works by clicking the **Check Balance** button. If it works, you should see your wallet balance displayed.
@@ -59,9 +59,24 @@ The API WALLET ADDRESS is not required.
 
 ### Navigate to Dashboard
 
-After logging in, click the **"+ Add Position"** button on your dashboard.
+Navigate to **LP Positions** in the sidebar
 
-### Enter Position Details
+### Fetch Position Details
+
+In the **"Add New LP Position"** section
+
+1. Select Protocol (e.g., Uniswap V3)
+2. Select Network (e.g., Ethereum, Arbitrum, Base, Polygon, Optimism)
+3. Enter Position NFT ID
+4. Click **Fetch Position Data**
+
+**Need your NFT ID?** [How to find your Uniswap V3 NFT ID →](../position-setup/uniswap-v3-nft-id.md)
+
+### Save Position
+
+This should fetch your position details and display them along with the hedging configuration options.
+
+At this point if **Hedging Enabled** is unticked, you can go ahead and save your position.
 
 Fill in the following fields:
 
@@ -70,8 +85,6 @@ Fill in the following fields:
 3. **NFT Token ID** - Your Uniswap V3 LP position NFT ID
 4. **Trading Account** - Select which trading account to use for hedging this position
 5. **Hedge Ratio** - Set your desired hedge ratio (e.g., 80% for asymmetric hedging)
-
-**Need your NFT ID?** [How to find your Uniswap V3 NFT ID →](../position-setup/uniswap-v3-nft-id.md)
 
 ### Verify & Save
 
