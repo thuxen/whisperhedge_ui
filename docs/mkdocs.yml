@@ -28,13 +28,13 @@ nav:
   - Home: index.md
   - Getting Started:
       - Overview: getting-started/index.md
-  - API Keys & Authentication:
-      - Overview: api-keys/index.md
-      - Hyperliquid API Keys: api-keys/hyperliquid-keys.md
-      - Subaccounts: api-keys/subaccounts.md
-      - Permissions: api-keys/permissions.md
-      - One Key Per Position: api-keys/one-key-per-position.md
-      - Rotating Keys: api-keys/rotating-keys.md
+  - Trading Accounts:
+      - Overview: trading-accounts/index.md
+      - Hyperliquid Setup: trading-accounts/hyperliquid-keys.md
+      - Subaccounts: trading-accounts/subaccounts.md
+      - Permissions: trading-accounts/permissions.md
+      - One Account Per Position: trading-accounts/one-key-per-position.md
+      - Rotating Credentials: trading-accounts/rotating-keys.md
   - Position Setup:
       - Overview: position-setup/index.md
       - Uniswap V3 NFT ID: position-setup/uniswap-v3-nft-id.md
@@ -52,15 +52,15 @@ nav:
       - Notifications: features/notifications.md
   - Security:
       - Overview: security/index.md
-      - API Key Security: security/api-key-security.md
-      - Read-Only Permissions: security/read-only-permissions.md
+      - Trading Account Security: security/api-key-security.md
+      - Trade-Only Permissions: security/read-only-permissions.md
       - Data Privacy: security/data-privacy.md
       - Account Security: security/account-security.md
       - What We Store: security/what-we-store.md
   - Troubleshooting:
       - Overview: troubleshooting/index.md
       - Common Errors: troubleshooting/common-errors.md
-      - API Key Issues: troubleshooting/api-key-issues.md
+      - Trading Account Issues: troubleshooting/api-key-issues.md
       - Position Not Updating: troubleshooting/position-not-updating.md
       - Contact Support: troubleshooting/contact-support.md
   - FAQ: faq.md
