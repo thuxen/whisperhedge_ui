@@ -346,15 +346,18 @@ class LPPositionState(rx.State):
         required_balance = hedgeable_value * 0.15
         available_balance = self.selected_wallet_available
         
+        # Calculate balance as percentage of hedgeable value
+        balance_pct = (available_balance / hedgeable_value * 100) if hedgeable_value > 0 else 0
+        
         if available_balance >= required_balance:
             return {
                 "status": "success",
-                "message": f"✓ Balance sufficient (${available_balance:,.2f} ≥ ${required_balance:,.2f} for {hedgeable_description})"
+                "message": f"✓ Balance covers {balance_pct:.0f}% of {hedgeable_description} (15% minimum)"
             }
         else:
             return {
                 "status": "insufficient",
-                "message": f"⚠ Insufficient balance (${available_balance:,.2f} < ${required_balance:,.2f} required for {hedgeable_description})"
+                "message": f"⚠ Balance is only {balance_pct:.0f}% of {hedgeable_description} (15% needed)"
             }
     
     @rx.var
