@@ -1,16 +1,18 @@
-# Finding Your Uniswap V3 NFT ID
+# Finding Your NFT ID
 
-Uniswap V3 positions are represented as NFTs (Non-Fungible Tokens). Each position has a unique Token ID that you need to track it in WhisperHedge.
+Many DeFi protocols represent LP positions as NFTs (Non-Fungible Tokens). Each position has a unique Token ID that you need to track it in WhisperHedge.
 
 ## What is an NFT ID?
 
-When you provide liquidity on Uniswap V3, you receive an NFT that represents your position. This NFT has a unique Token ID (a number) that identifies your specific position.
+When you provide liquidity on certain protocols, you receive an NFT that represents your position. This NFT has a unique Token ID (a number) that identifies your specific position.
 
 **Example:** `123456`
 
-## How to Find Your NFT ID
+## Uniswap V3
 
-### Method 1: Uniswap Interface
+### How to Find Your NFT ID
+
+#### Method 1: Uniswap Interface
 
 1. Go to [app.uniswap.org](https://app.uniswap.org)
 2. Connect your wallet
@@ -19,7 +21,7 @@ When you provide liquidity on Uniswap V3, you receive an NFT that represents you
 5. Click on the position to view details
 6. Look for "Token ID" or "NFT ID" in the position details
 
-### Method 2: Etherscan (Ethereum)
+#### Method 2: Etherscan (Ethereum)
 
 1. Go to [etherscan.io](https://etherscan.io)
 2. Search for your wallet address
@@ -28,7 +30,7 @@ When you provide liquidity on Uniswap V3, you receive an NFT that represents you
 5. Click to view your NFTs
 6. The Token ID is shown for each position
 
-### Method 3: Wallet (MetaMask, etc.)
+#### Method 3: Wallet (MetaMask, etc.)
 
 Some wallets display NFTs:
 
@@ -38,7 +40,7 @@ Some wallets display NFTs:
 4. Click on your position
 5. View the Token ID in the details
 
-### Method 4: Block Explorer
+#### Method 4: Block Explorer
 
 For other networks (Polygon, Arbitrum, etc.):
 
@@ -48,15 +50,15 @@ For other networks (Polygon, Arbitrum, etc.):
    - Optimism: optimistic.etherscan.io
 2. Follow same steps as Etherscan method
 
-## What You'll Also Need
+### What You'll Also Need
 
-### Wallet Address
+#### Wallet Address
 
 The wallet address that holds the NFT:
 
 **Example:** `0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb`
 
-### Network
+#### Network
 
 The blockchain network where your position exists:
 
@@ -66,7 +68,7 @@ The blockchain network where your position exists:
 - Optimism
 - Base
 
-## Adding to WhisperHedge
+### Adding to WhisperHedge
 
 Once you have your NFT ID:
 

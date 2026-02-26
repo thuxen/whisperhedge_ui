@@ -25,7 +25,7 @@ WhisperHedge currently supports:
 - Wallet address holding the NFT
 - Network (Ethereum, Polygon, etc.)
 
-[Find your NFT ID →](uniswap-v3-nft-id.md)
+[Find your NFT ID →](finding-nft-id.md)
 
 ## Quick Start
 
@@ -37,6 +37,6 @@ WhisperHedge currently supports:
 
 ## Related Topics
 
-- [Uniswap V3 NFT ID](uniswap-v3-nft-id.md)
+- [Uniswap V3 NFT ID](finding-nft-id.md)
 - [Hyperliquid Positions](hyperliquid-positions.md)
 - [Supported Protocols](supported-protocols.md)

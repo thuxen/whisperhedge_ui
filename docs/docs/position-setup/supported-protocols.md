@@ -46,7 +46,7 @@ WhisperHedge currently supports LP position tracking on the following protocols.
 - Wallet address
 - Network selection
 
-[Setup guide →](uniswap-v3-nft-id.md)
+[Setup guide →](finding-nft-id.md)
 
 ### Networks
 
@@ -135,5 +135,5 @@ We prioritize based on user demand and technical feasibility.
 ## Related Topics
 
 - [Hyperliquid Positions](hyperliquid-positions.md)
-- [Uniswap V3 NFT ID](uniswap-v3-nft-id.md)
+- [Uniswap V3 NFT ID](finding-nft-id.md)
 - [Adding Your First Position](../getting-started/index.md)

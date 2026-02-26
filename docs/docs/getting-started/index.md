@@ -70,7 +70,7 @@ In the **"Add New LP Position"** section
 3. Enter Position NFT ID
 4. Click **Fetch Position Data**
 
-**Need your NFT ID?** [How to find your Uniswap V3 NFT ID →](../position-setup/uniswap-v3-nft-id.md)
+**Need your NFT ID?** [How to find your NFT ID →](../position-setup/finding-nft-id.md)
 
 ### Save Position
 

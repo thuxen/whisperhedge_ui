@@ -33,7 +33,7 @@ For Uniswap V3 positions, you'll need:
 - NFT Token ID
 - Wallet address
 
-[Find Your NFT ID →](../position-setup/uniswap-v3-nft-id.md)
+[Find Your NFT ID →](../position-setup/finding-nft-id.md)
 
 ## Key Concepts
 
@@ -150,8 +150,8 @@ Common problems and solutions:
 
 ### Uniswap V3
 
-- [Finding NFT IDs](../position-setup/uniswap-v3-nft-id.md)
-- [Wallet Connection](../position-setup/uniswap-v3-nft-id.md#wallet-address)
+- [Finding NFT IDs](../position-setup/finding-nft-id.md)
+- [Wallet Connection](../position-setup/finding-nft-id.md#wallet-address)
 
 ## Quick Reference
 
