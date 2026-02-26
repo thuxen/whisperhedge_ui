@@ -154,21 +154,48 @@ class LPPositionState(rx.State):
                 self.error_message = "Please fetch position data first"
                 return rx.toast.error("Fetch position data before enabling hedging", duration=5000)
             
-            # Check 3: Balance validation (≥15% of position value) - ENFORCE
-            required_balance = position_value * 0.15
+            # Check 3: Balance validation (≥15% of hedgeable value) - ENFORCE
+            from web_ui.hl_utils import is_stablecoin
+            
+            token0_value = float(self.fetched_position_data.get("token0_amount_usd", 0))
+            token1_value = float(self.fetched_position_data.get("token1_amount_usd", 0))
+            
+            # Determine which tokens need hedging (exclude stablecoins)
+            token0_is_stable = is_stablecoin(self.token0_symbol)
+            token1_is_stable = is_stablecoin(self.token1_symbol)
+            
+            # Calculate hedgeable value (only volatile tokens)
+            if token0_is_stable and token1_is_stable:
+                # Both stable - shouldn't happen (blocked earlier), but handle gracefully
+                hedgeable_value = 0
+                hedgeable_description = "both stablecoins"
+            elif token0_is_stable:
+                # Only token1 needs hedging
+                hedgeable_value = token1_value
+                hedgeable_description = f"{self.token1_symbol} side"
+            elif token1_is_stable:
+                # Only token0 needs hedging
+                hedgeable_value = token0_value
+                hedgeable_description = f"{self.token0_symbol} side"
+            else:
+                # Both volatile - need full position value
+                hedgeable_value = position_value
+                hedgeable_description = "full position"
+            
+            required_balance = hedgeable_value * 0.15
             available_balance = self.selected_wallet_available
             
             if available_balance < required_balance:
-                self.error_message = f"Insufficient balance: ${available_balance:,.2f} available, ${required_balance:,.2f} required (15% of position)"
+                self.error_message = f"Insufficient balance: ${available_balance:,.2f} available, ${required_balance:,.2f} required (15% of {hedgeable_description})"
                 return rx.toast.error(
-                    f"Insufficient balance: Need ${required_balance:,.2f} (15% of ${position_value:,.2f}), have ${available_balance:,.2f}",
+                    f"Insufficient balance: Need ${required_balance:,.2f} (15% of {hedgeable_description}: ${hedgeable_value:,.2f}), have ${available_balance:,.2f}",
                     duration=8000
                 )
             
             # All checks passed - enable hedging
             self.hedge_enabled = True
             return rx.toast.success(
-                f"Hedging enabled! Balance: ${available_balance:,.2f} (required: ${required_balance:,.2f})",
+                f"Hedging enabled! Balance: ${available_balance:,.2f} (required: ${required_balance:,.2f} for {hedgeable_description})",
                 duration=5000
             )
         else:  # User is disabling hedging
@@ -276,6 +303,59 @@ class LPPositionState(rx.State):
         if hours == 1:
             return "1 hour"
         return f"{hours} hours"
+    
+    @rx.var
+    def balance_status_for_position(self) -> dict:
+        """Check if selected wallet has sufficient balance for current position"""
+        if not self.selected_hedge_wallet or self.selected_hedge_wallet == "None":
+            return {"status": "none", "message": ""}
+        
+        if self.balance_loading:
+            return {"status": "loading", "message": "Checking balance..."}
+        
+        if self.balance_error:
+            return {"status": "error", "message": self.balance_error}
+        
+        # Get position data
+        position_value = float(self.fetched_position_data.get("position_value_usd", 0))
+        if position_value == 0:
+            return {"status": "warning", "message": "Fetch position data first"}
+        
+        # Calculate required balance (same logic as toggle_hedge_enabled)
+        from web_ui.hl_utils import is_stablecoin
+        
+        token0_value = float(self.fetched_position_data.get("token0_amount_usd", 0))
+        token1_value = float(self.fetched_position_data.get("token1_amount_usd", 0))
+        token0_is_stable = is_stablecoin(self.token0_symbol)
+        token1_is_stable = is_stablecoin(self.token1_symbol)
+        
+        # Calculate hedgeable value (only volatile tokens)
+        if token0_is_stable and token1_is_stable:
+            hedgeable_value = 0
+            hedgeable_description = "both stablecoins"
+        elif token0_is_stable:
+            hedgeable_value = token1_value
+            hedgeable_description = f"{self.token1_symbol} side"
+        elif token1_is_stable:
+            hedgeable_value = token0_value
+            hedgeable_description = f"{self.token0_symbol} side"
+        else:
+            hedgeable_value = position_value
+            hedgeable_description = "full position"
+        
+        required_balance = hedgeable_value * 0.15
+        available_balance = self.selected_wallet_available
+        
+        if available_balance >= required_balance:
+            return {
+                "status": "success",
+                "message": f"✓ Balance sufficient (${available_balance:,.2f} ≥ ${required_balance:,.2f} for {hedgeable_description})"
+            }
+        else:
+            return {
+                "status": "insufficient",
+                "message": f"⚠ Insufficient balance (${available_balance:,.2f} < ${required_balance:,.2f} required for {hedgeable_description})"
+            }
     
     @rx.var
     def estimated_hedge_token0(self) -> float:

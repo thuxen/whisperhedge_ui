@@ -72,38 +72,27 @@ In the **"Add New LP Position"** section
 
 **Need your NFT ID?** [How to find your NFT ID →](../position-setup/finding-nft-id.md)
 
-### Save Position
-
 This should fetch your position details and display them along with the hedging configuration options.
 
-At this point if **Hedging Enabled** is unticked, you can go ahead and save your position.
+At this point you can **Save Position**. We recommend saving here as this keep your position in the Dashboard.
 
-Fill in the following fields:
-
-1. **Position Name** - Give this position a friendly name for easy identification
-2. **Network** - Select the blockchain network (e.g., Arbitrum, Base)
-3. **NFT Token ID** - Your Uniswap V3 LP position NFT ID
-4. **Trading Account** - Select which trading account to use for hedging this position
-5. **Hedge Ratio** - Set your desired hedge ratio (e.g., 80% for asymmetric hedging)
-
-### Verify & Save
-
-1. Click **"Verify Position"** to test the API connection
-2. Review the position details displayed (protocol, pair, current value)
-3. Click **"Save Position"** to activate automated hedging
+Alternatively if you are ready to start hedging right away, continue with the next step.
 
 !!! success "Position Added!"
-    Your position will appear on the dashboard within seconds. The first data fetch may take 1-2 minutes.
+    Your position will appear on the dashboard within seconds. 
 
-## Step 4: Configure Hedging Strategy
+## Step 4: Enable Hedging
 
-Once your position is added, configure your automated hedging strategy:
+In order to enable hedging, you need to have a working Trading Account with sufficient funds. Once you select a trading account, our system will do an automated check to ensure there are enough funds (minimum 15% of LP position).
 
-- **Variance-based rebalancing** - Hedge when delta exposure exceeds your threshold
-- **Asymmetric under-hedging** - Optimize for net profit vs. perfect hedging
-- **Funding-rate awareness** - Factor in perpetual funding costs
+Once you select your trading account, you can choose your Hedge Strategy:
+
+- **Dynamic** - Automated hedging parameters
+- **Static** - You select your hedge ratio and set hedging settings manually
 
 **Full strategy options:** [Hedging Strategy Guide](../hedging-strategy/index.md)
+
+Position Name and Notes fields are also available, or you can simply go with the defaults.
 
 ## Understanding Your Dashboard
 

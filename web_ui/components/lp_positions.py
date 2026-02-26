@@ -769,6 +769,33 @@ def lp_positions_component() -> rx.Component:
                                                         ),
                                                     ),
                                                 ),
+                                                # Balance status indicator
+                                                rx.cond(
+                                                    LPPositionState.balance_status_for_position["status"] == "success",
+                                                    rx.text(
+                                                        LPPositionState.balance_status_for_position["message"],
+                                                        size="1",
+                                                        color="green",
+                                                        weight="bold",
+                                                    ),
+                                                    rx.cond(
+                                                        LPPositionState.balance_status_for_position["status"] == "insufficient",
+                                                        rx.text(
+                                                            LPPositionState.balance_status_for_position["message"],
+                                                            size="1",
+                                                            color="red",
+                                                            weight="bold",
+                                                        ),
+                                                        rx.cond(
+                                                            LPPositionState.balance_status_for_position["status"] == "warning",
+                                                            rx.text(
+                                                                LPPositionState.balance_status_for_position["message"],
+                                                                size="1",
+                                                                color="orange",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
                                                 spacing="1",
                                                 width="100%",
                                             ),
