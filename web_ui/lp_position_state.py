@@ -305,6 +305,47 @@ class LPPositionState(rx.State):
         return f"{hours} hours"
     
     @rx.var
+    def recommended_balance_range(self) -> dict:
+        """Calculate recommended balance range for hedging based on position type"""
+        # Get position data
+        position_value = float(self.fetched_position_data.get("position_value_usd", 0))
+        if position_value == 0:
+            return {"min": 0, "max": 0, "description": ""}
+        
+        from web_ui.hl_utils import is_stablecoin
+        
+        token0_value = float(self.fetched_position_data.get("token0_amount_usd", 0))
+        token1_value = float(self.fetched_position_data.get("token1_amount_usd", 0))
+        token0_is_stable = is_stablecoin(self.token0_symbol)
+        token1_is_stable = is_stablecoin(self.token1_symbol)
+        
+        # Determine position type and calculate recommendation range
+        if token0_is_stable and not token1_is_stable:
+            # Vol/Stable - only token1 needs hedging (25-35%)
+            hedgeable_value = token1_value
+            min_pct = 0.25
+            max_pct = 0.35
+            description = f"This ensures safe hedging for your {self.token0_symbol}/{self.token1_symbol} position."
+        elif token1_is_stable and not token0_is_stable:
+            # Vol/Stable - only token0 needs hedging (25-35%)
+            hedgeable_value = token0_value
+            min_pct = 0.25
+            max_pct = 0.35
+            description = f"This ensures safe hedging for your {self.token0_symbol}/{self.token1_symbol} position."
+        else:
+            # Vol/Vol - both need hedging (30-40%)
+            hedgeable_value = position_value
+            min_pct = 0.30
+            max_pct = 0.40
+            description = f"This ensures safe hedging for your {self.token0_symbol}/{self.token1_symbol} position."
+        
+        return {
+            "min": hedgeable_value * min_pct,
+            "max": hedgeable_value * max_pct,
+            "description": description
+        }
+    
+    @rx.var
     def balance_status_for_position(self) -> dict:
         """Check if selected wallet has sufficient balance for current position"""
         if not self.selected_hedge_wallet or self.selected_hedge_wallet == "None":
@@ -346,18 +387,21 @@ class LPPositionState(rx.State):
         required_balance = hedgeable_value * 0.15
         available_balance = self.selected_wallet_available
         
-        # Calculate balance as percentage of hedgeable value
-        balance_pct = (available_balance / hedgeable_value * 100) if hedgeable_value > 0 else 0
+        # Get recommended range based on position type
+        recommended = self.recommended_balance_range
+        recommended_min = recommended["min"]
+        recommended_max = recommended["max"]
         
-        if available_balance >= required_balance:
+        if available_balance >= recommended_min:
             return {
                 "status": "success",
-                "message": f"✓ Balance covers {balance_pct:.0f}% of {hedgeable_description} (15% minimum)"
+                "message": f"✓ Balance sufficient (Recommended: ${recommended_min:,.0f}-${recommended_max:,.0f})"
             }
         else:
+            gap = recommended_min - available_balance
             return {
                 "status": "insufficient",
-                "message": f"⚠ Balance is only {balance_pct:.0f}% of {hedgeable_description} (15% needed)"
+                "message": f"⚠ Low balance - add ${gap:,.0f} (Recommended: ${recommended_min:,.0f}-${recommended_max:,.0f})"
             }
     
     @rx.var
