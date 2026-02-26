@@ -37,7 +37,7 @@ nav:
       - Rotating Credentials: trading-accounts/rotating-keys.md
   - Position Setup:
       - Overview: position-setup/index.md
-      - Uniswap V3 NFT ID: position-setup/uniswap-v3-nft-id.md
+      - Finding NFT ID: position-setup/finding-nft-id.md
       - Hyperliquid Positions: position-setup/hyperliquid-positions.md
       - Supported Protocols: position-setup/supported-protocols.md
   - Hedging Strategy:
