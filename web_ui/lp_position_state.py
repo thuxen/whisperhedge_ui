@@ -340,8 +340,8 @@ class LPPositionState(rx.State):
             description = f"This ensures safe hedging for your {self.token0_symbol}/{self.token1_symbol} position."
         
         return {
-            "min": hedgeable_value * min_pct,
-            "max": hedgeable_value * max_pct,
+            "min": round(hedgeable_value * min_pct),
+            "max": round(hedgeable_value * max_pct),
             "description": description
         }
     

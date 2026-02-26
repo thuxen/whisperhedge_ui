@@ -558,55 +558,45 @@ def lp_positions_component() -> rx.Component:
                 
                 # Step 2: Show fetched data and allow confirmation/editing
                 rx.vstack(
-                    # Position Details - Metadata Only (2-column layout)
+                    # Position Details - Metadata Only
                     rx.card(
                         rx.vstack(
                             rx.heading("Position Details", size="4", margin_bottom="1rem"),
                             
-                            rx.grid(
-                                # Left column
-                                rx.vstack(
-                                    rx.hstack(
-                                        rx.text("Protocol:", weight="bold", size="2"),
-                                        rx.text(LPPositionState.protocol.replace("_", " ").title(), size="2"),
-                                        spacing="2",
-                                    ),
-                                    rx.hstack(
-                                        rx.text("NFT ID:", weight="bold", size="2"),
-                                        rx.text(LPPositionState.nft_id, size="2"),
-                                        spacing="2",
-                                    ),
-                                    rx.hstack(
-                                        rx.text("Pair:", weight="bold", size="2"),
-                                        rx.text(LPPositionState.token0_symbol + "/" + LPPositionState.token1_symbol, size="2"),
-                                        spacing="2",
+                            rx.vstack(
+                                rx.hstack(
+                                    rx.text("Protocol:", weight="bold", size="2"),
+                                    rx.text(LPPositionState.protocol.replace("_", " ").title(), size="2"),
+                                    spacing="2",
+                                ),
+                                rx.hstack(
+                                    rx.text("Network:", weight="bold", size="2"),
+                                    rx.text(LPPositionState.network.title(), size="2"),
+                                    spacing="2",
+                                ),
+                                rx.hstack(
+                                    rx.text("NFT ID:", weight="bold", size="2"),
+                                    rx.text(LPPositionState.nft_id, size="2"),
+                                    spacing="2",
+                                ),
+                                rx.hstack(
+                                    rx.text("Pair:", weight="bold", size="2"),
+                                    rx.text(LPPositionState.token0_symbol + "/" + LPPositionState.token1_symbol, size="2"),
+                                    spacing="2",
+                                ),
+                                rx.hstack(
+                                    rx.text("Pool:", weight="bold", size="2"),
+                                    rx.text(LPPositionState.pool_address, size="2", color="gray"),
+                                    rx.icon_button(
+                                        rx.icon("clipboard", size=14),
+                                        size="1",
+                                        variant="ghost",
+                                        on_click=rx.set_clipboard(LPPositionState.pool_address),
                                     ),
                                     spacing="2",
-                                    align_items="start",
                                 ),
-                                # Right column
-                                rx.vstack(
-                                    rx.hstack(
-                                        rx.text("Network:", weight="bold", size="2"),
-                                        rx.text(LPPositionState.network.title(), size="2"),
-                                        spacing="2",
-                                    ),
-                                    rx.hstack(
-                                        rx.text("Pool:", weight="bold", size="2"),
-                                        rx.text(LPPositionState.pool_address, size="2", color="gray"),
-                                        rx.icon_button(
-                                            rx.icon("clipboard", size=14),
-                                            size="1",
-                                            variant="ghost",
-                                            on_click=rx.set_clipboard(LPPositionState.pool_address),
-                                        ),
-                                        spacing="2",
-                                    ),
-                                    spacing="2",
-                                    align_items="start",
-                                ),
-                                columns="2",
-                                spacing="4",
+                                spacing="2",
+                                align_items="start",
                                 width="100%",
                             ),
                             
@@ -657,23 +647,23 @@ def lp_positions_component() -> rx.Component:
                                 rx.text("Position:", weight="bold", size="2"),
                                 rx.vstack(
                                     rx.hstack(
-                                        rx.text(f"{LPPositionState.token0_symbol}:", weight="bold", size="2", width="60px"),
-                                        rx.text(f"{LPPositionState.fetched_position_data.get('token0_amount', 0):.6f}", size="2"),
-                                        rx.text("@", color="gray", size="2"),
-                                        rx.text(f"${LPPositionState.fetched_position_data.get('token0_price_usd', 0):.2f}", size="2"),
-                                        rx.text("=", color="gray", size="2"),
-                                        rx.text(f"${LPPositionState.fetched_position_data.get('token0_amount_usd', 0):,.2f}", size="2", color="green"),
-                                        rx.text(f"({LPPositionState.fetched_position_data.get('token0_pct', 0):.1f}%)", size="2", color="gray"),
+                                        rx.text(f"{LPPositionState.token0_symbol}:", weight="bold", size="2", min_width="60px"),
+                                        rx.text(f"{LPPositionState.fetched_position_data.get('token0_amount', 0):.6f}", size="2", min_width="120px", text_align="right"),
+                                        rx.text("@", color="gray", size="2", min_width="20px", text_align="center"),
+                                        rx.text(f"${LPPositionState.fetched_position_data.get('token0_price_usd', 0):.2f}", size="2", min_width="80px", text_align="right"),
+                                        rx.text("=", color="gray", size="2", min_width="20px", text_align="center"),
+                                        rx.text(f"${LPPositionState.fetched_position_data.get('token0_amount_usd', 0):,.2f}", size="2", color="green", min_width="100px", text_align="right"),
+                                        rx.text(f"({LPPositionState.fetched_position_data.get('token0_pct', 0):.1f}%)", size="2", color="gray", min_width="60px"),
                                         spacing="2",
                                     ),
                                     rx.hstack(
-                                        rx.text(f"{LPPositionState.token1_symbol}:", weight="bold", size="2", width="60px"),
-                                        rx.text(f"{LPPositionState.fetched_position_data.get('token1_amount', 0):.6f}", size="2"),
-                                        rx.text("@", color="gray", size="2"),
-                                        rx.text(f"${LPPositionState.fetched_position_data.get('token1_price_usd', 0):.2f}", size="2"),
-                                        rx.text("=", color="gray", size="2"),
-                                        rx.text(f"${LPPositionState.fetched_position_data.get('token1_amount_usd', 0):,.2f}", size="2", color="green"),
-                                        rx.text(f"({LPPositionState.fetched_position_data.get('token1_pct', 0):.1f}%)", size="2", color="gray"),
+                                        rx.text(f"{LPPositionState.token1_symbol}:", weight="bold", size="2", min_width="60px"),
+                                        rx.text(f"{LPPositionState.fetched_position_data.get('token1_amount', 0):.6f}", size="2", min_width="120px", text_align="right"),
+                                        rx.text("@", color="gray", size="2", min_width="20px", text_align="center"),
+                                        rx.text(f"${LPPositionState.fetched_position_data.get('token1_price_usd', 0):.2f}", size="2", min_width="80px", text_align="right"),
+                                        rx.text("=", color="gray", size="2", min_width="20px", text_align="center"),
+                                        rx.text(f"${LPPositionState.fetched_position_data.get('token1_amount_usd', 0):,.2f}", size="2", color="green", min_width="100px", text_align="right"),
+                                        rx.text(f"({LPPositionState.fetched_position_data.get('token1_pct', 0):.1f}%)", size="2", color="gray", min_width="60px"),
                                         spacing="2",
                                     ),
                                     spacing="1",
@@ -682,9 +672,9 @@ def lp_positions_component() -> rx.Component:
                                 
                                 rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
                                 
-                                # Total Value
+                                # Total LP Value
                                 rx.hstack(
-                                    rx.text("Total Value:", weight="bold", size="3"),
+                                    rx.text("Total LP Value:", weight="bold", size="3"),
                                     rx.text(f"${LPPositionState.fetched_position_data.get('position_value_usd', 0):,.2f}", size="3", weight="bold", color="green"),
                                     spacing="2",
                                 ),
