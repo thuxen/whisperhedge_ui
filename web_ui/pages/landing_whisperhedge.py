@@ -234,7 +234,7 @@ def hero_section() -> rx.Component:
                     font_weight="600",
                 ),
                 rx.text(
-                    "WhisperHedge is a non-custodial automation engine designed to mitigate Impermanent Loss. We execute user-defined hedging workflows on Hyperliquid, allowing you to focus on yield while our software manages your delta exposure—no manual monitoring required.",
+                    "WhisperHedge is a non-custodial automation engine designed to mitigate Impermanent Loss. We execute user-defined hedging workflows on Hyperliquid, allowing you to focus on yield while our hedging engine manages your delta exposure—no manual monitoring required.",
                     size="4",
                     color=COLORS.TEXT_SECONDARY,
                     text_align="center",
