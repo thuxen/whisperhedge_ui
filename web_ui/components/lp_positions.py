@@ -1179,4 +1179,77 @@ def lp_positions_component() -> rx.Component:
         ),
         width="100%",
     ),
+    
+    # Disable Hedge Confirmation Dialog
+    rx.dialog.root(
+        rx.dialog.content(
+            rx.vstack(
+                rx.hstack(
+                    rx.text("⚠️", size="6"),
+                    rx.text("Disable Hedging?", size="5", weight="bold"),
+                    spacing="2",
+                    align_items="center",
+                ),
+                rx.divider(),
+                rx.vstack(
+                    rx.text("Important:", weight="bold", size="3", color="orange"),
+                    rx.text(
+                        "Disabling hedging will stop automatic rebalancing, but your existing hedge positions on Hyperliquid will remain open.",
+                        size="2",
+                    ),
+                    rx.divider(margin_top="0.5rem", margin_bottom="0.5rem"),
+                    rx.text("Recommended Actions:", weight="bold", size="3"),
+                    rx.vstack(
+                        rx.hstack(
+                            rx.text("✓", color="green", weight="bold"),
+                            rx.text("Keep hedge positions open if you still have LP exposure", size="2"),
+                            spacing="2",
+                            align_items="start",
+                        ),
+                        rx.hstack(
+                            rx.text("✓", color="green", weight="bold"),
+                            rx.text("Only close hedge positions AFTER withdrawing all LP liquidity", size="2"),
+                            spacing="2",
+                            align_items="start",
+                        ),
+                        rx.hstack(
+                            rx.text("✓", color="green", weight="bold"),
+                            rx.text("Manually close positions on Hyperliquid when ready", size="2"),
+                            spacing="2",
+                            align_items="start",
+                        ),
+                        spacing="2",
+                        align_items="start",
+                    ),
+                    spacing="3",
+                    align_items="start",
+                ),
+                rx.divider(),
+                rx.hstack(
+                    rx.dialog.close(
+                        rx.button(
+                            "Cancel",
+                            variant="soft",
+                            color_scheme="gray",
+                            on_click=LPPositionState.cancel_disable_hedging,
+                        ),
+                    ),
+                    rx.dialog.close(
+                        rx.button(
+                            "Disable Hedging",
+                            color_scheme="orange",
+                            on_click=LPPositionState.confirm_disable_hedging,
+                        ),
+                    ),
+                    spacing="3",
+                    justify="end",
+                    width="100%",
+                ),
+                spacing="4",
+                width="100%",
+            ),
+            max_width="500px",
+        ),
+        open=LPPositionState.show_disable_hedge_dialog,
+    ),
     )

@@ -49,6 +49,9 @@ class LPPositionState(rx.State):
     # Delete confirmation dialog
     show_delete_dialog: bool = False
     position_to_delete: str = ""
+    
+    # Disable hedge confirmation dialog
+    show_disable_hedge_dialog: bool = False
     protocol: str = "uniswap_v3"
     network: str = "ethereum"
     nft_id: str = ""
@@ -199,7 +202,21 @@ class LPPositionState(rx.State):
                 duration=5000
             )
         else:  # User is disabling hedging
-            self.hedge_enabled = False
+            # Show confirmation dialog instead of immediate disable
+            self.show_disable_hedge_dialog = True
+    
+    def confirm_disable_hedging(self):
+        """User confirmed they want to disable hedging"""
+        self.hedge_enabled = False
+        self.show_disable_hedge_dialog = False
+        return rx.toast.warning(
+            "Hedging disabled. Remember to manually close hedge positions on Hyperliquid after withdrawing LP liquidity.",
+            duration=10000
+        )
+    
+    def cancel_disable_hedging(self):
+        """User cancelled disabling hedging"""
+        self.show_disable_hedge_dialog = False
     
     async def set_hedge_wallet(self, wallet: str):
         self.selected_hedge_wallet = wallet
