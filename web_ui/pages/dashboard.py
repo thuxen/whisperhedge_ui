@@ -15,6 +15,7 @@ from ..components import (
     settings_section,
     manage_plan_section,
 )
+from ..components.mobile_warning import mobile_warning_banner
 from ..components.plan_status import PlanStatusState
 from ..pages.manage_plan import ManagePlanState
 
@@ -29,6 +30,9 @@ def dashboard_page() -> rx.Component:
                     
                     rx.box(
                         rx.vstack(
+                            # Mobile warning banner (shows only on mobile devices)
+                            mobile_warning_banner(),
+                            
                             rx.box(
                                 rx.match(
                                     DashboardState.active_section,
