@@ -1,37 +1,69 @@
 import reflex as rx
 
 
-def mobile_warning_banner() -> rx.Component:
+class MobileWarningState(rx.State):
+    """State for mobile warning dialog"""
+    show_mobile_warning: bool = True
+    
+    def dismiss_mobile_warning(self):
+        """User dismissed the mobile warning"""
+        self.show_mobile_warning = False
+
+
+def mobile_warning_dialog() -> rx.Component:
     """
-    Warning banner that displays only on mobile devices.
+    Full-page modal dialog that displays only on mobile devices.
     Informs users that the platform is optimized for desktop.
     """
-    return rx.box(
-        rx.hstack(
-            rx.text("📱", size="5"),
-            rx.vstack(
-                rx.text("Mobile Notice", weight="bold", size="3"),
-                rx.text(
-                    "WhisperHedge is currently optimized for desktop browsers. Mobile monitoring features coming soon!",
-                    size="2"
+    return rx.cond(
+        MobileWarningState.show_mobile_warning,
+        rx.box(
+            rx.dialog.root(
+                rx.dialog.content(
+                    rx.vstack(
+                        rx.center(
+                            rx.text("📱", size="9"),
+                        ),
+                        rx.heading("Mobile Notice", size="6", text_align="center"),
+                        rx.divider(),
+                        rx.vstack(
+                            rx.text(
+                                "WhisperHedge is currently optimized for desktop browsers.",
+                                size="3",
+                                text_align="center",
+                            ),
+                            rx.text(
+                                "Mobile monitoring features coming soon!",
+                                size="3",
+                                text_align="center",
+                                weight="bold",
+                                color="blue",
+                            ),
+                            rx.text(
+                                "For the best experience, please use a desktop or laptop.",
+                                size="2",
+                                text_align="center",
+                                color="gray",
+                            ),
+                            spacing="2",
+                        ),
+                        rx.divider(),
+                        rx.dialog.close(
+                            rx.button(
+                                "I Understand",
+                                size="3",
+                                width="100%",
+                                color_scheme="blue",
+                                on_click=MobileWarningState.dismiss_mobile_warning,
+                            ),
+                        ),
+                        spacing="4",
+                        align_items="center",
+                    ),
+                    max_width="400px",
                 ),
-                rx.text(
-                    "For the best experience, please use a desktop or laptop.",
-                    size="2",
-                    color="gray"
-                ),
-                spacing="1",
-                align_items="start",
+                open=True,
             ),
-            spacing="3",
-            align_items="start",
-            width="100%",
+            display=["block", "block", "none"],  # Show on mobile/tablet, hide on desktop
         ),
-        padding="1rem",
-        background="var(--blue-3)",
-        border="1px solid var(--blue-6)",
-        border_radius="8px",
-        margin_bottom="1rem",
-        width="100%",
-        display=["block", "block", "none"],  # Show on mobile/tablet, hide on desktop
     )

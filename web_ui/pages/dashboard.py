@@ -15,7 +15,7 @@ from ..components import (
     settings_section,
     manage_plan_section,
 )
-from ..components.mobile_warning import mobile_warning_banner
+from ..components.mobile_warning import mobile_warning_dialog
 from ..components.plan_status import PlanStatusState
 from ..pages.manage_plan import ManagePlanState
 
@@ -24,15 +24,15 @@ def dashboard_page() -> rx.Component:
     return rx.cond(
         AuthState.is_authenticated,
         rx.fragment(
+            # Mobile warning dialog (full-page modal, shows only on mobile devices)
+            mobile_warning_dialog(),
+            
             rx.box(
                 rx.hstack(
                     sidebar(),
                     
                     rx.box(
                         rx.vstack(
-                            # Mobile warning banner (shows only on mobile devices)
-                            mobile_warning_banner(),
-                            
                             rx.box(
                                 rx.match(
                                     DashboardState.active_section,
