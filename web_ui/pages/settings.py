@@ -63,52 +63,6 @@ def settings_section(title: str, description: str, content: rx.Component) -> rx.
     )
 
 
-def profile_section() -> rx.Component:
-    """Profile settings section"""
-    return settings_section(
-        "Profile",
-        "Your account information (passwordless authentication)",
-        rx.vstack(
-            rx.hstack(
-                rx.text("Display Name", size="2", weight="medium", width="150px"),
-                rx.input(
-                    placeholder="Your name",
-                    value=SettingsState.display_name,
-                    on_change=SettingsState.set_display_name,
-                    width="100%",
-                    disabled=True,  # Placeholder
-                ),
-                width="100%",
-                align="center",
-            ),
-            rx.hstack(
-                rx.text("Email", size="2", weight="medium", width="150px"),
-                rx.input(
-                    placeholder="your@email.com",
-                    value=SettingsState.email,
-                    on_change=SettingsState.set_email,
-                    width="100%",
-                    disabled=True,  # Placeholder
-                ),
-                width="100%",
-                align="center",
-            ),
-            rx.hstack(
-                rx.spacer(),
-                rx.button(
-                    "Save Changes",
-                    on_click=SettingsState.save_profile,
-                    disabled=True,  # Placeholder
-                    size="2",
-                ),
-                width="100%",
-            ),
-            spacing="4",
-            width="100%",
-        ),
-    )
-
-
 def security_section() -> rx.Component:
     """Security settings section"""
     return settings_section(
@@ -145,68 +99,6 @@ def security_section() -> rx.Component:
                 ),
                 width="100%",
                 align="center",
-            ),
-            spacing="4",
-            width="100%",
-        ),
-    )
-
-
-def preferences_section() -> rx.Component:
-    """User preferences section"""
-    return settings_section(
-        "Preferences",
-        "Customize your application experience",
-        rx.vstack(
-            rx.hstack(
-                rx.text("Currency", size="2", weight="medium", width="150px"),
-                rx.select(
-                    ["USD", "EUR", "GBP", "JPY"],
-                    value=SettingsState.currency,
-                    on_change=SettingsState.set_currency,
-                    disabled=True,  # Placeholder
-                ),
-                width="100%",
-                align="center",
-            ),
-            rx.hstack(
-                rx.text("Timezone", size="2", weight="medium", width="150px"),
-                rx.select(
-                    ["UTC", "America/New_York", "America/Los_Angeles", "Europe/London"],
-                    value=SettingsState.timezone,
-                    on_change=SettingsState.set_timezone,
-                    disabled=True,  # Placeholder
-                ),
-                width="100%",
-                align="center",
-            ),
-            rx.hstack(
-                rx.text("Theme", size="2", weight="medium", width="150px"),
-                rx.select(
-                    ["dark", "light", "system"],
-                    value=SettingsState.theme,
-                    on_change=SettingsState.set_theme,
-                    disabled=True,  # Placeholder
-                ),
-                width="100%",
-                align="center",
-            ),
-            rx.hstack(
-                rx.text("Email Notifications", size="2", weight="medium", width="150px"),
-                rx.switch(disabled=True),  # Placeholder
-                rx.text("Receive updates about your positions", color="gray", size="2"),
-                width="100%",
-                align="center",
-            ),
-            rx.hstack(
-                rx.spacer(),
-                rx.button(
-                    "Save Preferences",
-                    on_click=SettingsState.save_preferences,
-                    disabled=True,  # Placeholder
-                    size="2",
-                ),
-                width="100%",
             ),
             spacing="4",
             width="100%",
@@ -274,9 +166,7 @@ def settings() -> rx.Component:
                 ),
                 
                 # Settings sections
-                profile_section(),
                 security_section(),
-                preferences_section(),
                 danger_zone_section(),
                 
                 spacing="5",

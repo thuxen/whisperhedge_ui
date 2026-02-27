@@ -57,34 +57,10 @@ def lp_positions_section() -> rx.Component:
     return lp_positions_component()
 
 
-def bot_status_section() -> rx.Component:
-    return rx.vstack(
-        rx.heading("Bot Status", size="7", margin_bottom="1rem"),
-        rx.card(
-            rx.vstack(
-                rx.heading("Coming Soon", size="6", color="gray"),
-                rx.text(
-                    "This section is under development.",
-                    size="3",
-                    color="gray",
-                ),
-                spacing="3",
-                align_items="center",
-                padding="4rem",
-            ),
-            width="100%",
-        ),
-        spacing="4",
-        width="100%",
-    )
-
-
 def settings_section() -> rx.Component:
     from ..pages.settings import (
         SettingsState,
-        profile_section,
         security_section,
-        preferences_section,
         danger_zone_section,
     )
     
@@ -110,9 +86,7 @@ def settings_section() -> rx.Component:
             ),
         ),
         
-        profile_section(),
         security_section(),
-        preferences_section(),
         danger_zone_section(),
         
         spacing="4",
@@ -634,54 +608,6 @@ def help_tab_button(label: str, tab_id: str, icon: str) -> rx.Component:
         _hover={
             "background": rx.cond(is_active, "var(--accent-4)", "var(--gray-3)"),
         },
-    )
-
-
-def faq_section() -> rx.Component:
-    """Enhanced FAQ/Help Center with categorized tabs"""
-    return rx.vstack(
-        rx.heading("Help Center", size="7", margin_bottom="1rem"),
-        
-        # Tab navigation
-        rx.hstack(
-            help_tab_button("FAQ", "faq", "help-circle"),
-            help_tab_button("Getting Started", "getting_started", "rocket"),
-            help_tab_button("Troubleshooting", "troubleshooting", "wrench"),
-            help_tab_button("API Docs", "api_docs", "code"),
-            help_tab_button("Best Practices", "best_practices", "shield-check"),
-            spacing="2",
-            width="100%",
-            margin_bottom="1.5rem",
-            flex_wrap="wrap",
-        ),
-        
-        # Tab content
-        rx.box(
-            rx.cond(
-                FAQState.active_tab == "faq",
-                faq_content(),
-            ),
-            rx.cond(
-                FAQState.active_tab == "getting_started",
-                getting_started_content(),
-            ),
-            rx.cond(
-                FAQState.active_tab == "troubleshooting",
-                troubleshooting_content(),
-            ),
-            rx.cond(
-                FAQState.active_tab == "api_docs",
-                api_docs_content(),
-            ),
-            rx.cond(
-                FAQState.active_tab == "best_practices",
-                best_practices_content(),
-            ),
-            width="100%",
-        ),
-        
-        spacing="4",
-        width="100%",
     )
 
 

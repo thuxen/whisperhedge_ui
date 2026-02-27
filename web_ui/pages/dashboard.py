@@ -10,8 +10,6 @@ from ..components import (
     overview_section,
     api_keys_section,
     lp_positions_section,
-    bot_status_section,
-    faq_section,
     settings_section,
     manage_plan_section,
 )
@@ -39,8 +37,6 @@ def dashboard_page() -> rx.Component:
                                     ("overview", overview_section()),
                                     ("api_keys", api_keys_section()),
                                     ("lp_positions", lp_positions_section()),
-                                    ("bot_status", bot_status_section()),
-                                    ("faq", faq_section()),
                                     ("settings", settings_section()),
                                     ("manage_plan", manage_plan_section()),
                                     api_keys_section(),

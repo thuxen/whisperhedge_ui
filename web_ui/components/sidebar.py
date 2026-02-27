@@ -107,10 +107,7 @@ def sidebar() -> rx.Component:
                 sidebar_item("Overview", "overview", "layout-dashboard"),
                 sidebar_item("LP Positions", "lp_positions", "coins"),
                 sidebar_item("Trading Accounts", "api_keys", "key"),
-                sidebar_item("Bot Status", "bot_status", "activity"),
                 sidebar_item("Manage Plan", "manage_plan", "credit-card"),
-                sidebar_item("Settings", "settings", "settings"),
-                sidebar_item("FAQ / Info", "faq", "info"),
                 rx.link(
                     rx.box(
                         rx.hstack(
@@ -153,6 +150,12 @@ def sidebar() -> rx.Component:
                         align_items="start",
                     ),
                     rx.spacer(),
+                    rx.button(
+                        rx.icon("settings", size=16),
+                        on_click=lambda: DashboardState.set_section("settings"),
+                        variant="ghost",
+                        size="2",
+                    ),
                     rx.button(
                         rx.icon("log-out", size=16),
                         on_click=AuthState.sign_out,
