@@ -205,10 +205,20 @@ class LPPositionState(rx.State):
             # Show confirmation dialog instead of immediate disable
             self.show_disable_hedge_dialog = True
     
-    def confirm_disable_hedging(self):
+    async def confirm_disable_hedging(self):
         """User confirmed they want to disable hedging"""
         self.hedge_enabled = False
+        self.selected_hedge_wallet = "None"
         self.show_disable_hedge_dialog = False
+        
+        # Refresh wallets to make API key available immediately
+        await self.load_wallets()
+        
+        # Reload API keys to update "in use" indicators
+        from web_ui.api_key_state import APIKeyState
+        api_key_state = await self.get_state(APIKeyState)
+        await api_key_state.load_api_keys()
+        
         return rx.toast.warning(
             "Hedging disabled. Remember to manually close hedge positions on Hyperliquid after withdrawing LP liquidity.",
             duration=10000
@@ -468,13 +478,25 @@ class LPPositionState(rx.State):
             
             if response.data:
                 # Get trading accounts that are already in use by other positions
-                used_keys_response = supabase.table("position_configs").select("hl_api_key_id").eq("user_id", auth_state.user_id).execute()
-                used_key_ids = {config["hl_api_key_id"] for config in used_keys_response.data if config.get("hl_api_key_id")}
+                # Explicitly exclude NULL values to avoid issues
+                used_keys_response = supabase.table("position_configs")\
+                    .select("hl_api_key_id")\
+                    .eq("user_id", auth_state.user_id)\
+                    .not_.is_("hl_api_key_id", "null")\
+                    .execute()
+                used_key_ids = {config["hl_api_key_id"] for config in used_keys_response.data}
                 
                 # When editing, allow the current position's trading account to appear
+                # Use (protocol, network, nft_id) as unique identifier
                 current_position_key_id = None
-                if self.is_editing and self.selected_position_id:
-                    current_config = supabase.table("position_configs").select("hl_api_key_id").eq("user_id", auth_state.user_id).eq("network", self.network).eq("nft_id", self.nft_id).execute()
+                if self.is_editing and self.protocol and self.network and self.nft_id:
+                    current_config = supabase.table("position_configs")\
+                        .select("hl_api_key_id")\
+                        .eq("user_id", auth_state.user_id)\
+                        .eq("protocol", self.protocol)\
+                        .eq("network", self.network)\
+                        .eq("nft_id", self.nft_id)\
+                        .execute()
                     if current_config.data and current_config.data[0].get("hl_api_key_id"):
                         current_position_key_id = current_config.data[0]["hl_api_key_id"]
                 
@@ -616,16 +638,29 @@ class LPPositionState(rx.State):
             
             # Check if this trading account is already used by another position
             try:
-                result = supabase.table("position_configs").select("id").eq("hl_api_key_id", api_key_id).execute()
+                # Get all positions using this API key (excluding NULL)
+                result = supabase.table("position_configs")\
+                    .select("user_id, protocol, network, nft_id")\
+                    .eq("user_id", auth_state.user_id)\
+                    .eq("hl_api_key_id", api_key_id)\
+                    .execute()
                 
-                # If editing, allow the same trading account for the same position
-                if self.is_editing and self.selected_position_id:
-                    # Check if the existing usage is by this same position
-                    existing_result = supabase.table("position_configs").select("id").eq("hl_api_key_id", api_key_id).eq("position_name", self.position_name).execute()
-                    return len(existing_result.data) > 0
+                if not result.data:
+                    return True  # Not used by any of this user's positions
+                
+                # If editing, check if it's THIS position using it
+                # Use (user_id, protocol, network, nft_id) as unique identifier
+                if self.is_editing and self.protocol and self.network and self.nft_id:
+                    for config in result.data:
+                        if (config["user_id"] == auth_state.user_id and 
+                            config["protocol"] == self.protocol and
+                            config["network"] == self.network and 
+                            config["nft_id"] == self.nft_id):
+                            return True  # Same position, allowed
+                    return False  # Different position using it
                 
                 # For new positions, trading account must not be used by any other position
-                return len(result.data) == 0
+                return False
             except Exception as table_error:
                 # If position_configs table doesn't exist, assume trading account is available
                 print(f"Warning: position_configs table not accessible: {table_error}")
@@ -1179,7 +1214,16 @@ class LPPositionState(rx.State):
             
             self.success_message = "Position saved successfully!"
             self.clear_form()
+            
+            # Reload positions, wallets, and API keys to refresh availability
             await self.load_positions()
+            await self.load_wallets()  # Refresh available wallets list
+            
+            # Reload API keys to update "in use" indicators
+            from web_ui.api_key_state import APIKeyState
+            api_key_state = await self.get_state(APIKeyState)
+            await api_key_state.load_api_keys()
+            
             yield rx.toast.success("Position saved successfully!", duration=3000)
         except Exception as e:
             print(f"Error saving position: {e}")
@@ -1221,28 +1265,31 @@ class LPPositionState(rx.State):
                 print(f"Validating API key uniqueness for wallet_id={wallet_id}")
                 
                 # Check if this API key is already used by another position
-                existing_usage = supabase.table("position_configs").select("id, position_name, network, nft_id").eq("user_id", user_id).eq("hl_api_key_id", wallet_id).execute()
+                # Use (user_id, protocol, network, nft_id) as unique identifier
+                existing_usage = supabase.table("position_configs")\
+                    .select("user_id, protocol, network, nft_id, position_name")\
+                    .eq("user_id", user_id)\
+                    .eq("hl_api_key_id", wallet_id)\
+                    .execute()
                 
                 if existing_usage.data:
                     print(f"API key is currently used by {len(existing_usage.data)} position(s)")
                     
-                    # Check if config exists for this position
-                    existing_check = supabase.table("position_configs").select("id").eq("user_id", user_id).eq("protocol", self.protocol).eq("network", self.network).eq("nft_id", self.nft_id).execute()
-                    
-                    if existing_check.data:
-                        # Editing existing position - allow if it's the same position
-                        existing_id = existing_check.data[0]["id"]
-                        if existing_usage.data[0]["id"] != existing_id:
-                            # API key is used by a different position
-                            other_position = existing_usage.data[0]["position_name"]
-                            print(f"API key validation FAILED - used by different position: {other_position}")
-                            raise Exception(f"API key already assigned to position: {other_position}")
-                        else:
+                    # Check if it's the same position (by user_id + protocol + network + nft_id)
+                    is_same_position = False
+                    for config in existing_usage.data:
+                        if (config["user_id"] == user_id and
+                            config["protocol"] == self.protocol and
+                            config["network"] == self.network and 
+                            config["nft_id"] == self.nft_id):
+                            is_same_position = True
                             print(f"API key validation PASSED - same position being edited")
-                    else:
-                        # New position - API key must not be in use
+                            break
+                    
+                    if not is_same_position:
+                        # API key is used by a different position
                         other_position = existing_usage.data[0]["position_name"]
-                        print(f"API key validation FAILED - used by position: {other_position}")
+                        print(f"API key validation FAILED - used by different position: {other_position}")
                         raise Exception(f"API key already assigned to position: {other_position}")
                 else:
                     print(f"API key validation PASSED - not in use by any position")
