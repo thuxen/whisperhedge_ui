@@ -57,8 +57,9 @@ class LPPositionState(rx.State):
     # Disable hedge confirmation dialog
     show_disable_hedge_dialog: bool = False
     
-    # Hedging settings visibility (collapsed by default)
-    show_hedging_settings: bool = False
+    # Settings dialog
+    show_settings_dialog: bool = False
+    selected_settings_position_id: str = ""
     
     protocol: str = "uniswap_v3"
     network: str = "ethereum"
@@ -236,9 +237,15 @@ class LPPositionState(rx.State):
         """User cancelled disabling hedging"""
         self.show_disable_hedge_dialog = False
     
-    def toggle_hedging_settings(self):
-        """Toggle hedging settings visibility"""
-        self.show_hedging_settings = not self.show_hedging_settings
+    def open_settings_dialog(self, position_id: str):
+        """Open settings dialog for a position"""
+        self.selected_settings_position_id = position_id
+        self.show_settings_dialog = True
+    
+    def close_settings_dialog(self):
+        """Close settings dialog"""
+        self.show_settings_dialog = False
+        self.selected_settings_position_id = ""
     
     async def set_hedge_wallet(self, wallet: str):
         self.selected_hedge_wallet = wallet
