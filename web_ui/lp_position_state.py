@@ -934,6 +934,11 @@ class LPPositionState(rx.State):
                     last_hedge_time_str = "Never"
                     lp_pnl_usd = None
                     lp_pnl_pct = None
+                    lp_il_usd = None
+                    lp_il_pct = None
+                    lp_utilization_pct = None
+                    lp_distance_to_lower_pct = None
+                    lp_distance_to_upper_pct = None
                     
                     if config.get("id"):
                         try:
@@ -948,6 +953,13 @@ class LPPositionState(rx.State):
                                 # Get PnL values from QuestDB
                                 lp_pnl_usd = latest_values.get('lp_pnl_usd')
                                 lp_pnl_pct = latest_values.get('lp_pnl_pct')
+                                
+                                # Get IL and range metrics from QuestDB
+                                lp_il_usd = latest_values.get('lp_il_usd')
+                                lp_il_pct = latest_values.get('lp_il_pct')
+                                lp_utilization_pct = latest_values.get('lp_utilization_pct')
+                                lp_distance_to_lower_pct = latest_values.get('lp_distance_to_lower_pct')
+                                lp_distance_to_upper_pct = latest_values.get('lp_distance_to_upper_pct')
                                 
                                 # Sync QuestDB value back to Supabase to keep database fresh
                                 try:
@@ -978,6 +990,11 @@ class LPPositionState(rx.State):
                         last_update=last_hedge_time_str,
                         current_pnl=lp_pnl_usd,
                         pnl_percentage=lp_pnl_pct,
+                        il_usd=lp_il_usd,
+                        il_pct=lp_il_pct,
+                        utilization_pct=lp_utilization_pct,
+                        distance_to_lower_pct=lp_distance_to_lower_pct,
+                        distance_to_upper_pct=lp_distance_to_upper_pct,
                     )
                     
                     position = LPPositionData(

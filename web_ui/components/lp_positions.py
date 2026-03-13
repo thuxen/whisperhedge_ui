@@ -5,6 +5,146 @@ from .position_chart import position_value_chart
 from .position_activity import position_activity_dialog
 
 
+def range_position_visual(position: LPPositionData) -> rx.Component:
+    """Create visual representation of position within LP range - Metrix Finance style
+    
+    The bar represents the full LP range with bounds at the edges.
+    Current price position is calculated from distance_to_lower_pct.
+    Position = distance_to_lower / (distance_to_lower + distance_to_upper) * 100
+    """
+    
+    return rx.cond(
+        position.metrics.utilization_pct != None,
+        rx.vstack(
+            rx.hstack(
+                rx.text("Range Position", size="1", color="gray", weight="medium"),
+                rx.badge(
+                    rx.cond(
+                        (position.metrics.utilization_pct >= 0) & (position.metrics.utilization_pct <= 100),
+                        "IN RANGE",
+                        "OUT OF RANGE"
+                    ),
+                    color_scheme=rx.cond(
+                        (position.metrics.utilization_pct >= 0) & (position.metrics.utilization_pct <= 100),
+                        "green",
+                        "red"
+                    ),
+                    variant="soft",
+                    size="1",
+                ),
+                spacing="2",
+                align_items="center",
+            ),
+            rx.box(
+                rx.vstack(
+                    # Custom range bar with dots (Metrix Finance style)
+                    rx.box(
+                        # Background bar
+                        rx.box(
+                            # Gradient bar background
+                            rx.box(
+                                width="100%",
+                                height="6px",
+                                background="linear-gradient(to right, rgba(239, 68, 68, 0.3), rgba(234, 179, 8, 0.3), rgba(34, 197, 94, 0.3), rgba(234, 179, 8, 0.3), rgba(239, 68, 68, 0.3))",
+                                border_radius="3px",
+                            ),
+                            # Position dots container
+                            rx.box(
+                                # Lower bound dot (purple)
+                                rx.box(
+                                    width="10px",
+                                    height="10px",
+                                    border_radius="50%",
+                                    background="rgba(168, 85, 247, 0.8)",
+                                    border="2px solid rgba(168, 85, 247, 1)",
+                                    position="absolute",
+                                    left="0",
+                                    top="-2px",
+                                ),
+                                # Current position dot (green if in range, red if out)
+                                # Position calculated as: distance_to_lower / (distance_to_lower + distance_to_upper) * 100
+                                rx.box(
+                                    width="12px",
+                                    height="12px",
+                                    border_radius="50%",
+                                    background=rx.cond(
+                                        (position.metrics.utilization_pct >= 0) & (position.metrics.utilization_pct <= 100),
+                                        "rgba(34, 197, 94, 0.9)",
+                                        "rgba(239, 68, 68, 0.9)"
+                                    ),
+                                    border=rx.cond(
+                                        (position.metrics.utilization_pct >= 0) & (position.metrics.utilization_pct <= 100),
+                                        "2px solid rgba(34, 197, 94, 1)",
+                                        "2px solid rgba(239, 68, 68, 1)"
+                                    ),
+                                    position="absolute",
+                                    left=rx.cond(
+                                        position.metrics.distance_to_lower_pct < 0,
+                                        "-6px",
+                                        rx.cond(
+                                            position.metrics.distance_to_upper_pct < 0,
+                                            "calc(100% - 6px)",
+                                            f"calc({(position.metrics.distance_to_lower_pct / (position.metrics.distance_to_lower_pct + position.metrics.distance_to_upper_pct) * 100)}% - 6px)"
+                                        )
+                                    ),
+                                    top="-3px",
+                                    z_index="2",
+                                ),
+                                # Upper bound dot (purple)
+                                rx.box(
+                                    width="10px",
+                                    height="10px",
+                                    border_radius="50%",
+                                    background="rgba(168, 85, 247, 0.8)",
+                                    border="2px solid rgba(168, 85, 247, 1)",
+                                    position="absolute",
+                                    right="0",
+                                    top="-2px",
+                                ),
+                                position="relative",
+                                width="100%",
+                                height="6px",
+                            ),
+                            position="relative",
+                            width="100%",
+                        ),
+                        width="100%",
+                        padding="0.5rem 0",
+                    ),
+                    spacing="1",
+                    width="100%",
+                ),
+                width="100%",
+            ),
+            # Distance to bounds
+            rx.hstack(
+                rx.text(
+                    f"Lower: {position.metrics.distance_to_lower_pct:.1f}%",
+                    size="1",
+                    color="gray",
+                ),
+                rx.text("•", size="1", color="gray"),
+                rx.text(
+                    f"Upper: {position.metrics.distance_to_upper_pct:.1f}%",
+                    size="1",
+                    color="gray",
+                ),
+                spacing="1",
+                justify="center",
+            ),
+            spacing="1",
+            align_items="start",
+            width="100%",
+        ),
+        rx.vstack(
+            rx.text("Range Position", size="1", color="gray", weight="medium"),
+            rx.text("N/A", size="2", color="gray"),
+            spacing="1",
+            align_items="start",
+        ),
+    )
+
+
 def lp_position_card(position: LPPositionData) -> rx.Component:
     return rx.card(
         rx.vstack(
@@ -90,6 +230,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
             rx.divider(margin_top="0.75rem", margin_bottom="0.75rem"),
             
             rx.grid(
+                # Row 1, Col 1: Total Position
                 rx.vstack(
                     rx.hstack(
                         rx.text("Total Position", size="1", color="gray", weight="medium"),
@@ -118,6 +259,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     spacing="1",
                     align_items="start",
                 ),
+                # Row 1, Col 2: PnL
                 rx.vstack(
                     rx.text("PnL", size="1", color="gray", weight="medium"),
                     rx.cond(
@@ -150,25 +292,59 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     spacing="1",
                     align_items="start",
                 ),
+                # Row 2, Col 1: Impermanent Loss
                 rx.vstack(
-                    rx.text("Status", size="1", color="gray", weight="medium"),
-                    rx.hstack(
-                        rx.text("Last Check:", size="2", color="gray"),
-                        rx.text(
-                            position.last_hedge_execution,
-                            size="2",
-                            weight="medium",
-                            color=rx.cond(position.last_hedge_execution == "Never", "gray", "green"),
+                    rx.text("Impermanent Loss", size="1", color="gray", weight="medium"),
+                    rx.cond(
+                        position.metrics.il_usd != None,
+                        rx.vstack(
+                            rx.text(
+                                rx.cond(
+                                    position.metrics.il_usd >= 0,
+                                    f"+${position.metrics.il_usd:,.2f}",
+                                    f"-${abs(position.metrics.il_usd):,.2f}",
+                                ),
+                                size="4",
+                                weight="bold",
+                                color=rx.cond(position.metrics.il_usd >= 0, "green", "red"),
+                            ),
+                            rx.text(
+                                rx.cond(
+                                    position.metrics.il_pct >= 0,
+                                    f"+{position.metrics.il_pct:.1f}%",
+                                    f"{position.metrics.il_pct:.1f}%",
+                                ),
+                                size="2",
+                                color=rx.cond(position.metrics.il_pct >= 0, "green", "red"),
+                            ),
+                            spacing="1",
+                            align_items="start",
                         ),
-                        spacing="1",
-                        align_items="center",
+                        rx.text("N/A", size="2", color="gray"),
                     ),
-                    spacing="2",
+                    spacing="1",
                     align_items="start",
                 ),
-                columns="3",
+                # Row 2, Col 2: Range Position
+                range_position_visual(position),
+                columns="2",
                 spacing="4",
                 width="100%",
+            ),
+            
+            rx.box(height="0.5rem"),
+            
+            # Status row
+            rx.hstack(
+                rx.text("Last Check:", size="1", color="gray"),
+                rx.text(
+                    position.last_hedge_execution,
+                    size="1",
+                    weight="medium",
+                    color=rx.cond(position.last_hedge_execution == "Never", "gray", "green"),
+                ),
+                spacing="1",
+                align_items="center",
             ),
             
             rx.box(height="0.5rem"),

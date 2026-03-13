@@ -124,7 +124,12 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
                 hl_account_value,
                 (lp_value_usd + hl_account_value) as total_value,
                 lp_pnl_usd,
-                lp_pnl_pct
+                lp_pnl_pct,
+                lp_il_usd,
+                lp_il_pct,
+                lp_utilization_pct,
+                lp_distance_to_lower_pct,
+                lp_distance_to_upper_pct
             FROM hedge_state
             WHERE position_id = %s
             ORDER BY time DESC
@@ -145,6 +150,11 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
                 'total_value': float(result['total_value']) if result['total_value'] else 0.0,
                 'lp_pnl_usd': float(result['lp_pnl_usd']) if result['lp_pnl_usd'] is not None else None,
                 'lp_pnl_pct': float(result['lp_pnl_pct']) if result['lp_pnl_pct'] is not None else None,
+                'lp_il_usd': float(result['lp_il_usd']) if result['lp_il_usd'] is not None else None,
+                'lp_il_pct': float(result['lp_il_pct']) if result['lp_il_pct'] is not None else None,
+                'lp_utilization_pct': float(result['lp_utilization_pct']) if result['lp_utilization_pct'] is not None else None,
+                'lp_distance_to_lower_pct': float(result['lp_distance_to_lower_pct']) if result['lp_distance_to_lower_pct'] is not None else None,
+                'lp_distance_to_upper_pct': float(result['lp_distance_to_upper_pct']) if result['lp_distance_to_upper_pct'] is not None else None,
             }
         
         return None

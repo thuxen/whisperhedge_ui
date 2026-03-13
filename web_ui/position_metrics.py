@@ -13,10 +13,19 @@ class PositionMetrics(BaseModel):
     hedge_value: float = 0.0
     total_value: float = 0.0
     
-    # Performance metrics (placeholders for future)
+    # Performance metrics
     entry_value: Optional[float] = None
     current_pnl: Optional[float] = None
     pnl_percentage: Optional[float] = None
+    
+    # Impermanent Loss metrics
+    il_usd: Optional[float] = None
+    il_pct: Optional[float] = None
+    
+    # Range position metrics
+    utilization_pct: Optional[float] = None
+    distance_to_lower_pct: Optional[float] = None
+    distance_to_upper_pct: Optional[float] = None
     
     # Price metrics (placeholders for future)
     entry_price: Optional[float] = None
