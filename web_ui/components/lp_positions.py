@@ -91,7 +91,15 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
             
             rx.grid(
                 rx.vstack(
-                    rx.text("Total Value (LP + Hedge Account)", size="1", color="gray", weight="medium"),
+                    rx.hstack(
+                        rx.text("Total Position", size="1", color="gray", weight="medium"),
+                        rx.tooltip(
+                            rx.icon("info", size=12, color="gray"),
+                            content="Total Position = LP Position (including fees) + Trading Account Balance",
+                        ),
+                        spacing="1",
+                        align_items="center",
+                    ),
                     rx.text(position.total_value_formatted, size="6", weight="bold", color="green"),
                     rx.hstack(
                         rx.text("LP:", size="1", color="gray"),
@@ -111,7 +119,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     align_items="start",
                 ),
                 rx.vstack(
-                    rx.text("PnL (LP Position)", size="1", color="gray", weight="medium"),
+                    rx.text("PnL", size="1", color="gray", weight="medium"),
                     rx.cond(
                         position.metrics.current_pnl != None,
                         rx.vstack(
