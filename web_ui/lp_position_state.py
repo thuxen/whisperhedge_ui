@@ -1,6 +1,7 @@
 import reflex as rx
 from pydantic import BaseModel
 from .auth import get_supabase_client
+from .position_metrics import PositionMetrics
 
 
 class LPPositionData(BaseModel):
@@ -39,6 +40,9 @@ class LPPositionData(BaseModel):
     drift_min_pct_of_capital: float = 0.06
     max_hedge_drift_pct: float = 0.50
     last_hedge_execution: str = "Never"
+    
+    # New metrics structure (keeps old fields for backward compatibility)
+    metrics: PositionMetrics = PositionMetrics()
 
 
 class LPPositionState(rx.State):
@@ -52,6 +56,10 @@ class LPPositionState(rx.State):
     
     # Disable hedge confirmation dialog
     show_disable_hedge_dialog: bool = False
+    
+    # Hedging settings visibility (collapsed by default)
+    show_hedging_settings: bool = False
+    
     protocol: str = "uniswap_v3"
     network: str = "ethereum"
     nft_id: str = ""
@@ -227,6 +235,10 @@ class LPPositionState(rx.State):
     def cancel_disable_hedging(self):
         """User cancelled disabling hedging"""
         self.show_disable_hedge_dialog = False
+    
+    def toggle_hedging_settings(self):
+        """Toggle hedging settings visibility"""
+        self.show_hedging_settings = not self.show_hedging_settings
     
     async def set_hedge_wallet(self, wallet: str):
         self.selected_hedge_wallet = wallet
@@ -787,7 +799,7 @@ class LPPositionState(rx.State):
             self.loading_position_id = ""
 
     async def refresh_position_status(self):
-        """Lightweight refresh of position status without full reload"""
+        """Lightweight refresh of position status and metric values without full reload"""
         try:
             print("[REFRESH STATUS] Starting position status refresh", flush=True)
             
@@ -798,18 +810,50 @@ class LPPositionState(rx.State):
                 print("[REFRESH STATUS] Not authenticated, skipping refresh", flush=True)
                 return
             
-            # Only update last_hedge_execution for existing positions
+            # Update metrics and last_hedge_execution for existing positions
             for position in self.lp_positions:
                 if position.position_config_id:
                     try:
-                        from web_ui.questdb_utils import get_last_hedge_execution, format_time_ago
+                        from web_ui.questdb_utils import get_latest_position_values, get_last_hedge_execution, format_time_ago
+                        
+                        # Get latest values from QuestDB
+                        latest_values = get_latest_position_values(position.position_config_id)
+                        if latest_values:
+                            # Update position values
+                            new_lp_value = latest_values['lp_value_usd']
+                            new_hedge_value = latest_values['hl_account_value']
+                            new_total_value = latest_values['total_value']
+                            new_pnl_usd = latest_values.get('lp_pnl_usd')
+                            new_pnl_pct = latest_values.get('lp_pnl_pct')
+                            
+                            # Log if values changed significantly (more than $0.01)
+                            if abs(position.position_size_usd - new_lp_value) > 0.01:
+                                print(f"[REFRESH STATUS] Position {position.position_name} LP value: ${position.position_size_usd:,.2f} -> ${new_lp_value:,.2f}", flush=True)
+                            
+                            # Update old fields (backward compatibility)
+                            position.position_size_usd = new_lp_value
+                            position.position_value_formatted = f"${new_lp_value:,.2f}"
+                            position.api_account_value = new_hedge_value
+                            position.total_value_usd = new_total_value
+                            position.total_value_formatted = f"${new_total_value:,.2f}"
+                            
+                            # Update new metrics object
+                            position.metrics.lp_value = new_lp_value
+                            position.metrics.hedge_value = new_hedge_value
+                            position.metrics.total_value = new_total_value
+                            position.metrics.current_pnl = new_pnl_usd
+                            position.metrics.pnl_percentage = new_pnl_pct
+                        
+                        # Update last hedge execution time
                         last_hedge_dt = get_last_hedge_execution(position.position_config_id)
                         new_status = format_time_ago(last_hedge_dt)
                         
                         # Only log if status changed
                         if position.last_hedge_execution != new_status:
-                            print(f"[REFRESH STATUS] Position {position.position_name}: {position.last_hedge_execution} -> {new_status}", flush=True)
+                            print(f"[REFRESH STATUS] Position {position.position_name} last check: {position.last_hedge_execution} -> {new_status}", flush=True)
                             position.last_hedge_execution = new_status
+                            position.metrics.last_update = new_status
+                            
                     except Exception as e:
                         print(f"[REFRESH STATUS] Error refreshing position {position.position_config_id}: {e}", flush=True)
             
@@ -881,6 +925,8 @@ class LPPositionState(rx.State):
                     # Fall back to database value only if QuestDB has no data (new positions)
                     position_size_usd = float(config.get("position_size_usd", 0.0))  # Fallback value
                     last_hedge_time_str = "Never"
+                    lp_pnl_usd = None
+                    lp_pnl_pct = None
                     
                     if config.get("id"):
                         try:
@@ -891,6 +937,10 @@ class LPPositionState(rx.State):
                             if latest_values and latest_values.get('lp_value_usd'):
                                 # Use QuestDB value (most accurate)
                                 position_size_usd = latest_values['lp_value_usd']
+                                
+                                # Get PnL values from QuestDB
+                                lp_pnl_usd = latest_values.get('lp_pnl_usd')
+                                lp_pnl_pct = latest_values.get('lp_pnl_pct')
                                 
                                 # Sync QuestDB value back to Supabase to keep database fresh
                                 try:
@@ -912,6 +962,16 @@ class LPPositionState(rx.State):
                     
                     # Calculate total value (LP position + API account)
                     total_value_usd = position_size_usd + api_account_value
+                    
+                    # Create PositionMetrics object
+                    position_metrics = PositionMetrics(
+                        lp_value=position_size_usd,
+                        hedge_value=api_account_value,
+                        total_value=total_value_usd,
+                        last_update=last_hedge_time_str,
+                        current_pnl=lp_pnl_usd,
+                        pnl_percentage=lp_pnl_pct,
+                    )
                     
                     position = LPPositionData(
                         id=pos_data["id"],
@@ -949,6 +1009,8 @@ class LPPositionState(rx.State):
                         drift_min_pct_of_capital=float(config.get("drift_min_pct_of_capital", 0.06)),
                         max_hedge_drift_pct=float(config.get("max_hedge_drift_pct", 0.50)),
                         last_hedge_execution=last_hedge_time_str,
+                        # New metrics object
+                        metrics=position_metrics,
                     )
                     self.lp_positions.append(position)
             else:

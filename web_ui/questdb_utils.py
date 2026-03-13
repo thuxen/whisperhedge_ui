@@ -122,7 +122,9 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
                 time as timestamp,
                 lp_value_usd,
                 hl_account_value,
-                (lp_value_usd + hl_account_value) as total_value
+                (lp_value_usd + hl_account_value) as total_value,
+                lp_pnl_usd,
+                lp_pnl_pct
             FROM hedge_state
             WHERE position_id = %s
             ORDER BY time DESC
@@ -141,6 +143,8 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
                 'lp_value_usd': float(result['lp_value_usd']) if result['lp_value_usd'] else 0.0,
                 'hl_account_value': float(result['hl_account_value']) if result['hl_account_value'] else 0.0,
                 'total_value': float(result['total_value']) if result['total_value'] else 0.0,
+                'lp_pnl_usd': float(result['lp_pnl_usd']) if result['lp_pnl_usd'] is not None else None,
+                'lp_pnl_pct': float(result['lp_pnl_pct']) if result['lp_pnl_pct'] is not None else None,
             }
         
         return None

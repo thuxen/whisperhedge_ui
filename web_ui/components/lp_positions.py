@@ -89,6 +89,38 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     align_items="start",
                 ),
                 rx.vstack(
+                    rx.text("PnL (LP Position)", size="1", color="gray", weight="medium"),
+                    rx.cond(
+                        position.metrics.current_pnl != None,
+                        rx.vstack(
+                            rx.text(
+                                rx.cond(
+                                    position.metrics.current_pnl >= 0,
+                                    f"+${position.metrics.current_pnl:,.2f}",
+                                    f"-${abs(position.metrics.current_pnl):,.2f}",
+                                ),
+                                size="4",
+                                weight="bold",
+                                color=rx.cond(position.metrics.current_pnl >= 0, "green", "red"),
+                            ),
+                            rx.text(
+                                rx.cond(
+                                    position.metrics.pnl_percentage >= 0,
+                                    f"+{position.metrics.pnl_percentage:.2f}%",
+                                    f"{position.metrics.pnl_percentage:.2f}%",
+                                ),
+                                size="2",
+                                color=rx.cond(position.metrics.pnl_percentage >= 0, "green", "red"),
+                            ),
+                            spacing="1",
+                            align_items="start",
+                        ),
+                        rx.text("N/A", size="2", color="gray"),
+                    ),
+                    spacing="1",
+                    align_items="start",
+                ),
+                rx.vstack(
                     rx.text("Status", size="1", color="gray", weight="medium"),
                     rx.hstack(
                         rx.text("Last Check:", size="2", color="gray"),
@@ -104,7 +136,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     spacing="2",
                     align_items="start",
                 ),
-                columns="2",
+                columns="3",
                 spacing="4",
                 width="100%",
             ),
@@ -140,8 +172,25 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
             rx.box(height="0.5rem"),
             
             rx.vstack(
-                rx.text("Hedging Settings", size="1", color="gray", weight="bold"),
-                rx.grid(
+                rx.hstack(
+                    rx.text("Hedging Settings", size="1", color="gray", weight="bold"),
+                    rx.spacer(),
+                    rx.button(
+                        rx.icon(
+                            rx.cond(LPPositionState.show_hedging_settings, "chevron-up", "chevron-down"),
+                            size=14,
+                        ),
+                        variant="ghost",
+                        size="1",
+                        on_click=LPPositionState.toggle_hedging_settings,
+                    ),
+                    width="100%",
+                    align="center",
+                ),
+                rx.cond(
+                    LPPositionState.show_hedging_settings,
+                    rx.vstack(
+                        rx.grid(
                     rx.vstack(
                         rx.hstack(
                             rx.text("Tokens Hedged", size="1", color="gray"),
@@ -306,11 +355,15 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     width="100%",
                     margin_top="0.5rem",
                 ),
+                        spacing="2",
+                        width="100%",
+                        padding="0.75rem",
+                        background="var(--gray-2)",
+                        border_radius="8px",
+                    ),
+                ),
                 spacing="2",
                 width="100%",
-                padding="0.75rem",
-                background="var(--gray-2)",
-                border_radius="8px",
             ),
             
             rx.cond(
@@ -388,11 +441,12 @@ def lp_positions_component() -> rx.Component:
                     rx.spacer(),
                     rx.button(
                         rx.icon("refresh-cw", size=16),
-                        "Refresh Status",
+                        "Refresh",
                         size="2",
                         variant="soft",
                         color_scheme="blue",
-                        on_click=LPPositionState.refresh_position_status,
+                        on_click=LPPositionState.load_positions,
+                        loading=LPPositionState.is_loading,
                     ),
                     width="100%",
                     align="center",
