@@ -265,24 +265,74 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     rx.cond(
                         position.metrics.current_pnl != None,
                         rx.vstack(
-                            rx.text(
-                                rx.cond(
-                                    position.metrics.current_pnl >= 0,
-                                    f"+${position.metrics.current_pnl:,.2f}",
-                                    f"-${abs(position.metrics.current_pnl):,.2f}",
+                            # Total PnL with percentage
+                            rx.hstack(
+                                rx.text(
+                                    rx.cond(
+                                        position.metrics.current_pnl >= 0,
+                                        f"+${position.metrics.current_pnl:,.2f}",
+                                        f"-${abs(position.metrics.current_pnl):,.2f}",
+                                    ),
+                                    size="4",
+                                    weight="bold",
+                                    color=rx.cond(position.metrics.current_pnl >= 0, "green", "red"),
                                 ),
-                                size="4",
-                                weight="bold",
-                                color=rx.cond(position.metrics.current_pnl >= 0, "green", "red"),
+                                rx.text(
+                                    rx.cond(
+                                        position.metrics.pnl_percentage >= 0,
+                                        f"(+{position.metrics.pnl_percentage:.1f}%)",
+                                        f"({position.metrics.pnl_percentage:.1f}%)",
+                                    ),
+                                    size="2",
+                                    color=rx.cond(position.metrics.pnl_percentage >= 0, "green", "red"),
+                                ),
+                                spacing="1",
+                                align_items="baseline",
                             ),
-                            rx.text(
-                                rx.cond(
-                                    position.metrics.pnl_percentage >= 0,
-                                    f"+{position.metrics.pnl_percentage:.2f}%",
-                                    f"{position.metrics.pnl_percentage:.2f}%",
+                            # LP and Hedge breakdown
+                            rx.hstack(
+                                rx.text("LP:", size="1", color="gray"),
+                                rx.text(
+                                    rx.cond(
+                                        position.metrics.lp_pnl_usd >= 0,
+                                        f"+${position.metrics.lp_pnl_usd:,.2f}",
+                                        f"-${abs(position.metrics.lp_pnl_usd):,.2f}",
+                                    ),
+                                    size="1",
+                                    weight="medium",
+                                    color=rx.cond(position.metrics.lp_pnl_usd >= 0, "green", "red"),
                                 ),
-                                size="2",
-                                color=rx.cond(position.metrics.pnl_percentage >= 0, "green", "red"),
+                                rx.text(
+                                    rx.cond(
+                                        position.metrics.lp_pnl_pct >= 0,
+                                        f"(+{position.metrics.lp_pnl_pct:.1f}%)",
+                                        f"({position.metrics.lp_pnl_pct:.1f}%)",
+                                    ),
+                                    size="1",
+                                    color=rx.cond(position.metrics.lp_pnl_pct >= 0, "green", "red"),
+                                ),
+                                rx.text("•", size="1", color="gray"),
+                                rx.text("Hedge:", size="1", color="gray"),
+                                rx.text(
+                                    rx.cond(
+                                        position.metrics.hedge_pnl_usd >= 0,
+                                        f"+${position.metrics.hedge_pnl_usd:,.2f}",
+                                        f"-${abs(position.metrics.hedge_pnl_usd):,.2f}",
+                                    ),
+                                    size="1",
+                                    weight="medium",
+                                    color=rx.cond(position.metrics.hedge_pnl_usd >= 0, "green", "red"),
+                                ),
+                                rx.text(
+                                    rx.cond(
+                                        position.metrics.hedge_pnl_pct >= 0,
+                                        f"(+{position.metrics.hedge_pnl_pct:.1f}%)",
+                                        f"({position.metrics.hedge_pnl_pct:.1f}%)",
+                                    ),
+                                    size="1",
+                                    color=rx.cond(position.metrics.hedge_pnl_pct >= 0, "green", "red"),
+                                ),
+                                spacing="1",
                             ),
                             spacing="1",
                             align_items="start",

@@ -821,7 +821,7 @@ class LPPositionState(rx.State):
             for position in self.lp_positions:
                 if position.position_config_id:
                     try:
-                        from web_ui.questdb_utils import get_latest_position_values, get_last_hedge_execution, format_time_ago
+                        from web_ui.questdb_utils import get_latest_position_values, get_first_position_values, get_last_hedge_execution, format_time_ago
                         
                         # Get latest values from QuestDB
                         latest_values = get_latest_position_values(position.position_config_id)
@@ -830,8 +830,35 @@ class LPPositionState(rx.State):
                             new_lp_value = latest_values['lp_value_usd']
                             new_hedge_value = latest_values['hl_account_value']
                             new_total_value = latest_values['total_value']
-                            new_pnl_usd = latest_values.get('lp_pnl_usd')
-                            new_pnl_pct = latest_values.get('lp_pnl_pct')
+                            
+                            # Get first values for PnL calculation
+                            first_values = get_first_position_values(position.position_config_id)
+                            
+                            # Initialize PnL variables
+                            new_lp_pnl_usd = None
+                            new_lp_pnl_pct = None
+                            new_hedge_pnl_usd = None
+                            new_hedge_pnl_pct = None
+                            new_total_pnl_usd = None
+                            new_total_pnl_pct = None
+                            
+                            # Calculate PnL if we have first values
+                            if first_values:
+                                entry_lp_value = first_values['lp_value_usd']
+                                entry_hedge_value = first_values['hl_account_value']
+                                entry_total_value = first_values['total_value']
+                                
+                                # Calculate LP PnL
+                                new_lp_pnl_usd = new_lp_value - entry_lp_value
+                                new_lp_pnl_pct = (new_lp_pnl_usd / entry_lp_value * 100) if entry_lp_value > 0 else 0
+                                
+                                # Calculate Hedge PnL
+                                new_hedge_pnl_usd = new_hedge_value - entry_hedge_value
+                                new_hedge_pnl_pct = (new_hedge_pnl_usd / entry_hedge_value * 100) if entry_hedge_value > 0 else 0
+                                
+                                # Calculate Total PnL
+                                new_total_pnl_usd = new_lp_pnl_usd + new_hedge_pnl_usd
+                                new_total_pnl_pct = (new_total_pnl_usd / entry_total_value * 100) if entry_total_value > 0 else 0
                             
                             # Log if values changed significantly (more than $0.01)
                             if abs(position.position_size_usd - new_lp_value) > 0.01:
@@ -844,12 +871,24 @@ class LPPositionState(rx.State):
                             position.total_value_usd = new_total_value
                             position.total_value_formatted = f"${new_total_value:,.2f}"
                             
-                            # Update new metrics object
+                            # Update metrics object with calculated values
                             position.metrics.lp_value = new_lp_value
                             position.metrics.hedge_value = new_hedge_value
                             position.metrics.total_value = new_total_value
-                            position.metrics.current_pnl = new_pnl_usd
-                            position.metrics.pnl_percentage = new_pnl_pct
+                            
+                            # Update entry baselines
+                            if first_values:
+                                position.metrics.entry_lp_value = entry_lp_value
+                                position.metrics.entry_hedge_value = entry_hedge_value
+                                position.metrics.entry_total_value = entry_total_value
+                            
+                            # Update PnL with CALCULATED values (NO backend fallback)
+                            position.metrics.lp_pnl_usd = new_lp_pnl_usd
+                            position.metrics.lp_pnl_pct = new_lp_pnl_pct
+                            position.metrics.hedge_pnl_usd = new_hedge_pnl_usd
+                            position.metrics.hedge_pnl_pct = new_hedge_pnl_pct
+                            position.metrics.current_pnl = new_total_pnl_usd
+                            position.metrics.pnl_percentage = new_total_pnl_pct
                         
                         # Update last hedge execution time
                         last_hedge_dt = get_last_hedge_execution(position.position_config_id)
@@ -932,8 +971,19 @@ class LPPositionState(rx.State):
                     # Fall back to database value only if QuestDB has no data (new positions)
                     position_size_usd = float(config.get("position_size_usd", 0.0))  # Fallback value
                     last_hedge_time_str = "Never"
+                    
+                    # Initialize PnL variables
+                    entry_lp_value = None
+                    entry_hedge_value = None
+                    entry_total_value = None
                     lp_pnl_usd = None
                     lp_pnl_pct = None
+                    hedge_pnl_usd = None
+                    hedge_pnl_pct = None
+                    total_pnl_usd = None
+                    total_pnl_pct = None
+                    
+                    # Initialize IL and range metrics
                     lp_il_usd = None
                     lp_il_pct = None
                     lp_utilization_pct = None
@@ -942,17 +992,13 @@ class LPPositionState(rx.State):
                     
                     if config.get("id"):
                         try:
-                            from web_ui.questdb_utils import get_latest_position_values, get_last_hedge_execution, format_time_ago
+                            from web_ui.questdb_utils import get_latest_position_values, get_first_position_values, get_last_hedge_execution, format_time_ago
                             
                             # Try to get latest values from QuestDB
                             latest_values = get_latest_position_values(config["id"])
                             if latest_values and latest_values.get('lp_value_usd'):
                                 # Use QuestDB value (most accurate)
                                 position_size_usd = latest_values['lp_value_usd']
-                                
-                                # Get PnL values from QuestDB
-                                lp_pnl_usd = latest_values.get('lp_pnl_usd')
-                                lp_pnl_pct = latest_values.get('lp_pnl_pct')
                                 
                                 # Get IL and range metrics from QuestDB
                                 lp_il_usd = latest_values.get('lp_il_usd')
@@ -972,6 +1018,25 @@ class LPPositionState(rx.State):
                                 # Also update hedge account value if available
                                 if latest_values.get('hl_account_value'):
                                     api_account_value = latest_values['hl_account_value']
+                                
+                                # Get first values for PnL calculation
+                                first_values = get_first_position_values(config["id"])
+                                if first_values:
+                                    entry_lp_value = first_values['lp_value_usd']
+                                    entry_hedge_value = first_values['hl_account_value']
+                                    entry_total_value = first_values['total_value']
+                                    
+                                    # Calculate LP PnL
+                                    lp_pnl_usd = position_size_usd - entry_lp_value
+                                    lp_pnl_pct = (lp_pnl_usd / entry_lp_value * 100) if entry_lp_value > 0 else 0
+                                    
+                                    # Calculate Hedge PnL
+                                    hedge_pnl_usd = api_account_value - entry_hedge_value
+                                    hedge_pnl_pct = (hedge_pnl_usd / entry_hedge_value * 100) if entry_hedge_value > 0 else 0
+                                    
+                                    # Calculate Total PnL
+                                    total_pnl_usd = lp_pnl_usd + hedge_pnl_usd
+                                    total_pnl_pct = (total_pnl_usd / entry_total_value * 100) if entry_total_value > 0 else 0
                             
                             # Get last hedge execution time
                             last_hedge_dt = get_last_hedge_execution(config["id"])
@@ -988,8 +1053,15 @@ class LPPositionState(rx.State):
                         hedge_value=api_account_value,
                         total_value=total_value_usd,
                         last_update=last_hedge_time_str,
-                        current_pnl=lp_pnl_usd,
-                        pnl_percentage=lp_pnl_pct,
+                        entry_lp_value=entry_lp_value,
+                        entry_hedge_value=entry_hedge_value,
+                        entry_total_value=entry_total_value,
+                        lp_pnl_usd=lp_pnl_usd,
+                        lp_pnl_pct=lp_pnl_pct,
+                        hedge_pnl_usd=hedge_pnl_usd,
+                        hedge_pnl_pct=hedge_pnl_pct,
+                        current_pnl=total_pnl_usd,
+                        pnl_percentage=total_pnl_pct,
                         il_usd=lp_il_usd,
                         il_pct=lp_il_pct,
                         utilization_pct=lp_utilization_pct,

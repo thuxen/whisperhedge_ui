@@ -123,8 +123,6 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
                 lp_value_usd,
                 hl_account_value,
                 (lp_value_usd + hl_account_value) as total_value,
-                lp_pnl_usd,
-                lp_pnl_pct,
                 lp_il_usd,
                 lp_il_pct,
                 lp_utilization_pct,
@@ -148,8 +146,6 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
                 'lp_value_usd': float(result['lp_value_usd']) if result['lp_value_usd'] else 0.0,
                 'hl_account_value': float(result['hl_account_value']) if result['hl_account_value'] else 0.0,
                 'total_value': float(result['total_value']) if result['total_value'] else 0.0,
-                'lp_pnl_usd': float(result['lp_pnl_usd']) if result['lp_pnl_usd'] is not None else None,
-                'lp_pnl_pct': float(result['lp_pnl_pct']) if result['lp_pnl_pct'] is not None else None,
                 'lp_il_usd': float(result['lp_il_usd']) if result['lp_il_usd'] is not None else None,
                 'lp_il_pct': float(result['lp_il_pct']) if result['lp_il_pct'] is not None else None,
                 'lp_utilization_pct': float(result['lp_utilization_pct']) if result['lp_utilization_pct'] is not None else None,
@@ -161,6 +157,53 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
         
     except Exception as e:
         print(f"Error fetching latest position values: {e}")
+        return None
+
+
+def get_first_position_values(position_id: str) -> Optional[dict]:
+    """
+    Get the first hedge_state entry for a position (baseline for PnL calculation).
+    
+    Args:
+        position_id: The position ID to query
+    
+    Returns:
+        dict with first_lp_value, first_hedge_value, first_total_value, or None if no data
+    """
+    try:
+        conn = get_questdb_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        query = """
+            SELECT 
+                time as timestamp,
+                lp_value_usd,
+                hl_account_value,
+                (lp_value_usd + hl_account_value) as total_value
+            FROM hedge_state
+            WHERE position_id = %s
+            ORDER BY time ASC
+            LIMIT 1
+        """
+        
+        cursor.execute(query, (position_id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result:
+            return {
+                'timestamp': result['timestamp'].isoformat() if result['timestamp'] else None,
+                'lp_value_usd': float(result['lp_value_usd']) if result['lp_value_usd'] else 0.0,
+                'hl_account_value': float(result['hl_account_value']) if result['hl_account_value'] else 0.0,
+                'total_value': float(result['total_value']) if result['total_value'] else 0.0,
+            }
+        
+        return None
+        
+    except Exception as e:
+        print(f"Error fetching first position values: {e}")
         return None
 
 
