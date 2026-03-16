@@ -377,6 +377,37 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                 ),
                 # Row 2, Col 2: Range Position
                 range_position_visual(position),
+                # Row 3, Col 1: APR
+                rx.vstack(
+                    rx.text("APR", size="1", color="gray", weight="medium"),
+                    rx.cond(
+                        position.metrics.apr != None,
+                        rx.vstack(
+                            rx.text(
+                                rx.cond(
+                                    position.metrics.apr >= 0,
+                                    f"+{position.metrics.apr:,.1f}%",
+                                    f"{position.metrics.apr:,.1f}%",
+                                ),
+                                size="4",
+                                weight="bold",
+                                color=rx.cond(position.metrics.apr >= 0, "green", "red"),
+                            ),
+                            rx.text(
+                                f"{position.metrics.position_age_days} days",
+                                size="1",
+                                color="gray",
+                            ),
+                            spacing="1",
+                            align_items="start",
+                        ),
+                        rx.text("N/A", size="2", color="gray"),
+                    ),
+                    spacing="1",
+                    align_items="start",
+                ),
+                # Row 3, Col 2: Empty (for future metric)
+                rx.box(),
                 columns="2",
                 spacing="4",
                 width="100%",

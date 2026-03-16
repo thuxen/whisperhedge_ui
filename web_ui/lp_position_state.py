@@ -841,6 +841,8 @@ class LPPositionState(rx.State):
                             new_hedge_pnl_pct = None
                             new_total_pnl_usd = None
                             new_total_pnl_pct = None
+                            new_apr = None
+                            new_position_age_days = None
                             
                             # Calculate PnL if we have first values
                             if first_values:
@@ -859,6 +861,19 @@ class LPPositionState(rx.State):
                                 # Calculate Total PnL
                                 new_total_pnl_usd = new_lp_pnl_usd + new_hedge_pnl_usd
                                 new_total_pnl_pct = (new_total_pnl_usd / entry_total_value * 100) if entry_total_value > 0 else 0
+                                
+                                # Calculate position age and APR
+                                from datetime import datetime
+                                
+                                start_time = datetime.fromisoformat(first_values['timestamp'])
+                                current_time = datetime.fromisoformat(latest_values['timestamp'])
+                                
+                                time_delta = current_time - start_time
+                                new_position_age_days = time_delta.total_seconds() / 86400
+                                
+                                new_apr = None
+                                if entry_total_value > 0 and new_position_age_days > 0:
+                                    new_apr = (new_total_pnl_usd / entry_total_value) * (365 / new_position_age_days) * 100
                             
                             # Log if values changed significantly (more than $0.01)
                             if abs(position.position_size_usd - new_lp_value) > 0.01:
@@ -889,6 +904,8 @@ class LPPositionState(rx.State):
                             position.metrics.hedge_pnl_pct = new_hedge_pnl_pct
                             position.metrics.current_pnl = new_total_pnl_usd
                             position.metrics.pnl_percentage = new_total_pnl_pct
+                            position.metrics.apr = new_apr
+                            position.metrics.position_age_days = int(new_position_age_days) if new_position_age_days else None
                         
                         # Update last hedge execution time
                         last_hedge_dt = get_last_hedge_execution(position.position_config_id)
@@ -982,6 +999,8 @@ class LPPositionState(rx.State):
                     hedge_pnl_pct = None
                     total_pnl_usd = None
                     total_pnl_pct = None
+                    apr = None
+                    position_age_days = None
                     
                     # Initialize IL and range metrics
                     lp_il_usd = None
@@ -1037,6 +1056,21 @@ class LPPositionState(rx.State):
                                     # Calculate Total PnL
                                     total_pnl_usd = lp_pnl_usd + hedge_pnl_usd
                                     total_pnl_pct = (total_pnl_usd / entry_total_value * 100) if entry_total_value > 0 else 0
+                                    
+                                    # Calculate position age and APR
+                                    from datetime import datetime
+                                    
+                                    start_time = datetime.fromisoformat(first_values['timestamp'])
+                                    current_time = datetime.fromisoformat(latest_values['timestamp'])
+                                    
+                                    # Calculate days (use fractional days if less than 1 day)
+                                    time_delta = current_time - start_time
+                                    position_age_days = time_delta.total_seconds() / 86400
+                                    
+                                    # Calculate APR
+                                    apr = None
+                                    if entry_total_value > 0 and position_age_days > 0:
+                                        apr = (total_pnl_usd / entry_total_value) * (365 / position_age_days) * 100
                             
                             # Get last hedge execution time
                             last_hedge_dt = get_last_hedge_execution(config["id"])
@@ -1062,6 +1096,8 @@ class LPPositionState(rx.State):
                         hedge_pnl_pct=hedge_pnl_pct,
                         current_pnl=total_pnl_usd,
                         pnl_percentage=total_pnl_pct,
+                        apr=apr,
+                        position_age_days=int(position_age_days) if position_age_days else None,
                         il_usd=lp_il_usd,
                         il_pct=lp_il_pct,
                         utilization_pct=lp_utilization_pct,

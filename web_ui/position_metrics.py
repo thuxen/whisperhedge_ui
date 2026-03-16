@@ -22,6 +22,7 @@ class PositionMetrics(BaseModel):
     entry_value: Optional[float] = None
     current_pnl: Optional[float] = None
     pnl_percentage: Optional[float] = None
+    apr: Optional[float] = None
     
     # Performance metrics - LP Component
     lp_pnl_usd: Optional[float] = None
