@@ -116,7 +116,7 @@ class LPPositionState(rx.State):
     
     # Dynamic hedging fields
     use_dynamic_hedging: bool = False
-    dynamic_profile: str = "whisper_dynamic"
+    dynamic_profile: str = "balanced"
     rebalance_cooldown_hours: float = 8.0
     delta_drift_threshold_pct: float = 0.38
     down_threshold: float = -0.065
@@ -141,7 +141,7 @@ class LPPositionState(rx.State):
         if value == "Dynamic":
             self.use_dynamic_hedging = True
             self.hedge_ratio = 0
-            self.dynamic_profile = "whisper_dynamic"  # Default to only available profile
+            self.dynamic_profile = "balanced"  # Default profile
         else:  # Static
             self.use_dynamic_hedging = False
             if self.hedge_ratio == 0:

@@ -1021,14 +1021,104 @@ def lp_positions_component() -> rx.Component:
                                                     
                                                     rx.vstack(
                                                         rx.text("Profile", size="2", weight="bold"),
-                                                        rx.select(
-                                                            ["whisper_dynamic"],
+                                                        rx.radio_group.root(
+                                                            rx.vstack(
+                                                                # Balanced
+                                                                rx.hstack(
+                                                                    rx.radio_group.item(value="balanced"),
+                                                                    rx.vstack(
+                                                                        rx.hstack(
+                                                                            rx.text("Balanced", size="2", weight="bold"),
+                                                                            rx.badge("Default", color_scheme="blue", variant="soft", size="1"),
+                                                                            spacing="2",
+                                                                        ),
+                                                                        rx.text(
+                                                                            "Recommended for most users. Dynamically adjusts hedging between 45%–100% based on market conditions.",
+                                                                            size="1",
+                                                                            color="gray",
+                                                                        ),
+                                                                        spacing="1",
+                                                                        align_items="start",
+                                                                    ),
+                                                                    spacing="3",
+                                                                    align_items="start",
+                                                                    width="100%",
+                                                                ),
+                                                                # Moderate Bullish
+                                                                rx.hstack(
+                                                                    rx.radio_group.item(value="moderate_bullish"),
+                                                                    rx.vstack(
+                                                                        rx.text("Moderate Bullish", size="2", weight="bold"),
+                                                                        rx.text(
+                                                                            "Leans slightly bullish. Keeps more exposure to the volatile asset during trends.",
+                                                                            size="1",
+                                                                            color="gray",
+                                                                        ),
+                                                                        spacing="1",
+                                                                        align_items="start",
+                                                                    ),
+                                                                    spacing="3",
+                                                                    align_items="start",
+                                                                    width="100%",
+                                                                ),
+                                                                # Aggressive Bullish
+                                                                rx.hstack(
+                                                                    rx.radio_group.item(value="aggressive_bullish"),
+                                                                    rx.vstack(
+                                                                        rx.text("Aggressive Bullish", size="2", weight="bold"),
+                                                                        rx.text(
+                                                                            "Strong bullish tilt. Significantly under-hedges to maximize potential gains.",
+                                                                            size="1",
+                                                                            color="gray",
+                                                                        ),
+                                                                        spacing="1",
+                                                                        align_items="start",
+                                                                    ),
+                                                                    spacing="3",
+                                                                    align_items="start",
+                                                                    width="100%",
+                                                                ),
+                                                                # Moderate Bearish
+                                                                rx.hstack(
+                                                                    rx.radio_group.item(value="moderate_bearish"),
+                                                                    rx.vstack(
+                                                                        rx.text("Moderate Bearish", size="2", weight="bold"),
+                                                                        rx.text(
+                                                                            "Leans defensive. Increases hedging during uncertain markets.",
+                                                                            size="1",
+                                                                            color="gray",
+                                                                        ),
+                                                                        spacing="1",
+                                                                        align_items="start",
+                                                                    ),
+                                                                    spacing="3",
+                                                                    align_items="start",
+                                                                    width="100%",
+                                                                ),
+                                                                # Full Protection
+                                                                rx.hstack(
+                                                                    rx.radio_group.item(value="full_protection"),
+                                                                    rx.vstack(
+                                                                        rx.text("Full Protection", size="2", weight="bold"),
+                                                                        rx.text(
+                                                                            "Maximum safety mode. Stays near 100% hedged in almost all conditions.",
+                                                                            size="1",
+                                                                            color="gray",
+                                                                        ),
+                                                                        spacing="1",
+                                                                        align_items="start",
+                                                                    ),
+                                                                    spacing="3",
+                                                                    align_items="start",
+                                                                    width="100%",
+                                                                ),
+                                                                spacing="2",
+                                                                width="100%",
+                                                            ),
                                                             value=LPPositionState.dynamic_profile,
                                                             on_change=LPPositionState.set_dynamic_profile,
-                                                            placeholder="Select profile",
                                                         ),
-                                                        rx.text("Whisper Capital's proprietary dynamic hedging algorithm", size="1", color="blue"),
-                                                        spacing="1",
+                                                        spacing="2",
                                                         width="100%",
                                                     ),
                                                     
@@ -1454,7 +1544,27 @@ def lp_positions_component() -> rx.Component:
                                             rx.text(
                                                 rx.cond(
                                                     pos.use_dynamic_hedging,
-                                                    "Dynamic (" + pos.dynamic_profile + ")",
+                                                    rx.cond(
+                                                        pos.dynamic_profile == "balanced",
+                                                        "Dynamic (Balanced)",
+                                                        rx.cond(
+                                                            pos.dynamic_profile == "moderate_bullish",
+                                                            "Dynamic (Moderate Bullish)",
+                                                            rx.cond(
+                                                                pos.dynamic_profile == "aggressive_bullish",
+                                                                "Dynamic (Aggressive Bullish)",
+                                                                rx.cond(
+                                                                    pos.dynamic_profile == "moderate_bearish",
+                                                                    "Dynamic (Moderate Bearish)",
+                                                                    rx.cond(
+                                                                        pos.dynamic_profile == "full_protection",
+                                                                        "Dynamic (Full Protection)",
+                                                                        "Dynamic (" + pos.dynamic_profile + ")"
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    ),
                                                     "Static"
                                                 ),
                                                 size="2",
