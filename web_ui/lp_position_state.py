@@ -61,6 +61,38 @@ class LPPositionState(rx.State):
     show_settings_dialog: bool = False
     selected_settings_position_id: str = ""
     
+    # Regime tracking data (loaded when opening settings dialog)
+    regime_timestamp: str = ""
+    regime_funding_regime: str = ""
+    regime_profile_name: str = ""
+    regime_target_hedge_ratio: float = 0.0
+    regime_delta_drift_threshold_pct: float = 0.0
+    regime_rebalance_cooldown_hours: float = 0.0
+    regime_down_threshold: float = 0.0
+    regime_bounce_threshold: float = 0.0
+    regime_lookback_hours: int = 0
+    regime_corr_returns_7d: float = 0.0
+    regime_std_token0_7d: float = 0.0
+    regime_std_token1_7d: float = 0.0
+    regime_vol_ratio: float = 0.0
+    regime_funding_rate_daily: float = 0.0
+    regime_mrhl_hours: float = 0.0
+    regime_arv_7d_pct: float = 0.0
+    regime_atr_7d_pct: float = 0.0
+    regime_pool_tvl_usd: float = 0.0
+    regime_pool_volume_24h_usd: float = 0.0
+    regime_pool_volume_tvl_ratio: float = 0.0
+    regime_hl_open_interest_token0: float = 0.0
+    regime_hl_open_interest_token1: float = 0.0
+    regime_mvhr_beta_raw: float = 0.0
+    regime_mvhr_base_ratio: float = 0.0
+    regime_dynamic_config_enabled: bool = False
+    regime_dynamic_config_applied: bool = False
+    regime_fallback_reason: str = ""
+    regime_regime_changed: bool = False
+    regime_config_changed: bool = False
+    regime_data_available: bool = False
+    
     protocol: str = "uniswap_v3"
     network: str = "ethereum"
     nft_id: str = ""
@@ -241,6 +273,44 @@ class LPPositionState(rx.State):
         """Open settings dialog for a position"""
         self.selected_settings_position_id = position_id
         self.show_settings_dialog = True
+        
+        # Fetch latest regime tracking data
+        from .questdb_utils import get_latest_regime_tracking
+        regime_data = get_latest_regime_tracking(position_id)
+        
+        if regime_data:
+            self.regime_timestamp = regime_data.get('timestamp', '')
+            self.regime_funding_regime = regime_data.get('funding_regime', '')
+            self.regime_profile_name = regime_data.get('profile_name', '')
+            self.regime_target_hedge_ratio = regime_data.get('target_hedge_ratio', 0.0)
+            self.regime_delta_drift_threshold_pct = regime_data.get('delta_drift_threshold_pct', 0.0)
+            self.regime_rebalance_cooldown_hours = regime_data.get('rebalance_cooldown_hours', 0.0)
+            self.regime_down_threshold = regime_data.get('down_threshold', 0.0)
+            self.regime_bounce_threshold = regime_data.get('bounce_threshold', 0.0)
+            self.regime_lookback_hours = regime_data.get('lookback_hours', 0)
+            self.regime_corr_returns_7d = regime_data.get('corr_returns_7d', 0.0)
+            self.regime_std_token0_7d = regime_data.get('std_token0_7d', 0.0)
+            self.regime_std_token1_7d = regime_data.get('std_token1_7d', 0.0)
+            self.regime_vol_ratio = regime_data.get('vol_ratio', 0.0)
+            self.regime_funding_rate_daily = regime_data.get('funding_rate_daily', 0.0)
+            self.regime_mrhl_hours = regime_data.get('mrhl_hours', 0.0)
+            self.regime_arv_7d_pct = regime_data.get('arv_7d_pct', 0.0)
+            self.regime_atr_7d_pct = regime_data.get('atr_7d_pct', 0.0)
+            self.regime_pool_tvl_usd = regime_data.get('pool_tvl_usd', 0.0)
+            self.regime_pool_volume_24h_usd = regime_data.get('pool_volume_24h_usd', 0.0)
+            self.regime_pool_volume_tvl_ratio = regime_data.get('pool_volume_tvl_ratio', 0.0)
+            self.regime_hl_open_interest_token0 = regime_data.get('hl_open_interest_token0', 0.0)
+            self.regime_hl_open_interest_token1 = regime_data.get('hl_open_interest_token1', 0.0)
+            self.regime_mvhr_beta_raw = regime_data.get('mvhr_beta_raw', 0.0)
+            self.regime_mvhr_base_ratio = regime_data.get('mvhr_base_ratio', 0.0)
+            self.regime_dynamic_config_enabled = regime_data.get('dynamic_config_enabled', False)
+            self.regime_dynamic_config_applied = regime_data.get('dynamic_config_applied', False)
+            self.regime_fallback_reason = regime_data.get('fallback_reason', '')
+            self.regime_regime_changed = regime_data.get('regime_changed', False)
+            self.regime_config_changed = regime_data.get('config_changed', False)
+            self.regime_data_available = True
+        else:
+            self.regime_data_available = False
     
     def close_settings_dialog(self):
         """Close settings dialog"""
@@ -548,6 +618,86 @@ class LPPositionState(rx.State):
     def available_wallets(self) -> list[str]:
         """Get list of available trading accounts for wallet selector"""
         return self._cached_wallets
+    
+    @rx.var
+    def regime_down_threshold_display(self) -> str:
+        """Format down threshold as percentage"""
+        return f"{self.regime_down_threshold * 100:.2f}%"
+    
+    @rx.var
+    def regime_bounce_threshold_display(self) -> str:
+        """Format bounce threshold as percentage"""
+        return f"{self.regime_bounce_threshold * 100:.2f}%"
+    
+    @rx.var
+    def regime_funding_rate_display(self) -> str:
+        """Format funding rate as percentage"""
+        return f"{self.regime_funding_rate_daily * 100:.4f}%"
+    
+    @rx.var
+    def regime_target_ratio_display(self) -> str:
+        """Format target hedge ratio"""
+        return f"{self.regime_target_hedge_ratio:.1f}%"
+    
+    @rx.var
+    def regime_delta_drift_display(self) -> str:
+        """Format delta drift threshold"""
+        return f"{self.regime_delta_drift_threshold_pct:.2f}%"
+    
+    @rx.var
+    def regime_cooldown_display(self) -> str:
+        """Format rebalance cooldown"""
+        return f"{self.regime_rebalance_cooldown_hours:.1f}h"
+    
+    @rx.var
+    def regime_lookback_display(self) -> str:
+        """Format lookback hours"""
+        return f"{self.regime_lookback_hours}h"
+    
+    @rx.var
+    def regime_arv_display(self) -> str:
+        """Format ARV"""
+        return f"{self.regime_arv_7d_pct:.2f}%"
+    
+    @rx.var
+    def regime_atr_display(self) -> str:
+        """Format ATR"""
+        return f"{self.regime_atr_7d_pct:.2f}%"
+    
+    @rx.var
+    def regime_pool_tvl_display(self) -> str:
+        """Format pool TVL"""
+        return f"${self.regime_pool_tvl_usd:,.0f}"
+    
+    @rx.var
+    def regime_pool_volume_display(self) -> str:
+        """Format pool volume"""
+        return f"${self.regime_pool_volume_24h_usd:,.0f}"
+    
+    @rx.var
+    def regime_volume_tvl_ratio_display(self) -> str:
+        """Format volume/TVL ratio"""
+        return f"{self.regime_pool_volume_tvl_ratio:.2f}"
+    
+    @rx.var
+    def regime_hl_oi_token0_display(self) -> str:
+        """Format Hyperliquid open interest for token0"""
+        return f"${self.regime_hl_open_interest_token0:,.0f}"
+    
+    @rx.var
+    def regime_hl_oi_token1_display(self) -> str:
+        """Format Hyperliquid open interest for token1"""
+        return f"${self.regime_hl_open_interest_token1:,.0f}"
+    
+    @rx.var
+    def regime_mvhr_beta_display(self) -> str:
+        """Format MVHR beta"""
+        return f"{self.regime_mvhr_beta_raw:.4f}"
+    
+    @rx.var
+    def regime_mvhr_base_ratio_display(self) -> str:
+        """Format MVHR base ratio"""
+        return f"{self.regime_mvhr_base_ratio:.2f}%"
     
     async def fetch_wallet_balance(self):
         """Fetch balance for selected wallet"""

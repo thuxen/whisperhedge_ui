@@ -276,3 +276,99 @@ def format_time_ago(dt: Optional[datetime]) -> str:
     else:  # 1 day or more
         days = int(seconds / 86400)
         return f"{days} day{'s' if days != 1 else ''} ago"
+
+
+def get_latest_regime_tracking(position_id: str) -> dict | None:
+    """
+    Get the most recent regime tracking entry for a position.
+    Returns the latest applied config values, regime classification, and indicators.
+    
+    Args:
+        position_id: The position ID to query
+    
+    Returns:
+        Dict with regime tracking data or None if no data found
+    """
+    query = """
+        SELECT 
+            time,
+            funding_regime,
+            profile_name,
+            target_hedge_ratio,
+            delta_drift_threshold_pct,
+            rebalance_cooldown_hours,
+            down_threshold,
+            bounce_threshold,
+            lookback_hours,
+            corr_returns_7d,
+            std_token0_7d,
+            std_token1_7d,
+            vol_ratio,
+            funding_rate_daily,
+            mrhl_hours,
+            arv_7d_pct,
+            atr_7d_pct,
+            pool_tvl_usd,
+            pool_volume_24h_usd,
+            pool_volume_tvl_ratio,
+            hl_open_interest_token0,
+            hl_open_interest_token1,
+            mvhr_beta_raw,
+            mvhr_base_ratio,
+            dynamic_config_enabled,
+            dynamic_config_applied,
+            fallback_reason,
+            regime_changed,
+            config_changed
+        FROM regime_tracking
+        WHERE position_id = %s
+        ORDER BY time DESC
+        LIMIT 1
+    """
+    
+    try:
+        conn = get_questdb_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute(query, (position_id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result:
+            return {
+                'timestamp': result['time'].isoformat() if result.get('time') else '',
+                'funding_regime': result.get('funding_regime') or '',
+                'profile_name': result.get('profile_name') or '',
+                'target_hedge_ratio': float(result['target_hedge_ratio']) if result.get('target_hedge_ratio') is not None else 0.0,
+                'delta_drift_threshold_pct': float(result['delta_drift_threshold_pct']) if result.get('delta_drift_threshold_pct') is not None else 0.0,
+                'rebalance_cooldown_hours': float(result['rebalance_cooldown_hours']) if result.get('rebalance_cooldown_hours') is not None else 0.0,
+                'down_threshold': float(result['down_threshold']) if result.get('down_threshold') is not None else 0.0,
+                'bounce_threshold': float(result['bounce_threshold']) if result.get('bounce_threshold') is not None else 0.0,
+                'lookback_hours': int(result['lookback_hours']) if result.get('lookback_hours') is not None else 0,
+                'corr_returns_7d': float(result['corr_returns_7d']) if result.get('corr_returns_7d') is not None else 0.0,
+                'std_token0_7d': float(result['std_token0_7d']) if result.get('std_token0_7d') is not None else 0.0,
+                'std_token1_7d': float(result['std_token1_7d']) if result.get('std_token1_7d') is not None else 0.0,
+                'vol_ratio': float(result['vol_ratio']) if result.get('vol_ratio') is not None else 0.0,
+                'funding_rate_daily': float(result['funding_rate_daily']) if result.get('funding_rate_daily') is not None else 0.0,
+                'mrhl_hours': float(result['mrhl_hours']) if result.get('mrhl_hours') is not None else 0.0,
+                'arv_7d_pct': float(result['arv_7d_pct']) if result.get('arv_7d_pct') is not None else 0.0,
+                'atr_7d_pct': float(result['atr_7d_pct']) if result.get('atr_7d_pct') is not None else 0.0,
+                'pool_tvl_usd': float(result['pool_tvl_usd']) if result.get('pool_tvl_usd') is not None else 0.0,
+                'pool_volume_24h_usd': float(result['pool_volume_24h_usd']) if result.get('pool_volume_24h_usd') is not None else 0.0,
+                'pool_volume_tvl_ratio': float(result['pool_volume_tvl_ratio']) if result.get('pool_volume_tvl_ratio') is not None else 0.0,
+                'hl_open_interest_token0': float(result['hl_open_interest_token0']) if result.get('hl_open_interest_token0') is not None else 0.0,
+                'hl_open_interest_token1': float(result['hl_open_interest_token1']) if result.get('hl_open_interest_token1') is not None else 0.0,
+                'mvhr_beta_raw': float(result['mvhr_beta_raw']) if result.get('mvhr_beta_raw') is not None else 0.0,
+                'mvhr_base_ratio': float(result['mvhr_base_ratio']) if result.get('mvhr_base_ratio') is not None else 0.0,
+                'dynamic_config_enabled': bool(result.get('dynamic_config_enabled', False)),
+                'dynamic_config_applied': bool(result.get('dynamic_config_applied', False)),
+                'fallback_reason': result.get('fallback_reason') or '',
+                'regime_changed': bool(result.get('regime_changed', False)),
+                'config_changed': bool(result.get('config_changed', False)),
+            }
+        return None
+    except Exception as e:
+        print(f"Error fetching regime tracking data: {e}")
+        return None

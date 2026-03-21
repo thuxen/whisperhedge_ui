@@ -1518,132 +1518,337 @@ def lp_positions_component() -> rx.Component:
                             
                             rx.box(height="0.5rem"),
                             
-                            # Hedge Configuration Section
-                            rx.vstack(
-                                rx.text("Hedge Configuration", size="2", weight="bold"),
-                                rx.box(
-                                    rx.grid(
+                            # Current Applied Settings Section
+                            rx.cond(
+                                LPPositionState.regime_data_available,
+                                rx.vstack(
+                                    rx.text("Current Applied Settings", size="3", weight="bold", color="blue"),
+                                    rx.text(f"Last updated: {LPPositionState.regime_timestamp}", size="1", color="gray"),
+                                    
+                                    # Regime Classification
+                                    rx.box(
                                         rx.vstack(
-                                            rx.text("Tokens Hedged", size="1", color="gray"),
-                                            rx.text(
-                                                rx.cond(pos.hedge_enabled, "Enabled", "Disabled"),
-                                                size="2",
-                                                weight="medium"
-                                            ),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        rx.vstack(
-                                            rx.text("Target Ratio", size="1", color="gray"),
-                                            rx.text(pos.target_hedge_ratio.to(str) + "%", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        rx.vstack(
-                                            rx.text("Hedge Mode", size="1", color="gray"),
-                                            rx.text(
-                                                rx.cond(
-                                                    pos.use_dynamic_hedging,
-                                                    rx.cond(
-                                                        pos.dynamic_profile == "balanced",
-                                                        "Dynamic (Balanced)",
-                                                        rx.cond(
-                                                            pos.dynamic_profile == "moderate_bullish",
-                                                            "Dynamic (Moderate Bullish)",
-                                                            rx.cond(
-                                                                pos.dynamic_profile == "aggressive_bullish",
-                                                                "Dynamic (Aggressive Bullish)",
-                                                                rx.cond(
-                                                                    pos.dynamic_profile == "moderate_bearish",
-                                                                    "Dynamic (Moderate Bearish)",
-                                                                    rx.cond(
-                                                                        pos.dynamic_profile == "full_protection",
-                                                                        "Dynamic (Full Protection)",
-                                                                        "Dynamic (" + pos.dynamic_profile + ")"
-                                                                    )
-                                                                )
-                                                            )
-                                                        )
-                                                    ),
-                                                    "Static"
+                                            rx.text("Regime Classification", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Funding Regime", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_funding_regime, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
                                                 ),
-                                                size="2",
-                                                weight="medium"
+                                                rx.vstack(
+                                                    rx.text("Profile", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_profile_name, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
                                             ),
-                                            spacing="1",
-                                            align_items="start",
+                                            spacing="2",
                                         ),
-                                        rx.vstack(
-                                            rx.text("Rebalance Cooldown", size="1", color="gray"),
-                                            rx.text(pos.rebalance_cooldown_hours.to(str) + "h", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        columns="2",
-                                        spacing="4",
-                                        width="100%",
+                                        padding="0.75rem",
+                                        background="var(--blue-2)",
+                                        border_radius="8px",
                                     ),
-                                    padding="0.75rem",
-                                    background="var(--gray-2)",
-                                    border_radius="8px",
-                                ),
-                                spacing="2",
-                                width="100%",
-                            ),
-                            
-                            rx.box(height="0.5rem"),
-                            
-                            # Dynamic Hedging Parameters Section
-                            rx.vstack(
-                                rx.text("Dynamic Hedging Parameters", size="2", weight="bold"),
-                                rx.box(
-                                    rx.grid(
+                                    
+                                    # Applied Config Values
+                                    rx.box(
                                         rx.vstack(
-                                            rx.text("Delta Drift", size="1", color="gray"),
-                                            rx.text(pos.delta_drift_threshold_pct.to(str) + "%", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
+                                            rx.text("Applied Config Values", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Target Hedge Ratio", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_target_ratio_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Delta Drift", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_delta_drift_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Rebalance Cooldown", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_cooldown_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Down Threshold", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_down_threshold_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Bounce Threshold", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_bounce_threshold_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Lookback Hours", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_lookback_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
                                         ),
-                                        rx.vstack(
-                                            rx.text("Down Threshold", size="1", color="gray"),
-                                            rx.text((pos.down_threshold * 100).to(str) + "%", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        rx.vstack(
-                                            rx.text("Bounce Threshold", size="1", color="gray"),
-                                            rx.text((pos.bounce_threshold * 100).to(str) + "%", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        rx.vstack(
-                                            rx.text("Lookback Hours", size="1", color="gray"),
-                                            rx.text(pos.lookback_hours.to(str) + "h", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        rx.vstack(
-                                            rx.text("Min Drift % Capital", size="1", color="gray"),
-                                            rx.text((pos.drift_min_pct_of_capital * 100).to(str) + "%", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        rx.vstack(
-                                            rx.text("Max Hedge Drift", size="1", color="gray"),
-                                            rx.text((pos.max_hedge_drift_pct * 100).to(str) + "%", size="2", weight="medium"),
-                                            spacing="1",
-                                            align_items="start",
-                                        ),
-                                        columns="2",
-                                        spacing="4",
-                                        width="100%",
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
                                     ),
-                                    padding="0.75rem",
-                                    background="var(--gray-2)",
-                                    border_radius="8px",
+                                    
+                                    # Core Market Indicators
+                                    rx.box(
+                                        rx.vstack(
+                                            rx.text("Core Market Indicators", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Correlation (7d)", size="1", color="gray"),
+                                                    rx.text(f"{LPPositionState.regime_corr_returns_7d:.4f}", size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Vol Ratio", size="1", color="gray"),
+                                                    rx.text(f"{LPPositionState.regime_vol_ratio:.4f}", size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Funding Rate (daily)", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_funding_rate_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("MRHL (hours)", size="1", color="gray"),
+                                                    rx.text(f"{LPPositionState.regime_mrhl_hours:.2f}", size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
+                                        ),
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
+                                    ),
+                                    
+                                    # Volatility Metrics
+                                    rx.box(
+                                        rx.vstack(
+                                            rx.text("Volatility Metrics", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Token0 Std Dev (7d)", size="1", color="gray"),
+                                                    rx.text(f"{LPPositionState.regime_std_token0_7d:.4f}", size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Token1 Std Dev (7d)", size="1", color="gray"),
+                                                    rx.text(f"{LPPositionState.regime_std_token1_7d:.4f}", size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("ARV 7d", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_arv_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("ATR 7d", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_atr_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
+                                        ),
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
+                                    ),
+                                    
+                                    # Pool Metrics
+                                    rx.box(
+                                        rx.vstack(
+                                            rx.text("Pool Metrics", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Pool TVL", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_pool_tvl_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Pool Volume (24h)", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_pool_volume_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Volume/TVL Ratio", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_volume_tvl_ratio_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
+                                        ),
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
+                                    ),
+                                    
+                                    # Hyperliquid Data
+                                    rx.box(
+                                        rx.vstack(
+                                            rx.text("Hyperliquid Data", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Token0 Open Interest", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_hl_oi_token0_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Token1 Open Interest", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_hl_oi_token1_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
+                                        ),
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
+                                    ),
+                                    
+                                    # MVHR Details
+                                    rx.box(
+                                        rx.vstack(
+                                            rx.text("MVHR Details", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Beta (raw)", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_mvhr_beta_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Base Ratio", size="1", color="gray"),
+                                                    rx.text(LPPositionState.regime_mvhr_base_ratio_display, size="2", weight="medium"),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
+                                        ),
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
+                                    ),
+                                    
+                                    # Metadata
+                                    rx.box(
+                                        rx.vstack(
+                                            rx.text("Metadata", size="2", weight="medium"),
+                                            rx.grid(
+                                                rx.vstack(
+                                                    rx.text("Dynamic Config Enabled", size="1", color="gray"),
+                                                    rx.text(
+                                                        rx.cond(LPPositionState.regime_dynamic_config_enabled, "Yes", "No"),
+                                                        size="2",
+                                                        weight="medium"
+                                                    ),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Dynamic Config Applied", size="1", color="gray"),
+                                                    rx.text(
+                                                        rx.cond(LPPositionState.regime_dynamic_config_applied, "Yes", "No"),
+                                                        size="2",
+                                                        weight="medium"
+                                                    ),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Fallback Reason", size="1", color="gray"),
+                                                    rx.text(
+                                                        rx.cond(
+                                                            LPPositionState.regime_fallback_reason != "",
+                                                            LPPositionState.regime_fallback_reason,
+                                                            "None"
+                                                        ),
+                                                        size="2",
+                                                        weight="medium"
+                                                    ),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Regime Changed", size="1", color="gray"),
+                                                    rx.text(
+                                                        rx.cond(LPPositionState.regime_regime_changed, "Yes", "No"),
+                                                        size="2",
+                                                        weight="medium"
+                                                    ),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                rx.vstack(
+                                                    rx.text("Config Changed", size="1", color="gray"),
+                                                    rx.text(
+                                                        rx.cond(LPPositionState.regime_config_changed, "Yes", "No"),
+                                                        size="2",
+                                                        weight="medium"
+                                                    ),
+                                                    spacing="1",
+                                                    align_items="start",
+                                                ),
+                                                columns="4",
+                                                spacing="6",
+                                                width="100%",
+                                            ),
+                                            spacing="2",
+                                        ),
+                                        padding="0.75rem",
+                                        background="var(--gray-2)",
+                                        border_radius="8px",
+                                    ),
+                                    
+                                    spacing="2",
+                                    width="100%",
                                 ),
-                                spacing="2",
-                                width="100%",
+                                rx.box(),
                             ),
                             
                             rx.divider(margin_top="1rem"),
@@ -1671,7 +1876,7 @@ def lp_positions_component() -> rx.Component:
                 spacing="4",
                 width="100%",
             ),
-            max_width="600px",
+            max_width="900px",
         ),
         open=LPPositionState.show_settings_dialog,
     ),
