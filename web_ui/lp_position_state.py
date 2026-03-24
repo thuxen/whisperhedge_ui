@@ -4,6 +4,79 @@ from .auth import get_supabase_client
 from .position_metrics import PositionMetrics
 
 
+# ═══════════════════════════════════════════════════════════════════
+# PARAMETER LABEL MAPPINGS (for settings dialog context)
+# ═══════════════════════════════════════════════════════════════════
+
+# Delta Drift Threshold labels (with fuzzy matching tolerance)
+DELTA_DRIFT_LABELS = {
+    0.14: ("Low", 0.02),           # ±2% tolerance
+    0.38: ("Medium", 0.02),
+    0.58: ("High", 0.02),
+    0.80: ("Very High", 0.02),
+}
+
+# Down Threshold labels (with fuzzy matching tolerance)
+DOWN_THRESHOLD_LABELS = {
+    -0.032: ("Aggressive", 0.005),  # ±0.5% tolerance
+    -0.055: ("Moderate", 0.005),
+    -0.065: ("Conservative", 0.005),
+    -0.15: ("Very Conservative", 0.01),
+}
+
+# Bounce Threshold labels (with fuzzy matching tolerance)
+BOUNCE_THRESHOLD_LABELS = {
+    -0.019: ("Aggressive", 0.005),
+    -0.032: ("Moderate", 0.005),
+    -0.038: ("Conservative", 0.005),
+    -0.075: ("Very Conservative", 0.01),
+}
+
+# Lookback Hours labels (exact match for integers)
+LOOKBACK_LABELS = {
+    4: "Aggressive",
+    6: "Balanced",
+    12: "Conservative",
+}
+
+# Min Drift % of Capital labels (with fuzzy matching tolerance)
+MIN_DRIFT_LABELS = {
+    0.04: ("Aggressive", 0.01),
+    0.06: ("Balanced", 0.01),
+    0.10: ("Conservative", 0.01),
+}
+
+# Max Hedge Drift % labels (with fuzzy matching tolerance)
+MAX_DRIFT_LABELS = {
+    0.40: ("Aggressive", 0.05),
+    0.50: ("Balanced", 0.05),
+    0.70: ("Conservative", 0.05),
+}
+
+
+def get_label_with_fuzzy_match(value: float, label_map: dict) -> str | None:
+    """
+    Get label for a value using fuzzy matching with tolerance.
+    
+    Args:
+        value: The numeric value to match
+        label_map: Dict mapping reference values to (label, tolerance) tuples
+        
+    Returns:
+        Label string if match found within tolerance, None otherwise
+    """
+    for ref_val, label_data in label_map.items():
+        if isinstance(label_data, tuple):
+            label, tolerance = label_data
+            if abs(value - ref_val) <= tolerance:
+                return label
+        else:
+            # Exact match for simple string labels
+            if value == ref_val:
+                return label_data
+    return None
+
+
 class LPPositionData(BaseModel):
     id: str
     position_config_id: str = ""
@@ -621,12 +694,18 @@ class LPPositionState(rx.State):
     
     @rx.var
     def regime_down_threshold_display(self) -> str:
-        """Format down threshold as percentage"""
+        """Format down threshold with context label"""
+        label = get_label_with_fuzzy_match(self.regime_down_threshold, DOWN_THRESHOLD_LABELS)
+        if label:
+            return f"{label} ({self.regime_down_threshold * 100:.1f}%)"
         return f"{self.regime_down_threshold * 100:.2f}%"
     
     @rx.var
     def regime_bounce_threshold_display(self) -> str:
-        """Format bounce threshold as percentage"""
+        """Format bounce threshold with context label"""
+        label = get_label_with_fuzzy_match(self.regime_bounce_threshold, BOUNCE_THRESHOLD_LABELS)
+        if label:
+            return f"{label} ({self.regime_bounce_threshold * 100:.1f}%)"
         return f"{self.regime_bounce_threshold * 100:.2f}%"
     
     @rx.var
@@ -641,8 +720,11 @@ class LPPositionState(rx.State):
     
     @rx.var
     def regime_delta_drift_display(self) -> str:
-        """Format delta drift threshold"""
-        return f"{self.regime_delta_drift_threshold_pct:.2f}%"
+        """Format delta drift threshold with context label"""
+        label = get_label_with_fuzzy_match(self.regime_delta_drift_threshold_pct, DELTA_DRIFT_LABELS)
+        if label:
+            return f"{label} ({self.regime_delta_drift_threshold_pct * 100:.0f}%)"
+        return f"{self.regime_delta_drift_threshold_pct * 100:.1f}%"
     
     @rx.var
     def regime_cooldown_display(self) -> str:
@@ -651,7 +733,10 @@ class LPPositionState(rx.State):
     
     @rx.var
     def regime_lookback_display(self) -> str:
-        """Format lookback hours"""
+        """Format lookback hours with context label"""
+        label = get_label_with_fuzzy_match(self.regime_lookback_hours, LOOKBACK_LABELS)
+        if label:
+            return f"{label} ({self.regime_lookback_hours}h)"
         return f"{self.regime_lookback_hours}h"
     
     @rx.var

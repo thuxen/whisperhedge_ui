@@ -1531,13 +1531,29 @@ def lp_positions_component() -> rx.Component:
                                             rx.text("Regime Classification", size="2", weight="medium"),
                                             rx.grid(
                                                 rx.vstack(
-                                                    rx.text("Funding Regime", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Funding Regime", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Current funding rate regime classification. Positive Strong/Mild = longs pay shorts (favorable for hedging). Neutral = balanced. Negative = shorts pay longs (costly for hedging). Affects hedge ratio adjustments.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_funding_regime, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Profile", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Profile", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Active dynamic hedging profile. Balanced = neutral approach. Moderate/Aggressive Bullish = under-hedge for upside. Moderate Bearish = over-hedge for protection. Full Protection = maximum hedging. Determines base hedge strategy.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_profile_name, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
@@ -1559,37 +1575,85 @@ def lp_positions_component() -> rx.Component:
                                             rx.text("Applied Config Values", size="2", weight="medium"),
                                             rx.grid(
                                                 rx.vstack(
-                                                    rx.text("Target Hedge Ratio", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Target Hedge Ratio", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Percentage of LP position to hedge with short positions. 100% = fully hedged (delta neutral), 0% = no hedge (full exposure). Dynamic profiles adjust this based on market conditions.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_target_ratio_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Delta Drift", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Delta Drift", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="How much your position delta can drift before triggering a rebalance. Low = rebalance often (tight hedge). High = rebalance rarely (loose hedge). Medium is recommended for most positions.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_delta_drift_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Rebalance Cooldown", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Rebalance Cooldown", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Minimum time to wait between hedge rebalances. Prevents over-trading. Lower = more responsive but higher fees. Higher = fewer trades but may miss optimal rebalances.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_cooldown_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Down Threshold", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Down Threshold", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Price drop % that triggers hedge adjustment. Used to detect significant downward moves. Aggressive = react to small moves. Conservative = wait for larger moves before adjusting.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_down_threshold_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Bounce Threshold", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Bounce Threshold", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Price recovery % after a drop that triggers hedge reduction. Detects bounce-back moves. Aggressive = reduce hedge quickly on small bounces. Conservative = wait for stronger recovery.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_bounce_threshold_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Lookback Hours", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Lookback Hours", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Pullback filter: How far back to look for momentum before hedging. Conservative=12h (more forgiving of trends), Balanced=6h, Aggressive=4h (quicker reaction)",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_lookback_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
@@ -1611,25 +1675,57 @@ def lp_positions_component() -> rx.Component:
                                             rx.text("Core Market Indicators", size="2", weight="medium"),
                                             rx.grid(
                                                 rx.vstack(
-                                                    rx.text("Correlation (7d)", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Correlation (7d)", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="7-day correlation between token prices. Values near 1.0 = prices move together (low hedge needed). Near 0 = uncorrelated. Near -1.0 = inverse relationship (high hedge needed). Used to calculate optimal hedge ratio.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(f"{LPPositionState.regime_corr_returns_7d:.4f}", size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Vol Ratio", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Vol Ratio", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Ratio of token0 volatility to token1 volatility. Higher ratio = token0 is more volatile. Used with correlation to calculate minimum variance hedge ratio (MVHR). Helps determine optimal hedge size.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(f"{LPPositionState.regime_vol_ratio:.4f}", size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Funding Rate (daily)", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Funding Rate (daily)", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Daily perpetual futures funding rate. Positive = longs pay shorts (you earn for hedging). Negative = shorts pay longs (you pay for hedging). Affects profitability of maintaining hedge positions.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_funding_rate_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("MRHL (hours)", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("MRHL (hours)", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Mean Reversion Half-Life: Time it takes for price to revert halfway back after a move. Lower = faster mean reversion (good for aggressive hedging). Higher = slower reversion (trend-following). Helps detect market regime.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(f"{LPPositionState.regime_mrhl_hours:.2f}", size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
@@ -1651,25 +1747,57 @@ def lp_positions_component() -> rx.Component:
                                             rx.text("Volatility Metrics", size="2", weight="medium"),
                                             rx.grid(
                                                 rx.vstack(
-                                                    rx.text("Token0 Std Dev (7d)", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Token0 Std Dev (7d)", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Standard deviation of token0 price returns over 7 days. Measures token0 volatility. Higher = more volatile. Used to calculate volatility ratio and optimal hedge size.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(f"{LPPositionState.regime_std_token0_7d:.4f}", size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Token1 Std Dev (7d)", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Token1 Std Dev (7d)", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Standard deviation of token1 price returns over 7 days. Measures token1 volatility. Higher = more volatile. Used to calculate volatility ratio and optimal hedge size.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(f"{LPPositionState.regime_std_token1_7d:.4f}", size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("ARV 7d", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("ARV 7d", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Annualized Realized Volatility over 7 days. Measures actual price movement volatility, annualized for comparison. Higher ARV = more volatile market. Helps assess risk and adjust hedging strategy.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_arv_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("ATR 7d", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("ATR 7d", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Average True Range over 7 days. Measures average price movement range. Higher ATR = larger price swings. Used to detect high volatility periods and adjust hedge sensitivity.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_atr_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
@@ -1691,19 +1819,43 @@ def lp_positions_component() -> rx.Component:
                                             rx.text("Pool Metrics", size="2", weight="medium"),
                                             rx.grid(
                                                 rx.vstack(
-                                                    rx.text("Pool TVL", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Pool TVL", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Total Value Locked in the liquidity pool. Higher TVL = more liquidity, lower slippage, more stable pool. Indicates pool health and trading efficiency.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_pool_tvl_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Pool Volume (24h)", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Pool Volume (24h)", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="24-hour trading volume in the pool. Higher volume = more active trading, better fee generation. Indicates pool activity and liquidity utilization.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_pool_volume_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Volume/TVL Ratio", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Volume/TVL Ratio", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Ratio of 24h volume to total value locked. Higher ratio = more efficient capital usage, better fee generation per dollar locked. Indicates pool efficiency and profitability.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_volume_tvl_ratio_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
@@ -1725,112 +1877,30 @@ def lp_positions_component() -> rx.Component:
                                             rx.text("Hyperliquid Data", size="2", weight="medium"),
                                             rx.grid(
                                                 rx.vstack(
-                                                    rx.text("Token0 Open Interest", size="1", color="gray"),
+                                                    rx.hstack(
+                                                        rx.text("Token0 Open Interest", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Total open interest for token0 perpetual futures on Hyperliquid. Higher OI = more market participants, deeper liquidity for hedging. Indicates availability of hedge positions.",
+                                                        ),
+                                                        spacing="1",
+                                                        align_items="center",
+                                                    ),
                                                     rx.text(LPPositionState.regime_hl_oi_token0_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
                                                 rx.vstack(
-                                                    rx.text("Token1 Open Interest", size="1", color="gray"),
-                                                    rx.text(LPPositionState.regime_hl_oi_token1_display, size="2", weight="medium"),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                columns="4",
-                                                spacing="6",
-                                                width="100%",
-                                            ),
-                                            spacing="2",
-                                        ),
-                                        padding="0.75rem",
-                                        background="var(--gray-2)",
-                                        border_radius="8px",
-                                    ),
-                                    
-                                    # MVHR Details
-                                    rx.box(
-                                        rx.vstack(
-                                            rx.text("MVHR Details", size="2", weight="medium"),
-                                            rx.grid(
-                                                rx.vstack(
-                                                    rx.text("Beta (raw)", size="1", color="gray"),
-                                                    rx.text(LPPositionState.regime_mvhr_beta_display, size="2", weight="medium"),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                rx.vstack(
-                                                    rx.text("Base Ratio", size="1", color="gray"),
-                                                    rx.text(LPPositionState.regime_mvhr_base_ratio_display, size="2", weight="medium"),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                columns="4",
-                                                spacing="6",
-                                                width="100%",
-                                            ),
-                                            spacing="2",
-                                        ),
-                                        padding="0.75rem",
-                                        background="var(--gray-2)",
-                                        border_radius="8px",
-                                    ),
-                                    
-                                    # Metadata
-                                    rx.box(
-                                        rx.vstack(
-                                            rx.text("Metadata", size="2", weight="medium"),
-                                            rx.grid(
-                                                rx.vstack(
-                                                    rx.text("Dynamic Config Enabled", size="1", color="gray"),
-                                                    rx.text(
-                                                        rx.cond(LPPositionState.regime_dynamic_config_enabled, "Yes", "No"),
-                                                        size="2",
-                                                        weight="medium"
-                                                    ),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                rx.vstack(
-                                                    rx.text("Dynamic Config Applied", size="1", color="gray"),
-                                                    rx.text(
-                                                        rx.cond(LPPositionState.regime_dynamic_config_applied, "Yes", "No"),
-                                                        size="2",
-                                                        weight="medium"
-                                                    ),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                rx.vstack(
-                                                    rx.text("Fallback Reason", size="1", color="gray"),
-                                                    rx.text(
-                                                        rx.cond(
-                                                            LPPositionState.regime_fallback_reason != "",
-                                                            LPPositionState.regime_fallback_reason,
-                                                            "None"
+                                                    rx.hstack(
+                                                        rx.text("Token1 Open Interest", size="1", color="gray"),
+                                                        rx.tooltip(
+                                                            rx.icon("info", size=12, color="gray"),
+                                                            content="Total open interest for token1 perpetual futures on Hyperliquid. Higher OI = more market participants, deeper liquidity for hedging. Indicates availability of hedge positions.",
                                                         ),
-                                                        size="2",
-                                                        weight="medium"
+                                                        spacing="1",
+                                                        align_items="center",
                                                     ),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                rx.vstack(
-                                                    rx.text("Regime Changed", size="1", color="gray"),
-                                                    rx.text(
-                                                        rx.cond(LPPositionState.regime_regime_changed, "Yes", "No"),
-                                                        size="2",
-                                                        weight="medium"
-                                                    ),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                rx.vstack(
-                                                    rx.text("Config Changed", size="1", color="gray"),
-                                                    rx.text(
-                                                        rx.cond(LPPositionState.regime_config_changed, "Yes", "No"),
-                                                        size="2",
-                                                        weight="medium"
-                                                    ),
+                                                    rx.text(LPPositionState.regime_hl_oi_token1_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
