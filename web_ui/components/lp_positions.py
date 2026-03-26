@@ -1593,7 +1593,7 @@ def lp_positions_component() -> rx.Component:
                                                         rx.text("Delta Drift", size="1", color="gray"),
                                                         rx.tooltip(
                                                             rx.icon("info", size=12, color="gray"),
-                                                            content="How much your position delta can drift before triggering a rebalance. Low = rebalance often (tight hedge). High = rebalance rarely (loose hedge). Medium is recommended for most positions.",
+                                                            content="How much your position delta can drift before triggering a rebalance. Low = rebalance often (tight hedge), High = rebalance rarely (loose hedge). Standard tiers: Low (14%), Medium (38%), High (58%), Very High (80%). Dynamic profiles may use different values.",
                                                         ),
                                                         spacing="1",
                                                         align_items="center",
@@ -1621,7 +1621,7 @@ def lp_positions_component() -> rx.Component:
                                                         rx.text("Down Threshold", size="1", color="gray"),
                                                         rx.tooltip(
                                                             rx.icon("info", size=12, color="gray"),
-                                                            content="Price drop % that triggers hedge adjustment. Used to detect significant downward moves. Aggressive = react to small moves. Conservative = wait for larger moves before adjusting.",
+                                                            content="Price drop % that triggers hedge adjustment. Used to detect significant downward moves. Standard tiers: Aggressive (-3.2%), Moderate (-5.5%), Conservative (-6.5%), Very Conservative (-15%). Dynamic profiles may use different values.",
                                                         ),
                                                         spacing="1",
                                                         align_items="center",
@@ -1635,7 +1635,7 @@ def lp_positions_component() -> rx.Component:
                                                         rx.text("Bounce Threshold", size="1", color="gray"),
                                                         rx.tooltip(
                                                             rx.icon("info", size=12, color="gray"),
-                                                            content="Price recovery % after a drop that triggers hedge reduction. Detects bounce-back moves. Aggressive = reduce hedge quickly on small bounces. Conservative = wait for stronger recovery.",
+                                                            content="Price recovery % after a drop that triggers hedge reduction. Detects bounce-back moves. Standard tiers: Aggressive (-1.9%), Moderate (-3.2%), Conservative (-3.8%), Very Conservative (-7.5%). Dynamic profiles may use different values.",
                                                         ),
                                                         spacing="1",
                                                         align_items="center",
@@ -1649,7 +1649,7 @@ def lp_positions_component() -> rx.Component:
                                                         rx.text("Lookback Hours", size="1", color="gray"),
                                                         rx.tooltip(
                                                             rx.icon("info", size=12, color="gray"),
-                                                            content="Pullback filter: How far back to look for momentum before hedging. Conservative=12h (more forgiving of trends), Balanced=6h, Aggressive=4h (quicker reaction)",
+                                                            content="Pullback filter: How far back to look for momentum before hedging. Standard tiers: Aggressive (4h), Balanced (6h), Conservative (12h). Dynamic profiles may use different values.",
                                                         ),
                                                         spacing="1",
                                                         align_items="center",
