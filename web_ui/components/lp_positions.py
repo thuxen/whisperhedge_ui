@@ -1788,20 +1788,6 @@ def lp_positions_component() -> rx.Component:
                                                     spacing="1",
                                                     align_items="start",
                                                 ),
-                                                rx.vstack(
-                                                    rx.hstack(
-                                                        rx.text("ATR 7d", size="1", color="gray"),
-                                                        rx.tooltip(
-                                                            rx.icon("info", size=12, color="gray"),
-                                                            content="Average True Range over 7 days. Measures average price movement range. Higher ATR = larger price swings. Used to detect high volatility periods and adjust hedge sensitivity.",
-                                                        ),
-                                                        spacing="1",
-                                                        align_items="center",
-                                                    ),
-                                                    rx.text(LPPositionState.regime_atr_display, size="2", weight="medium"),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
                                                 columns="4",
                                                 spacing="6",
                                                 width="100%",
@@ -1857,50 +1843,6 @@ def lp_positions_component() -> rx.Component:
                                                         align_items="center",
                                                     ),
                                                     rx.text(LPPositionState.regime_volume_tvl_ratio_display, size="2", weight="medium"),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                columns="4",
-                                                spacing="6",
-                                                width="100%",
-                                            ),
-                                            spacing="2",
-                                        ),
-                                        padding="0.75rem",
-                                        background="var(--gray-2)",
-                                        border_radius="8px",
-                                    ),
-                                    
-                                    # Hyperliquid Data
-                                    rx.box(
-                                        rx.vstack(
-                                            rx.text("Hyperliquid Data", size="2", weight="medium"),
-                                            rx.grid(
-                                                rx.vstack(
-                                                    rx.hstack(
-                                                        rx.text("Token0 Open Interest", size="1", color="gray"),
-                                                        rx.tooltip(
-                                                            rx.icon("info", size=12, color="gray"),
-                                                            content="Total open interest for token0 perpetual futures on Hyperliquid. Higher OI = more market participants, deeper liquidity for hedging. Indicates availability of hedge positions.",
-                                                        ),
-                                                        spacing="1",
-                                                        align_items="center",
-                                                    ),
-                                                    rx.text(LPPositionState.regime_hl_oi_token0_display, size="2", weight="medium"),
-                                                    spacing="1",
-                                                    align_items="start",
-                                                ),
-                                                rx.vstack(
-                                                    rx.hstack(
-                                                        rx.text("Token1 Open Interest", size="1", color="gray"),
-                                                        rx.tooltip(
-                                                            rx.icon("info", size=12, color="gray"),
-                                                            content="Total open interest for token1 perpetual futures on Hyperliquid. Higher OI = more market participants, deeper liquidity for hedging. Indicates availability of hedge positions.",
-                                                        ),
-                                                        spacing="1",
-                                                        align_items="center",
-                                                    ),
-                                                    rx.text(LPPositionState.regime_hl_oi_token1_display, size="2", weight="medium"),
                                                     spacing="1",
                                                     align_items="start",
                                                 ),

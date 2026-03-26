@@ -716,7 +716,7 @@ class LPPositionState(rx.State):
     @rx.var
     def regime_target_ratio_display(self) -> str:
         """Format target hedge ratio"""
-        return f"{self.regime_target_hedge_ratio:.1f}%"
+        return f"{self.regime_target_hedge_ratio * 100:.1f}%"
     
     @rx.var
     def regime_delta_drift_display(self) -> str:
