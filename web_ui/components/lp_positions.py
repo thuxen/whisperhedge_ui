@@ -236,7 +236,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                         rx.text("Total Position", size="1", color="gray", weight="medium"),
                         rx.tooltip(
                             rx.icon("info", size=12, color="gray"),
-                            content="Total Position = LP Position (including fees) + Trading Account Balance",
+                            content="Total Position = LP Position + Trading Account Balance + Accumulated Fees",
                         ),
                         spacing="1",
                         align_items="center",
@@ -251,6 +251,27 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                                 rx.text("•", size="1", color="gray"),
                                 rx.text("Hedge:", size="1", color="gray"),
                                 rx.text(f"${position.api_account_value:,.2f}", size="2", weight="medium"),
+                                spacing="1",
+                            ),
+                        ),
+                        rx.cond(
+                            (position.metrics.fee_usd_total != None) & (position.metrics.fee_usd_total > 0),
+                            rx.hstack(
+                                rx.text("•", size="1", color="gray"),
+                                rx.hstack(
+                                    rx.text("Fees:", size="1", color="gray"),
+                                    rx.tooltip(
+                                        rx.icon("info", size=12, color="gray"),
+                                        content=rx.cond(
+                                            (position.metrics.fee_amount_0 != None) & (position.metrics.fee_amount_0 > 0),
+                                            f"Token0: {position.metrics.fee_amount_0:.6f} (${position.metrics.fee_usd_0:,.2f}) • Token1: {position.metrics.fee_amount_1:.6f} (${position.metrics.fee_usd_1:,.2f})",
+                                            "Accumulated LP fees from trading activity",
+                                        ),
+                                    ),
+                                    spacing="1",
+                                    align_items="center",
+                                ),
+                                rx.text(f"${position.metrics.fee_usd_total:,.2f}", size="2", weight="medium", color="green"),
                                 spacing="1",
                             ),
                         ),
@@ -289,7 +310,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                                 spacing="1",
                                 align_items="baseline",
                             ),
-                            # LP and Hedge breakdown
+                            # LP, Hedge, and Fees breakdown
                             rx.hstack(
                                 rx.text("LP:", size="1", color="gray"),
                                 rx.text(
@@ -331,6 +352,19 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                                     ),
                                     size="1",
                                     color=rx.cond(position.metrics.hedge_pnl_pct >= 0, "green", "red"),
+                                ),
+                                rx.cond(
+                                    (position.metrics.fee_usd_total != None) & (position.metrics.fee_usd_total > 0),
+                                    rx.fragment(
+                                        rx.text("•", size="1", color="gray"),
+                                        rx.text("Fees:", size="1", color="gray"),
+                                        rx.text(
+                                            f"+${position.metrics.fee_usd_total:,.2f}",
+                                            size="1",
+                                            weight="medium",
+                                            color="green",
+                                        ),
+                                    ),
                                 ),
                                 spacing="1",
                             ),

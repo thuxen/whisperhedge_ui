@@ -111,7 +111,7 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
         position_id: The position ID to query
     
     Returns:
-        Dict with lp_value_usd, hl_account_value, total_value, timestamp
+        Dict with lp_value_usd, hl_account_value, total_value (including fees), timestamp, and fee data
     """
     try:
         conn = get_questdb_connection()
@@ -141,16 +141,27 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
         conn.close()
         
         if result:
+            # Get accumulated fees
+            fees = get_accumulated_fees(position_id)
+            fee_usd_total = fees['fee_usd_total'] if fees else 0.0
+            
             return {
                 'timestamp': result['timestamp'].isoformat() if result['timestamp'] else None,
                 'lp_value_usd': float(result['lp_value_usd']) if result['lp_value_usd'] else 0.0,
                 'hl_account_value': float(result['hl_account_value']) if result['hl_account_value'] else 0.0,
-                'total_value': float(result['total_value']) if result['total_value'] else 0.0,
+                'total_value': float(result['total_value']) + fee_usd_total if result['total_value'] else fee_usd_total,
                 'lp_il_usd': float(result['lp_il_usd']) if result['lp_il_usd'] is not None else None,
                 'lp_il_pct': float(result['lp_il_pct']) if result['lp_il_pct'] is not None else None,
                 'lp_utilization_pct': float(result['lp_utilization_pct']) if result['lp_utilization_pct'] is not None else None,
                 'lp_distance_to_lower_pct': float(result['lp_distance_to_lower_pct']) if result['lp_distance_to_lower_pct'] is not None else None,
                 'lp_distance_to_upper_pct': float(result['lp_distance_to_upper_pct']) if result['lp_distance_to_upper_pct'] is not None else None,
+                'fee_usd_total': fee_usd_total,
+                'fee_amount_0': fees['fee_amount_0'] if fees else 0.0,
+                'fee_amount_1': fees['fee_amount_1'] if fees else 0.0,
+                'fee_usd_0': fees['fee_usd_0'] if fees else 0.0,
+                'fee_usd_1': fees['fee_usd_1'] if fees else 0.0,
+                'token0_symbol': fees['token0_symbol'] if fees else '',
+                'token1_symbol': fees['token1_symbol'] if fees else '',
             }
         
         return None
@@ -168,7 +179,7 @@ def get_first_position_values(position_id: str) -> Optional[dict]:
         position_id: The position ID to query
     
     Returns:
-        dict with first_lp_value, first_hedge_value, first_total_value, or None if no data
+        dict with first_lp_value, first_hedge_value, first_total_value (including fees at entry), or None if no data
     """
     try:
         conn = get_questdb_connection()
@@ -193,17 +204,87 @@ def get_first_position_values(position_id: str) -> Optional[dict]:
         conn.close()
         
         if result:
+            # Get fees accumulated up to the first entry timestamp
+            # For entry baseline, we include any fees that existed at position start
+            fees = get_accumulated_fees(position_id)
+            fee_usd_total = fees['fee_usd_total'] if fees else 0.0
+            
             return {
                 'timestamp': result['timestamp'].isoformat() if result['timestamp'] else None,
                 'lp_value_usd': float(result['lp_value_usd']) if result['lp_value_usd'] else 0.0,
                 'hl_account_value': float(result['hl_account_value']) if result['hl_account_value'] else 0.0,
-                'total_value': float(result['total_value']) if result['total_value'] else 0.0,
+                'total_value': float(result['total_value']) + fee_usd_total if result['total_value'] else fee_usd_total,
+                'fee_usd_total': fee_usd_total,
             }
         
         return None
         
     except Exception as e:
         print(f"Error fetching first position values: {e}")
+        return None
+
+
+def get_accumulated_fees(position_id: str) -> Optional[Dict]:
+    """
+    Get latest accumulated fees for a position from fee_log table.
+    The fee_log table already contains cumulative totals, so we just get the latest entry.
+    
+    Args:
+        position_id: The position ID to query
+    
+    Returns:
+        Dict with fee_usd_total, fee_amount_0, fee_amount_1, fee_usd_0, fee_usd_1, 
+        token0_symbol, token1_symbol, or None if no fee data
+    """
+    try:
+        print(f"[GET_ACCUMULATED_FEES] Querying fees for position_id: {position_id}", flush=True)
+        conn = get_questdb_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Get the LATEST fee entry (fee_log already has cumulative totals)
+        query = """
+            SELECT 
+                fee_usd_total,
+                fee_amount_0,
+                fee_amount_1,
+                fee_usd_0,
+                fee_usd_1,
+                token0_symbol,
+                token1_symbol
+            FROM fee_log
+            WHERE position_id = %s
+            ORDER BY time DESC
+            LIMIT 1
+        """
+        
+        cursor.execute(query, (position_id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        print(f"[GET_ACCUMULATED_FEES] Query result: {result}", flush=True)
+        
+        if result and result['fee_usd_total'] is not None:
+            fee_data = {
+                'fee_usd_total': float(result['fee_usd_total']) if result['fee_usd_total'] else 0.0,
+                'fee_amount_0': float(result['fee_amount_0']) if result['fee_amount_0'] else 0.0,
+                'fee_amount_1': float(result['fee_amount_1']) if result['fee_amount_1'] else 0.0,
+                'fee_usd_0': float(result['fee_usd_0']) if result['fee_usd_0'] else 0.0,
+                'fee_usd_1': float(result['fee_usd_1']) if result['fee_usd_1'] else 0.0,
+                'token0_symbol': result['token0_symbol'] if result['token0_symbol'] else '',
+                'token1_symbol': result['token1_symbol'] if result['token1_symbol'] else '',
+            }
+            print(f"[GET_ACCUMULATED_FEES] Returning fee data: {fee_data}", flush=True)
+            return fee_data
+        
+        print(f"[GET_ACCUMULATED_FEES] No fee data found for position {position_id}", flush=True)
+        return None
+        
+    except Exception as e:
+        print(f"[GET_ACCUMULATED_FEES] Error fetching accumulated fees: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
         return None
 
 

@@ -1126,6 +1126,20 @@ class LPPositionState(rx.State):
                             position.metrics.hedge_value = new_hedge_value
                             position.metrics.total_value = new_total_value
                             
+                            # Update fee metrics
+                            fee_usd_total = latest_values.get('fee_usd_total', 0.0)
+                            position.metrics.fee_usd_total = fee_usd_total
+                            position.metrics.fee_amount_0 = latest_values.get('fee_amount_0', 0.0)
+                            position.metrics.fee_amount_1 = latest_values.get('fee_amount_1', 0.0)
+                            position.metrics.fee_usd_0 = latest_values.get('fee_usd_0', 0.0)
+                            position.metrics.fee_usd_1 = latest_values.get('fee_usd_1', 0.0)
+                            
+                            # Debug logging for fees
+                            if fee_usd_total > 0:
+                                print(f"[REFRESH STATUS] Position {position.position_name} fees: ${fee_usd_total:,.2f} (Token0: {position.metrics.fee_amount_0:.6f}, Token1: {position.metrics.fee_amount_1:.6f})", flush=True)
+                            else:
+                                print(f"[REFRESH STATUS] Position {position.position_name} has no fees (fee_usd_total={fee_usd_total})", flush=True)
+                            
                             # Update entry baselines
                             if first_values:
                                 position.metrics.entry_lp_value = entry_lp_value
@@ -1338,6 +1352,11 @@ class LPPositionState(rx.State):
                         utilization_pct=lp_utilization_pct,
                         distance_to_lower_pct=lp_distance_to_lower_pct,
                         distance_to_upper_pct=lp_distance_to_upper_pct,
+                        fee_usd_total=latest_values.get('fee_usd_total') if latest_values else None,
+                        fee_amount_0=latest_values.get('fee_amount_0') if latest_values else None,
+                        fee_amount_1=latest_values.get('fee_amount_1') if latest_values else None,
+                        fee_usd_0=latest_values.get('fee_usd_0') if latest_values else None,
+                        fee_usd_1=latest_values.get('fee_usd_1') if latest_values else None,
                     )
                     
                     position = LPPositionData(

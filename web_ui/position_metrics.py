@@ -36,6 +36,13 @@ class PositionMetrics(BaseModel):
     il_usd: Optional[float] = None
     il_pct: Optional[float] = None
     
+    # Fee metrics
+    fee_usd_total: Optional[float] = None
+    fee_amount_0: Optional[float] = None
+    fee_amount_1: Optional[float] = None
+    fee_usd_0: Optional[float] = None
+    fee_usd_1: Optional[float] = None
+    
     # Range position metrics
     utilization_pct: Optional[float] = None
     distance_to_lower_pct: Optional[float] = None
