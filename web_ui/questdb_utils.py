@@ -171,15 +171,17 @@ def get_latest_position_values(position_id: str) -> Optional[Dict]:
         return None
 
 
-def get_first_position_values(position_id: str) -> Optional[dict]:
+def get_first_position_values(position_id: str) -> Optional[Dict]:
     """
     Get the first hedge_state entry for a position (baseline for PnL calculation).
+    Note: Does NOT include fees in total_value since fees are earnings that accumulate over time,
+    not part of the entry baseline.
     
     Args:
         position_id: The position ID to query
     
     Returns:
-        dict with first_lp_value, first_hedge_value, first_total_value (including fees at entry), or None if no data
+        dict with first_lp_value, first_hedge_value, first_total_value (LP + Hedge only), or None if no data
     """
     try:
         conn = get_questdb_connection()
@@ -204,17 +206,11 @@ def get_first_position_values(position_id: str) -> Optional[dict]:
         conn.close()
         
         if result:
-            # Get fees accumulated up to the first entry timestamp
-            # For entry baseline, we include any fees that existed at position start
-            fees = get_accumulated_fees(position_id)
-            fee_usd_total = fees['fee_usd_total'] if fees else 0.0
-            
             return {
                 'timestamp': result['timestamp'].isoformat() if result['timestamp'] else None,
                 'lp_value_usd': float(result['lp_value_usd']) if result['lp_value_usd'] else 0.0,
                 'hl_account_value': float(result['hl_account_value']) if result['hl_account_value'] else 0.0,
-                'total_value': float(result['total_value']) + fee_usd_total if result['total_value'] else fee_usd_total,
-                'fee_usd_total': fee_usd_total,
+                'total_value': float(result['total_value']) if result['total_value'] else 0.0,
             }
         
         return None
