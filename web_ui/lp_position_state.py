@@ -967,9 +967,13 @@ class LPPositionState(rx.State):
             await self.load_wallets()
             
             # 4. Fetch fresh blockchain data
-            from .blockchain_utils import fetch_uniswap_position
+            from .blockchain_utils import fetch_position_by_protocol
             
-            self.fetched_position_data = await fetch_uniswap_position(self.network, self.nft_id)
+            self.fetched_position_data = await fetch_position_by_protocol(
+                self.protocol,
+                self.network,
+                self.nft_id
+            )
             
             # Update fields with fresh blockchain data if available
             if self.fetched_position_data:
@@ -1480,10 +1484,14 @@ class LPPositionState(rx.State):
     async def fetch_position_data_worker(self):
         """Async worker for fetching position data"""
         try:
-            from .blockchain_utils import fetch_uniswap_position
+            from .blockchain_utils import fetch_position_by_protocol
             
             # Fetch position data directly from blockchain (no API needed)
-            self.fetched_position_data = await fetch_uniswap_position(self._fetch_network, self._fetch_nft_id)
+            self.fetched_position_data = await fetch_position_by_protocol(
+                self._fetch_protocol,
+                self._fetch_network,
+                self._fetch_nft_id
+            )
             
             # Populate form fields with fetched data
             self.protocol = self._fetch_protocol
@@ -1570,8 +1578,11 @@ class LPPositionState(rx.State):
             self.show_confirmation = True
             
         except Exception as e:
-            self.error_message = "Failed to fetch position data. Please check the NFT ID and network."
-            yield rx.toast.error("Failed to fetch position data. Please check NFT ID/Network.", duration=5000)
+            print(f"ERROR in fetch_position_data_worker: {e}")
+            import traceback
+            traceback.print_exc()
+            self.error_message = f"Failed to fetch position data: {str(e)}"
+            yield rx.toast.error(f"Failed to fetch: {str(e)}", duration=8000)
         finally:
             self.is_fetching = False
             # Clear temporary state

@@ -89,6 +89,54 @@ FACTORY_ADDRESSES = {
     "optimism": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
 }
 
+# Aerodrome Slipstream contract addresses (Base only)
+AERODROME_POSITION_MANAGER_ADDRESSES = {
+    "base": "0x827922686190790b37229fd06084350E74485b72",
+}
+
+AERODROME_FACTORY_ADDRESSES = {
+    "base": "0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A",
+}
+
+# Aerodrome Factory ABI - uses tickSpacing instead of fee
+AERODROME_FACTORY_ABI = [
+    {
+        "inputs": [
+            {"internalType": "address", "name": "tokenA", "type": "address"},
+            {"internalType": "address", "name": "tokenB", "type": "address"},
+            {"internalType": "int24", "name": "tickSpacing", "type": "int24"},
+        ],
+        "name": "getPool",
+        "outputs": [{"internalType": "address", "name": "pool", "type": "address"}],
+        "stateMutability": "view",
+        "type": "function",
+    }
+]
+
+# Aerodrome Pool slot0 ABI - no feeProtocol field (different from Uniswap V3)
+AERODROME_POOL_SLOT0_ABI = [{
+    "inputs": [],
+    "name": "slot0",
+    "outputs": [
+        {"internalType": "uint160", "name": "sqrtPriceX96", "type": "uint160"},
+        {"internalType": "int24", "name": "tick", "type": "int24"},
+        {"internalType": "uint16", "name": "observationIndex", "type": "uint16"},
+        {"internalType": "uint16", "name": "observationCardinality", "type": "uint16"},
+        {"internalType": "uint16", "name": "observationCardinalityNext", "type": "uint16"},
+        {"internalType": "bool", "name": "unlocked", "type": "bool"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+}]
+
+# Fee tier to tick spacing mapping for Aerodrome
+FEE_TO_TICK_SPACING = {
+    100: 1,      # 0.01% -> tickSpacing 1
+    500: 10,     # 0.05% -> tickSpacing 10
+    3000: 60,    # 0.3% -> tickSpacing 60
+    10000: 200,  # 1% -> tickSpacing 200
+}
+
 
 def get_web3(network: str) -> Optional[Web3]:
     """Get Web3 instance for the specified network"""
@@ -489,3 +537,273 @@ async def fetch_uniswap_position(network: str, nft_id: str) -> Dict[str, str]:
         
     except Exception as e:
         raise Exception(f"Error fetching position data: {str(e)}")
+
+
+async def fetch_aerodrome_position(network: str, nft_id: str) -> Dict[str, str]:
+    """
+    Fetch Aerodrome Slipstream position data from blockchain
+    
+    Args:
+        network: Network name (currently only 'base' supported)
+        nft_id: NFT token ID
+        
+    Returns:
+        Dictionary with position data
+    """
+    try:
+        # Validate network
+        if network.lower() != "base":
+            raise Exception(f"Aerodrome Slipstream is only available on Base network")
+        
+        # Get Web3 instance
+        w3 = get_web3(network)
+        if not w3:
+            raise Exception(f"Could not connect to {network} network")
+        
+        # Get position manager contract
+        manager_address = AERODROME_POSITION_MANAGER_ADDRESSES.get(network.lower())
+        if not manager_address:
+            raise Exception(f"Aerodrome position manager not found for {network}")
+        
+        position_manager = w3.eth.contract(
+            address=Web3.to_checksum_address(manager_address),
+            abi=POSITION_MANAGER_ABI  # Same ABI as Uniswap V3
+        )
+        
+        # Fetch position data
+        position_data = position_manager.functions.positions(int(nft_id)).call()
+        
+        # Parse position data (same structure as Uniswap V3)
+        (nonce, operator, token0, token1, fee, tick_lower, tick_upper, 
+         liquidity, fee_growth_0, fee_growth_1, tokens_owed_0, tokens_owed_1) = position_data
+        
+        # Get token info
+        token0_symbol = get_token_symbol(w3, token0)
+        token1_symbol = get_token_symbol(w3, token1)
+        
+        # Get token decimals
+        try:
+            token0_contract = w3.eth.contract(address=Web3.to_checksum_address(token0), abi=ERC20_ABI)
+            token0_decimals = token0_contract.functions.decimals().call()
+        except:
+            token0_decimals = 18
+        
+        try:
+            token1_contract = w3.eth.contract(address=Web3.to_checksum_address(token1), abi=ERC20_ABI)
+            token1_decimals = token1_contract.functions.decimals().call()
+        except:
+            token1_decimals = 18
+        
+        # Get pool address from Aerodrome factory (uses tickSpacing instead of fee)
+        factory_address = AERODROME_FACTORY_ADDRESSES.get(network.lower())
+        if not factory_address:
+            raise Exception(f"Aerodrome factory not found for {network}")
+        
+        # Convert fee to tickSpacing
+        tick_spacing = FEE_TO_TICK_SPACING.get(fee)
+        if not tick_spacing:
+            raise Exception(f"Unknown fee tier {fee} - cannot determine tickSpacing")
+        
+        factory = w3.eth.contract(
+            address=Web3.to_checksum_address(factory_address),
+            abi=AERODROME_FACTORY_ABI
+        )
+        pool_address = factory.functions.getPool(
+            Web3.to_checksum_address(token0),
+            Web3.to_checksum_address(token1),
+            tick_spacing
+        ).call()
+        
+        # Format fee tier
+        fee_tier = fee_to_percentage(fee)
+        
+        # Get pool's current price from slot0 (Aerodrome has different slot0 structure)
+        current_price = 0.0
+        current_tick = 0
+        sqrt_price_x96 = 0
+        current_price_raw = 0
+        try:
+            pool_contract = w3.eth.contract(
+                address=Web3.to_checksum_address(pool_address),
+                abi=AERODROME_POOL_SLOT0_ABI  # Different from Uniswap V3
+            )
+            slot0 = pool_contract.functions.slot0().call()
+            sqrt_price_x96 = slot0[0]
+            current_tick = slot0[1]
+            current_price_raw = (sqrt_price_x96 / (2**96)) ** 2
+        except Exception as e:
+            print(f"Error fetching pool price: {e}")
+        
+        # Adjust for token decimals
+        decimal_adjustment = 10 ** (token1_decimals - token0_decimals)
+        current_price = current_price_raw / decimal_adjustment
+        
+        # Calculate price bounds from ticks
+        pa_raw = 1.0001 ** tick_lower
+        pb_raw = 1.0001 ** tick_upper
+        pa = pa_raw / decimal_adjustment
+        pb = pb_raw / decimal_adjustment
+        
+        # Calculate token amounts using Uniswap V3 formulas
+        token0_amount_actual, token1_amount_actual = compute_lp_amounts_from_raw_liquidity(
+            raw_liquidity=liquidity,
+            current_tick=current_tick,
+            tick_lower=tick_lower,
+            tick_upper=tick_upper,
+            sqrt_price_x96=sqrt_price_x96,
+            token0_decimals=token0_decimals,
+            token1_decimals=token1_decimals
+        )
+        
+        # Generate position name (matching Uniswap V3 format)
+        position_name = f"{network.title()} {token0_symbol}/{token1_symbol} Position #{nft_id}"
+        
+        # Base result with blockchain data
+        base_result = {
+            "position_name": position_name,
+            "pool_address": pool_address,
+            "token0_address": token0,
+            "token1_address": token1,
+            "token0_symbol": token0_symbol,
+            "token1_symbol": token1_symbol,
+            "token0_decimals": token0_decimals,
+            "token1_decimals": token1_decimals,
+            "fee_tier": fee_tier,
+            "tick_lower": tick_lower,
+            "tick_upper": tick_upper,
+            "current_tick": current_tick,
+            "liquidity": str(liquidity),
+            "current_price": current_price,
+            "pa": pa,
+            "pb": pb,
+        }
+        
+        # Try to get USD values from Hyperliquid
+        try:
+            from .hl_utils import get_hl_token_metadata, is_stablecoin
+            
+            token0_metadata = get_hl_token_metadata(token0_symbol)
+            token1_metadata = get_hl_token_metadata(token1_symbol)
+            
+            # Get prices (stablecoins = $1)
+            token0_price_usd = None
+            token1_price_usd = None
+            
+            if is_stablecoin(token0_symbol):
+                token0_price_usd = 1.0
+            else:
+                token0_price_usd = token0_metadata['price'] if token0_metadata else None
+            
+            if is_stablecoin(token1_symbol):
+                token1_price_usd = 1.0
+            else:
+                token1_price_usd = token1_metadata['price'] if token1_metadata else None
+            
+            # Convert pool price to USD
+            current_price_usd = 0.0
+            pa_usd = 0.0
+            pb_usd = 0.0
+            
+            if token0_price_usd and token1_price_usd:
+                current_price_usd = round(current_price * token1_price_usd, 4)
+                pa_usd = round(pa * token1_price_usd, 2)
+                pb_usd = round(pb * token1_price_usd, 2)
+                
+                # Round token amounts to Hyperliquid sz_decimals
+                token0_sz_decimals = token0_metadata.get('sz_decimals', 8) if token0_metadata else 8
+                token1_sz_decimals = token1_metadata.get('sz_decimals', 8) if token1_metadata else 8
+                
+                token0_amount_rounded = round(token0_amount_actual, token0_sz_decimals)
+                token1_amount_rounded = round(token1_amount_actual, token1_sz_decimals)
+                
+                # Calculate USD values
+                token0_amount_usd = round(token0_amount_rounded * token0_price_usd, 2)
+                token1_amount_usd = round(token1_amount_rounded * token1_price_usd, 2)
+                position_value_usd = round(token0_amount_usd + token1_amount_usd, 2)
+                
+                # Calculate percentage allocation
+                token0_pct = round((token0_amount_usd / position_value_usd * 100), 1) if position_value_usd > 0 else 0.0
+                token1_pct = round((token1_amount_usd / position_value_usd * 100), 1) if position_value_usd > 0 else 0.0
+                
+                # Calculate delta
+                delta = token0_amount_rounded if current_tick >= tick_lower and current_tick <= tick_upper else 0.0
+                
+                # Prepare hedge_tokens JSONB data
+                hedge_tokens = {
+                    "token0": {
+                        "hl_symbol": token0_metadata.get('hl_symbol', '') if token0_metadata else '',
+                        "pool_symbol": token0_symbol,
+                        "sz_decimals": token0_sz_decimals,
+                        "price_decimals": token0_metadata.get('price_decimals', 5) if token0_metadata else 5
+                    },
+                    "token1": {
+                        "hl_symbol": token1_metadata.get('hl_symbol', '') if token1_metadata else '',
+                        "pool_symbol": token1_symbol,
+                        "sz_decimals": token1_sz_decimals,
+                        "price_decimals": token1_metadata.get('price_decimals', 5) if token1_metadata else 5
+                    }
+                }
+                
+                base_result.update({
+                    "token0_amount": token0_amount_rounded,
+                    "token1_amount": token1_amount_rounded,
+                    "token0_price_usd": token0_price_usd,
+                    "token1_price_usd": token1_price_usd,
+                    "current_price_usd": current_price_usd,
+                    "pa_usd": pa_usd,
+                    "pb_usd": pb_usd,
+                    "token0_amount_usd": token0_amount_usd,
+                    "token1_amount_usd": token1_amount_usd,
+                    "token0_pct": token0_pct,
+                    "token1_pct": token1_pct,
+                    "position_value_usd": position_value_usd,
+                    "delta": delta,
+                    "hl_price_available": True,
+                    "hedge_tokens": hedge_tokens,
+                    "in_range": current_tick >= tick_lower and current_tick <= tick_upper,
+                })
+            else:
+                # Missing prices
+                missing_tokens = []
+                if not token0_price_usd and not is_stablecoin(token0_symbol):
+                    missing_tokens.append(token0_symbol)
+                if not token1_price_usd and not is_stablecoin(token1_symbol):
+                    missing_tokens.append(token1_symbol)
+                
+                base_result.update({
+                    "hl_price_available": False,
+                    "hl_price_error": f"Price unavailable for: {', '.join(missing_tokens)}" if missing_tokens else "Price data unavailable",
+                })
+        except Exception as e:
+            print(f"Error fetching HL prices: {e}")
+            base_result.update({
+                "hl_price_available": False,
+                "hl_price_error": f"Error: {str(e)}",
+            })
+        
+        return base_result
+        
+    except Exception as e:
+        raise Exception(f"Error fetching Aerodrome position data: {str(e)}")
+
+
+async def fetch_position_by_protocol(protocol: str, network: str, nft_id: str) -> Dict:
+    """
+    Route to correct fetch function based on protocol
+    
+    Args:
+        protocol: Protocol name ('uniswap_v3' or 'aerodrome_slipstream')
+        network: Network name
+        nft_id: NFT token ID
+        
+    Returns:
+        Dictionary with position data
+    """
+    print(f"[ROUTER] Protocol: {protocol}, Network: {network}, NFT ID: {nft_id}")
+    
+    if protocol == "uniswap_v3":
+        return await fetch_uniswap_position(network, nft_id)
+    elif protocol == "aerodrome_slipstream":
+        return await fetch_aerodrome_position(network, nft_id)
+    else:
+        raise ValueError(f"Unsupported protocol: {protocol}")
