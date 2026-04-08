@@ -163,7 +163,11 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                             variant="surface",
                         ),
                         rx.badge(
-                            rx.cond(position.use_dynamic_hedging, "Dynamic", "Static"),
+                            rx.cond(
+                                position.use_dynamic_hedging,
+                                "Dynamic - " + position.dynamic_profile.replace("_", " ").title(),
+                                "Static"
+                            ),
                             color_scheme=rx.cond(position.use_dynamic_hedging, "purple", "blue"),
                             variant="soft",
                         ),
