@@ -952,6 +952,7 @@ class LPPositionState(rx.State):
         # 2. Update form fields
         self.selected_position_id = position_id
         self.position_name = position.position_name
+        self.protocol = position.protocol
         self.network = position.network
         self.nft_id = position.nft_id
         self.pool_address = position.pool_address
