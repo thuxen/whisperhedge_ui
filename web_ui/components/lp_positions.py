@@ -432,7 +432,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                                 color=rx.cond(position.metrics.apr >= 0, "green", "red"),
                             ),
                             rx.text(
-                                f"{position.metrics.position_age_days} days",
+                                f"Hedge Age: {position.metrics.position_age_days} days",
                                 size="1",
                                 color="gray",
                             ),
