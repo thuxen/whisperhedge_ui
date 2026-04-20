@@ -1332,8 +1332,9 @@ class LPPositionState(rx.State):
                         except Exception as e:
                             print(f"Error fetching QuestDB data for position {config.get('id')}: {e}")
                     
-                    # Calculate total value (LP position + API account)
-                    total_value_usd = position_size_usd + api_account_value
+                    # Calculate total value (LP position + API account + Accumulated Fees)
+                    fee_usd_total = latest_values.get('fee_usd_total', 0.0) if latest_values else 0.0
+                    total_value_usd = position_size_usd + api_account_value + fee_usd_total
                     
                     # Create PositionMetrics object
                     position_metrics = PositionMetrics(
