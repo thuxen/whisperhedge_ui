@@ -1098,8 +1098,9 @@ class LPPositionState(rx.State):
                                 new_hedge_pnl_usd = new_hedge_value - entry_hedge_value
                                 new_hedge_pnl_pct = (new_hedge_pnl_usd / entry_hedge_value * 100) if entry_hedge_value > 0 else 0
                                 
-                                # Calculate Total PnL
-                                new_total_pnl_usd = new_lp_pnl_usd + new_hedge_pnl_usd
+                                # Calculate Total PnL (includes fees as profit)
+                                fee_usd_total = latest_values.get('fee_usd_total', 0.0)
+                                new_total_pnl_usd = new_lp_pnl_usd + new_hedge_pnl_usd + fee_usd_total
                                 new_total_pnl_pct = (new_total_pnl_usd / entry_total_value * 100) if entry_total_value > 0 else 0
                                 
                                 # Calculate position age and APR
@@ -1307,8 +1308,9 @@ class LPPositionState(rx.State):
                                     hedge_pnl_usd = api_account_value - entry_hedge_value
                                     hedge_pnl_pct = (hedge_pnl_usd / entry_hedge_value * 100) if entry_hedge_value > 0 else 0
                                     
-                                    # Calculate Total PnL
-                                    total_pnl_usd = lp_pnl_usd + hedge_pnl_usd
+                                    # Calculate Total PnL (includes fees as profit)
+                                    fee_usd_total_for_pnl = latest_values.get('fee_usd_total', 0.0) if latest_values else 0.0
+                                    total_pnl_usd = lp_pnl_usd + hedge_pnl_usd + fee_usd_total_for_pnl
                                     total_pnl_pct = (total_pnl_usd / entry_total_value * 100) if entry_total_value > 0 else 0
                                     
                                     # Calculate position age and APR
