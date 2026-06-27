@@ -12,6 +12,7 @@ NETWORK_RPCS = {
     "base": os.getenv("BASE_RPC", "https://base.llamarpc.com"),
     "polygon": os.getenv("POLYGON_RPC", "https://polygon.llamarpc.com"),
     "optimism": os.getenv("OPTIMISM_RPC", "https://optimism.llamarpc.com"),
+    "hyperevm": os.getenv("HYPEREVM_RPC", "https://lb.drpc.live/hyperliquid/AgabH9LLzU5spjPklruwaz9Ek6W6rmgR8LnvQrxF2MGT"),
 }
 
 # Uniswap V3 NFT Position Manager addresses
@@ -21,6 +22,7 @@ POSITION_MANAGER_ADDRESSES = {
     "base": "0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1",
     "polygon": "0xC36442b4a4522E871399CD717aBDD847Ab11FE88",
     "optimism": "0xC36442b4a4522E871399CD717aBDD847Ab11FE88",
+    "hyperevm": "0xeaD19AE861c29bBb2101E834922B2FEee69B9091",  # Project X Position Manager
 }
 
 # Minimal ABI for Uniswap V3 Position Manager
@@ -87,6 +89,7 @@ FACTORY_ADDRESSES = {
     "base": "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
     "polygon": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
     "optimism": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+    "hyperevm": "0xFf7B3e8C00e57ea31477c32A5B52a58Eea47b072",  # Project X Factory
 }
 
 # Aerodrome Slipstream contract addresses (Base only)
@@ -792,7 +795,7 @@ async def fetch_position_by_protocol(protocol: str, network: str, nft_id: str) -
     Route to correct fetch function based on protocol
     
     Args:
-        protocol: Protocol name ('uniswap_v3' or 'aerodrome_slipstream')
+        protocol: Protocol name ('uniswap_v3', 'aerodrome_slipstream', or 'project_x')
         network: Network name
         nft_id: NFT token ID
         
@@ -805,5 +808,10 @@ async def fetch_position_by_protocol(protocol: str, network: str, nft_id: str) -
         return await fetch_uniswap_position(network, nft_id)
     elif protocol == "aerodrome_slipstream":
         return await fetch_aerodrome_position(network, nft_id)
+    elif protocol == "project_x":
+        # Project X uses Uniswap V3 compatible contracts on HyperEVM
+        if network != "hyperevm":
+            raise ValueError(f"Project X is only available on hyperevm network, got: {network}")
+        return await fetch_uniswap_position(network, nft_id)
     else:
         raise ValueError(f"Unsupported protocol: {protocol}")

@@ -670,6 +670,7 @@ def lp_positions_component() -> rx.Component:
                                 rx.select.content(
                                     rx.select.item("Uniswap V3", value="uniswap_v3"),
                                     rx.select.item("Aerodrome Slipstream", value="aerodrome_slipstream"),
+                                    rx.select.item("Project X", value="project_x"),
                                 ),
                                 name="protocol",
                                 value=LPPositionState.protocol,
@@ -677,7 +678,7 @@ def lp_positions_component() -> rx.Component:
                                 max_width="250px",
                             ),
                             rx.text(
-                                "The DEX protocol (Uniswap V3 or Aerodrome Slipstream)",
+                                "The DEX protocol (Uniswap V3, Aerodrome Slipstream, or Project X)",
                                 size="1",
                                 color="gray",
                             ),
@@ -697,13 +698,24 @@ def lp_positions_component() -> rx.Component:
                                     default_value="base",
                                     max_width="250px",
                                 ),
-                                # Uniswap V3: All networks
-                                rx.select(
-                                    ["ethereum", "arbitrum", "base", "polygon", "optimism"],
-                                    placeholder="Select network",
-                                    name="network",
-                                    default_value=LPPositionState.network,
-                                    max_width="250px",
+                                rx.cond(
+                                    LPPositionState.protocol == "project_x",
+                                    # Project X: HyperEVM only
+                                    rx.select(
+                                        ["hyperevm"],
+                                        placeholder="Select network",
+                                        name="network",
+                                        default_value="hyperevm",
+                                        max_width="250px",
+                                    ),
+                                    # Uniswap V3: All networks
+                                    rx.select(
+                                        ["ethereum", "arbitrum", "base", "polygon", "optimism"],
+                                        placeholder="Select network",
+                                        name="network",
+                                        default_value=LPPositionState.network,
+                                        max_width="250px",
+                                    ),
                                 ),
                             ),
                             rx.text(
