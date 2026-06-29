@@ -88,6 +88,7 @@ class LPPositionData(BaseModel):
     token0_symbol: str = ""
     token1_symbol: str = ""
     fee_tier: str = ""
+    liquidity: str = "0"
     is_active: bool = True
     notes: str = ""
     created_at: str = ""
@@ -1382,6 +1383,7 @@ class LPPositionState(rx.State):
                         token0_symbol=pos_data.get("token0_symbol", ""),
                         token1_symbol=pos_data.get("token1_symbol", ""),
                         fee_tier=str(pos_data.get("fee_tier", "")),
+                        liquidity=str(config.get("liquidity", "0")),
                         is_active=pos_data.get("is_active", True),
                         notes=pos_data.get("notes", ""),
                         created_at=pos_data.get("created_at", ""),
