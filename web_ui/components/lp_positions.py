@@ -157,6 +157,15 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                             color_scheme="gray",
                             variant="soft"
                         ),
+                        rx.cond(
+                            position.liquidity == "0",
+                            rx.badge(
+                                "Zero Liquidity",
+                                color_scheme="orange",
+                                variant="surface",
+                            ),
+                            rx.fragment(),
+                        ),
                         rx.badge(
                             rx.cond(position.hedge_enabled, "Hedge Active", "Hedge Inactive"),
                             color_scheme=rx.cond(position.hedge_enabled, "green", "red"),
@@ -248,7 +257,12 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
                     rx.text(position.total_value_formatted, size="6", weight="bold", color="green"),
                     rx.hstack(
                         rx.text("LP:", size="1", color="gray"),
-                        rx.text(position.position_value_formatted, size="2", weight="medium"),
+                        rx.text(
+                            position.position_value_formatted, 
+                            size="2", 
+                            weight="medium",
+                            color=rx.cond(position.liquidity == "0", "gray", "inherit")
+                        ),
                         rx.cond(
                             position.api_account_value > 0,
                             rx.hstack(
@@ -455,7 +469,7 @@ def lp_position_card(position: LPPositionData) -> rx.Component:
             
             # Status row
             rx.hstack(
-                rx.text("Last Check:", size="1", color="gray"),
+                rx.text("Last Hedge Check:", size="1", color="gray"),
                 rx.text(
                     position.last_hedge_execution,
                     size="1",

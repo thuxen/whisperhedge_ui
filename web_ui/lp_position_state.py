@@ -986,6 +986,10 @@ class LPPositionState(rx.State):
             # 5. Load hedge configuration
             await self.load_hedge_config(position_id)
             
+            # Check if position has zero liquidity and inform user
+            if self.fetched_position_data and self.fetched_position_data.get("liquidity") == "0":
+                yield rx.toast.info("This position currently has zero liquidity", duration=4000)
+            
             yield rx.toast.success("Position loaded for editing!", duration=3000)
         except Exception as e:
             yield rx.toast.error(f"Failed to load: {str(e)}", duration=5000)
@@ -1686,6 +1690,10 @@ class LPPositionState(rx.State):
             from web_ui.api_key_state import APIKeyState
             api_key_state = await self.get_state(APIKeyState)
             await api_key_state.load_api_keys()
+            
+            # Check if position has zero liquidity and inform user
+            if self.fetched_position_data and self.fetched_position_data.get("liquidity") == "0":
+                yield rx.toast.info("Position currently has zero liquidity", duration=4000)
             
             yield rx.toast.success("Position saved successfully!", duration=3000)
         except Exception as e:
